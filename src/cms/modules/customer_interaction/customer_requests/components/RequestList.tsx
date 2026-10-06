@@ -201,12 +201,8 @@ export const RequestList: React.FC<RequestListProps> = ({
               return (
                 <tr
                   key={request.id}
-                  className={`transition-colors ${
-                    isEnterprise
-                      ? 'bg-amber-500/[0.04] hover:bg-amber-500/[0.08] dark:bg-amber-950/20 dark:hover:bg-amber-950/30'
-                      : isIrrelevant
-                      ? 'opacity-75 hover:opacity-100 hover:bg-slate-50/80 dark:hover:bg-slate-800/50'
-                      : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/50'
+                  className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors ${
+                    isEnterprise ? 'border-l-2 border-l-slate-900 dark:border-l-slate-100' : ''
                   }`}
                 >
                   {/* Checkbox */}
@@ -229,12 +225,12 @@ export const RequestList: React.FC<RequestListProps> = ({
                         {name}
                       </button>
                       {isEnterprise && (
-                        <span className="px-1.5 py-0.2 rounded text-[9px] font-extrabold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-700 shrink-0">
-                          ⭐ VIP
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shrink-0">
+                          Doanh nghiệp
                         </span>
                       )}
                       {isIrrelevant && (
-                        <span className="px-1.5 py-0.2 rounded text-[9px] font-medium bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shrink-0">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shrink-0">
                           Không phù hợp
                         </span>
                       )}

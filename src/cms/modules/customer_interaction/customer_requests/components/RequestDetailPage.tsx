@@ -27,6 +27,7 @@ import {
   ChevronDown,
   FileText,
   Loader2,
+  RotateCcw,
 } from 'lucide-react';
 import { CustomerRequest } from '../types';
 import { useCmsToast } from '@/cms/context/CmsToastContext';
@@ -396,14 +397,14 @@ export const RequestDetailPage: React.FC<RequestDetailPageProps> = ({
         </div>
       </div>
 
-      {/* AI Lead Intelligence Card */}
+      {/* Professional Triage Assessment Panel */}
       {(() => {
         const aiNote = request.internalNotes?.find((n) => n.content?.startsWith('[AI Thẩm định]'));
         const isEnterprise =
           liveAiResult?.category === 'enterprise' ||
           request.tags?.includes('ai:enterprise') ||
-          request.tags?.includes('vip') ||
-          request.priority === 'urgent';
+          request.tags?.includes('doanh_nghiep_lon') ||
+          (request.tags?.includes('vip') && request.priority === 'urgent');
         const isIrrelevant =
           liveAiResult?.category === 'irrelevant' ||
           request.tags?.includes('ai:irrelevant') ||
@@ -416,8 +417,8 @@ export const RequestDetailPage: React.FC<RequestDetailPageProps> = ({
         const summaryText =
           liveAiResult?.summary ||
           (aiNote
-            ? aiNote.content.split('\n')[1]?.replace('- Tóm tắt: ', '') || aiNote.content.slice(0, 150)
-            : 'Chưa có dữ liệu phân tích chi tiết. Bấm "Thẩm định lại với AI" để hệ thống tự động đánh giá quy mô và lọc nội dung rác.');
+            ? aiNote.content.split('\n')[1]?.replace('- Tóm tắt: ', '') || aiNote.content.slice(0, 160)
+            : 'Chưa có dữ liệu thẩm định. Nhấn nút bên cạnh để kiểm tra thông tin và đối chiếu quy mô.');
 
         const suggestionText =
           liveAiResult?.suggestedAction ||
@@ -425,84 +426,96 @@ export const RequestDetailPage: React.FC<RequestDetailPageProps> = ({
             ? aiNote.content.split('- Đề xuất: ')[1]?.split('\n')[0]
             : undefined);
 
+        const identifiedProds =
+          liveAiResult?.identifiedProducts ||
+          (aiNote && aiNote.content.includes('- Phần mềm nhận diện: ')
+            ? aiNote.content
+                .split('- Phần mềm nhận diện: ')[1]
+                ?.split('\n')[0]
+                ?.split(',')
+                .map((s) => s.trim())
+                .filter((s) => s && s !== 'N/A')
+            : []);
+
         return (
-          <div
-            className={`p-4 sm:p-5 rounded-2xl border transition-all ${
-              isEnterprise
-                ? 'bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-transparent border-amber-300 dark:border-amber-800/80 shadow-xs'
-                : isIrrelevant
-                ? 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-800'
-                : 'bg-gradient-to-r from-blue-500/10 via-cyan-500/5 to-transparent border-blue-200 dark:border-blue-800/80'
-            }`}
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`p-2.5 rounded-xl text-white shadow-xs shrink-0 ${
-                    isEnterprise
-                      ? 'bg-gradient-to-br from-amber-500 to-orange-600'
-                      : isIrrelevant
-                      ? 'bg-slate-500'
-                      : 'bg-gradient-to-br from-blue-500 to-cyan-600'
-                  }`}
-                >
-                  <Sparkles className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                      Trợ lý AI Lead Triage
-                    </span>
-                    {isEnterprise && (
-                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
-                        ⭐ DOANH NGHIỆP LỚN / VIP
-                      </span>
-                    )}
-                    {isIrrelevant && (
-                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
-                        🚫 KHÔNG LIÊN QUAN / RÁC
-                      </span>
-                    )}
-                    {isQualified && !isEnterprise && !isIrrelevant && (
-                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                        💼 KHÁCH TIỀM NĂNG CHUẨN
-                      </span>
-                    )}
-                    {liveAiResult && (
-                      <span className="text-[11px] text-slate-500 font-medium">
-                        (Độ tin cậy: {liveAiResult.confidence}%)
-                      </span>
-                    )}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-xs transition-colors">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+              <div className="space-y-2.5 flex-1 min-w-0">
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                    <ShieldCheck className="w-4 h-4" />
                   </div>
-                  <p className="text-xs text-slate-700 dark:text-slate-200 mt-1 font-medium leading-relaxed">
-                    {summaryText}
-                  </p>
-                  {suggestionText && (
-                    <div className="text-[11px] text-orange-700 dark:text-orange-400 font-semibold mt-1 flex items-center gap-1">
-                      <span>💡 Đề xuất xử lý:</span>
-                      <span>{suggestionText}</span>
-                    </div>
+                  <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                    Thẩm định Phân loại Yêu cầu
+                  </span>
+
+                  {isEnterprise && (
+                    <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900">
+                      Doanh nghiệp quy mô lớn / Ưu tiên cao
+                    </span>
+                  )}
+                  {isIrrelevant && (
+                    <span className="px-2.5 py-0.5 rounded-md text-xs font-medium bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200 dark:border-rose-900/60">
+                      Không phù hợp / Nhầm thương hiệu
+                    </span>
+                  )}
+                  {isQualified && !isEnterprise && !isIrrelevant && (
+                    <span className="px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                      Khách tiềm năng chuẩn
+                    </span>
+                  )}
+
+                  {liveAiResult && (
+                    <span className="text-[11px] text-slate-400">
+                      (Xác thực: {liveAiResult.confidence}%)
+                    </span>
                   )}
                 </div>
+
+                <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-normal">
+                  <strong className="font-semibold text-slate-800 dark:text-slate-200">Tóm tắt: </strong>
+                  {summaryText}
+                </p>
+
+                {identifiedProds && identifiedProds.length > 0 && (
+                  <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                    <span className="text-[11px] font-medium text-slate-400">Dòng giải pháp đề cập:</span>
+                    {identifiedProds.map((prod, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60"
+                      >
+                        {prod}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {suggestionText && (
+                  <div className="text-xs text-slate-600 dark:text-slate-400 pt-0.5 flex items-start gap-1.5">
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 shrink-0">Đề xuất xử lý:</span>
+                    <span>{suggestionText}</span>
+                  </div>
+                )}
               </div>
 
-              <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+              <div className="shrink-0 self-end sm:self-start">
                 <button
                   type="button"
                   onClick={handleRunAiTriage}
                   disabled={isTriaging}
-                  className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                  title="Chạy phân tích AI để đánh giá độ ưu tiên và lọc rác"
+                  className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  title="Thẩm định lại thông tin đối chiếu với hồ sơ phân loại"
                 >
                   {isTriaging ? (
                     <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-orange-500" />
-                      <span>Đang phân tích...</span>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-500" />
+                      <span>Đang kiểm tra...</span>
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-3.5 h-3.5 text-orange-500" />
-                      <span>Thẩm định lại với AI</span>
+                      <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Thẩm định lại</span>
                     </>
                   )}
                 </button>

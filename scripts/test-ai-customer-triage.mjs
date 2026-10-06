@@ -55,6 +55,22 @@ async function runTests() {
   }
   console.log('-> TEST 3 PASSED! (Phát hiện chính xác Khách tiềm năng chuẩn)');
 
+  // Test Case 4: Công ty lớn nhưng chỉ hỏi 1 license hoặc hỏi tham khảo chung chung (Kiểm tra độ nghiêm ngặt)
+  console.log('\n[TEST 4] Công ty lớn nhưng chỉ hỏi 1 license lẻ thông thường:');
+  const test4 = await analyzeCustomerRequestWithAi({
+    fullname: 'Hoàng Anh Tuấn',
+    company: 'Tổng công ty Tư vấn Xây dựng Việt Nam (VNCC)',
+    telephone: '0912998877',
+    email: 'tuan.ha@vncc.vn',
+    subject: 'Hỏi giá nâng cấp 1 license AutoCAD',
+    message: 'Bên mình muốn hỏi chi phí gia hạn nâng cấp cho 1 license AutoCAD bản hiện tại sang bản 2026.',
+  });
+  console.log('Result 4:', JSON.stringify(test4, null, 2));
+  if (test4.category !== 'qualified') {
+    throw new Error(`Test 4 FAILED! Mua 1 license lẻ thông thường không được xếp vào enterprise, got ${test4.category}`);
+  }
+  console.log('-> TEST 4 PASSED! (Tiêu chí Enterprise nghiêm ngặt: Mua 1 license lẻ tự động xếp vào qualified)');
+
   console.log('\n--- TẤT CẢ CÁC BÀI TEST ĐÃ VƯỢT QUA 100%! ---');
 }
 

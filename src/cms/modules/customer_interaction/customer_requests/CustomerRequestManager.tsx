@@ -945,25 +945,25 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
               );
             })}
 
-            {/* Quick VIP Filter Pill */}
+            {/* Quick Enterprise Filter Pill */}
             <button
               type="button"
               onClick={() => {
                 setCurrentPage(1);
-                const isVipActive = filter.searchQuery === 'ai:enterprise';
+                const isEnterpriseActive = filter.searchQuery === 'ai:enterprise';
                 setFilter((prev) => ({
                   ...prev,
-                  searchQuery: isVipActive ? '' : 'ai:enterprise',
+                  searchQuery: isEnterpriseActive ? '' : 'ai:enterprise',
                 }));
               }}
-              className={`ml-auto px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer text-xs ${
+              className={`ml-auto px-3 py-1.5 rounded-xl font-semibold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer text-xs ${
                 filter.searchQuery === 'ai:enterprise'
-                  ? 'bg-amber-500 text-white shadow-xs'
-                  : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/80 hover:bg-amber-100'
+                  ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-xs'
+                  : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
-              title="Lọc nhanh các yêu cầu từ Doanh nghiệp lớn / VIP do AI thẩm định"
+              title="Lọc các yêu cầu quy mô Doanh nghiệp lớn"
             >
-              <span>⭐ Doanh nghiệp lớn (VIP)</span>
+              <span>Doanh nghiệp quy mô lớn</span>
             </button>
           </div>
 
