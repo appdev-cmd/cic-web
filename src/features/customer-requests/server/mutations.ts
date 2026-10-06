@@ -6,7 +6,9 @@ import { AppError } from '@/server/errors';
 import {
   parseUnifiedRequestId,
   formatUnifiedRequestId,
+  getCustomerRequestDetail,
 } from './queries';
+import { analyzeCustomerRequestWithAi, type AiTriageResult } from './ai-triage';
 import type {
   CustomerRequestSourceType,
   RequestStatus,
@@ -355,3 +357,129 @@ export async function trashCustomerRequests(
     return { success: true, count: unifiedIds.length };
   });
 }
+
+export async function triageCustomerRequest(
+  unifiedId: string,
+  principal: CmsPrincipal
+): Promise<{ success: boolean; aiResult: AiTriageResult }> {
+  const detail = await getCustomerRequestDetail(unifiedId);
+  if (!detail) {
+    throw new AppError(`Customer request not found: ${unifiedId}`, 'NOT_FOUND');
+  }
+
+  // Extract fields from submissionValues & sourceConfig
+  const nameVal = detail.submissionValues.find((v) =>
+    ['fullname', 'fullName', 'name', 'ho_ten', 'hoten'].includes(v.fieldKey)
+  )?.valueText;
+  const emailVal = detail.submissionValues.find((v) =>
+    ['email', 'thu_dien_tu'].includes(v.fieldKey)
+  )?.valueText;
+  const phoneVal = detail.submissionValues.find((v) =>
+    ['phone', 'telephone', 'so_dien_thoai', 'sdt'].includes(v.fieldKey)
+  )?.valueText;
+  const companyVal = detail.submissionValues.find((v) =>
+    ['company', 'don_vi', 'cong_ty'].includes(v.fieldKey)
+  )?.valueText;
+  const subjectVal =
+    detail.submissionValues.find((v) => ['subject', 'tieu_de'].includes(v.fieldKey))?.valueText ||
+    detail.sourceConfig?.ctaName ||
+    detail.sourceConfig?.formName;
+  const messageVal = detail.submissionValues.find((v) =>
+    ['message', 'note', 'notes', 'noi_dung', 'loi_nhan'].includes(v.fieldKey)
+  )?.valueText;
+
+  const aiResult = await analyzeCustomerRequestWithAi({
+    fullname: nameVal,
+    email: emailVal,
+    telephone: phoneVal,
+    company: companyVal,
+    subject: subjectVal,
+    message: messageVal,
+    formName: detail.sourceConfig?.formName,
+  });
+
+  const { sourceType, sourceId } = parseUnifiedRequestId(unifiedId);
+
+  return withTransaction(async (sql) => {
+    const workspace = await resolveSourceWorkspace(sql, sourceType, sourceId);
+    const state = await getOrCreateState(sql, sourceType, sourceId, workspace);
+
+    // Merge existing tags with AI tags
+    const mergedTags = Array.from(new Set([...(state.tags || []), ...aiResult.tags]));
+
+    // Update state priority and tags, and status if state is still 'new' and AI suggests 'not_suitable'
+    const newStatus =
+      state.status === 'new' && aiResult.suggestedStatus === 'not_suitable'
+        ? 'not_suitable'
+        : state.status;
+
+    await sql`
+      UPDATE cic_customer_request_states
+      SET priority = ${aiResult.priority},
+          status = ${newStatus},
+          tags = ${mergedTags},
+          updated_at = now()
+      WHERE id = ${state.id}
+    `;
+
+    // Note formatting
+    const noteContent =
+      aiResult.category === 'enterprise'
+        ? `[AI Thẩm định] ⭐ KHÁCH HÀNG DOANH NGHIỆP LỚN / VIP (Độ tin cậy: ${aiResult.confidence}%)\n- Tóm tắt: ${aiResult.summary}\n- Phần mềm nhận diện: ${aiResult.identifiedProducts.join(', ') || 'N/A'}\n- Đề xuất: ${aiResult.suggestedAction}`
+        : aiResult.category === 'irrelevant'
+        ? `[AI Thẩm định] 🚫 KHÔNG LIÊN QUAN / RÁC (Độ tin cậy: ${aiResult.confidence}%)\n- Lý do: ${aiResult.reason}\n- Tóm tắt: ${aiResult.summary}\n- Hệ thống đã tự động chuyển sang trạng thái: Không phù hợp (not_suitable).`
+        : `[AI Thẩm định] 💼 KHÁCH TIỀM NĂNG CHUẨN (Độ tin cậy: ${aiResult.confidence}%)\n- Tóm tắt: ${aiResult.summary}\n- Phần mềm nhận diện: ${aiResult.identifiedProducts.join(', ') || 'N/A'}\n- Đề xuất: ${aiResult.suggestedAction}`;
+
+    await sql`
+      INSERT INTO cic_customer_request_notes (
+        request_state_id, content, created_by, created_at
+      ) VALUES (
+        ${state.id}, ${noteContent}, ${principal.legacyUserId}, now()
+      )
+    `;
+
+    await sql`
+      INSERT INTO cic_customer_request_events (
+        request_state_id, event_type, old_value, new_value, actor_id, created_at
+      ) VALUES (
+        ${state.id}, 'ai_triaged', ${sql.json(state.status)}, ${sql.json(aiResult as never)}, ${principal.legacyUserId}, now()
+      )
+    `;
+
+    return { success: true, aiResult };
+  });
+}
+
+export async function bulkCleanIrrelevantRequests(
+  unifiedIds: string[],
+  principal: CmsPrincipal
+): Promise<{ success: boolean; count: number }> {
+  if (!unifiedIds.length) {
+    throw new AppError('No requests specified.', 'VALIDATION_ERROR');
+  }
+
+  return withTransaction(async (sql) => {
+    for (const unifiedId of unifiedIds) {
+      const { sourceType, sourceId } = parseUnifiedRequestId(unifiedId);
+      const workspace = await resolveSourceWorkspace(sql, sourceType, sourceId);
+      const state = await getOrCreateState(sql, sourceType, sourceId, workspace);
+
+      await sql`
+        UPDATE cic_customer_request_states
+        SET status = 'not_suitable', priority = 'low', updated_at = now()
+        WHERE id = ${state.id}
+      `;
+
+      await sql`
+        INSERT INTO cic_customer_request_events (
+          request_state_id, event_type, old_value, new_value, actor_id, created_at
+        ) VALUES (
+          ${state.id}, 'bulk_cleaned', ${sql.json(state.status)}, ${sql.json('not_suitable')}, ${principal.legacyUserId}, now()
+        )
+      `;
+    }
+
+    return { success: true, count: unifiedIds.length };
+  });
+}
+
