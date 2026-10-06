@@ -10,6 +10,7 @@ import { sendEmail } from '@/lib/email/transporter';
 import { escapeHtml } from '@/lib/email/tokens';
 import { checkRateLimit, getClientIp } from '@/server/auth/rate-limit';
 import { createCmsNotification } from '@/server/notifications/service';
+import { analyzeCustomerRequestWithAi, type AiTriageResult } from '@/features/customer-requests/server/ai-triage';
 
 
 export async function submitContactAction(payload: unknown) {
@@ -37,16 +38,47 @@ export async function submitContactAction(payload: unknown) {
 
   if (error || !data) throw new Error('Unable to submit contact request.');
 
-  // Initialize operational overlay in background / transaction
+  // 1. Run AI Lead Triage
+  let aiResult: AiTriageResult;
+  try {
+    aiResult = await analyzeCustomerRequestWithAi({
+      fullname: input.fullname,
+      email: input.email,
+      telephone: input.telephone,
+      subject: input.subject,
+      message: input.message,
+      formName: 'Biểu mẫu liên hệ chính',
+    });
+  } catch (triageErr) {
+    console.error('[submitContactAction] AI triage error:', triageErr);
+    aiResult = {
+      category: 'qualified',
+      confidence: 50,
+      priority: 'medium',
+      suggestedStatus: 'new',
+      tags: ['ai:qualified'],
+      summary: `Liên hệ từ ${input.fullname || 'khách hàng'}`,
+      reason: 'Tiếp nhận thông thường.',
+      identifiedProducts: [],
+      suggestedAction: 'Liên hệ tư vấn.',
+    };
+  }
+
+  // 2. Initialize operational overlay with AI results
   try {
     const sql = getPostgresClient();
     const [state] = await sql`
       INSERT INTO cic_customer_request_states (
         workspace, source_type, source_id, status, priority, tags, created_at, updated_at
       ) VALUES (
-        'vi', 'contact', ${data.id}, 'new', 'medium', '{}', now(), now()
+        'vi', 'contact', ${data.id}, ${aiResult.suggestedStatus}, ${aiResult.priority}, ${aiResult.tags}, now(), now()
       )
-      ON CONFLICT (workspace, source_type, source_id) DO NOTHING
+      ON CONFLICT (workspace, source_type, source_id) 
+      DO UPDATE SET 
+        status = EXCLUDED.status,
+        priority = EXCLUDED.priority,
+        tags = EXCLUDED.tags,
+        updated_at = now()
       RETURNING id
     `;
     if (state?.id) {
@@ -54,7 +86,23 @@ export async function submitContactAction(payload: unknown) {
         INSERT INTO cic_customer_request_events (
           request_state_id, event_type, old_value, new_value, actor_id, created_at
         ) VALUES (
-          ${state.id}, 'created', NULL, ${sql.json({ source: 'contact_form', formCode: 'form_lienhe', subject: input.subject || 'Liên hệ mới' })}, NULL, now()
+          ${state.id}, 'created', NULL, ${sql.json({ source: 'contact_form', formCode: 'form_lienhe', subject: input.subject || 'Liên hệ mới', ai: aiResult } as never)}, NULL, now()
+        )
+      `;
+
+      // Insert AI analysis note into cic_customer_request_notes
+      const noteContent =
+        aiResult.category === 'enterprise'
+          ? `[AI Thẩm định] ⭐ KHÁCH HÀNG DOANH NGHIỆP LỚN / VIP (Độ tin cậy: ${aiResult.confidence}%)\n- Tóm tắt: ${aiResult.summary}\n- Phần mềm nhận diện: ${aiResult.identifiedProducts.join(', ') || 'N/A'}\n- Đề xuất: ${aiResult.suggestedAction}`
+          : aiResult.category === 'irrelevant'
+          ? `[AI Thẩm định] 🚫 KHÔNG LIÊN QUAN / RÁC (Độ tin cậy: ${aiResult.confidence}%)\n- Lý do: ${aiResult.reason}\n- Tóm tắt: ${aiResult.summary}\n- Hệ thống đã tự động chuyển sang trạng thái: Không phù hợp (not_suitable).`
+          : `[AI Thẩm định] 💼 KHÁCH TIỀM NĂNG CHUẨN (Độ tin cậy: ${aiResult.confidence}%)\n- Tóm tắt: ${aiResult.summary}\n- Phần mềm nhận diện: ${aiResult.identifiedProducts.join(', ') || 'N/A'}\n- Đề xuất: ${aiResult.suggestedAction}`;
+
+      await sql`
+        INSERT INTO cic_customer_request_notes (
+          request_state_id, content, created_by, created_at
+        ) VALUES (
+          ${state.id}, ${noteContent}, NULL, now()
         )
       `;
     }
@@ -62,22 +110,28 @@ export async function submitContactAction(payload: unknown) {
     console.error('[submitContactAction] Error initializing customer request state:', err);
   }
 
-  // Trigger CMS Notification
-  void createCmsNotification({
-    title: `Liên hệ mới: ${input.fullname || 'Khách hàng'}`,
-    description: `${input.email || ''} - SĐT: ${input.telephone || 'Chưa cung cấp'}: ${input.subject || input.message?.slice(0, 100) || ''}`,
-    type: 'contact',
-    targetModule: 'customer_requests',
-    targetAction: 'view',
-    linkUrl: `/cms/customer-requests?search=${encodeURIComponent(input.email || input.fullname || '')}`,
-    metadata: {
-      contactId: data.id,
-      name: input.fullname,
-      email: input.email,
-      telephone: input.telephone,
-      subject: input.subject,
-    },
-  });
+  // 3. Trigger CMS Notification (Skip notification for irrelevant/spam to avoid noise)
+  if (aiResult.category !== 'irrelevant') {
+    const isEnterprise = aiResult.category === 'enterprise';
+    void createCmsNotification({
+      title: `${isEnterprise ? '[⭐ VIP] ' : ''}Liên hệ mới: ${input.fullname || 'Khách hàng'}`,
+      description: `${aiResult.summary} (SĐT: ${input.telephone || 'Chưa cung cấp'})`,
+      type: 'contact',
+      priority: isEnterprise ? 'urgent' : 'normal',
+      targetModule: 'customer_requests',
+      targetAction: 'view',
+      linkUrl: `/cms/customer-requests?search=${encodeURIComponent(input.email || input.fullname || '')}`,
+      metadata: {
+        contactId: data.id,
+        name: input.fullname,
+        email: input.email,
+        telephone: input.telephone,
+        subject: input.subject,
+        aiCategory: aiResult.category,
+        aiScore: aiResult.confidence,
+      },
+    });
+  }
 
   // Send automatic email notifications
   try {
@@ -204,16 +258,48 @@ export async function submitCustomerInteractionAction(payload: unknown) {
     throw new Error('Unable to submit customer request: ' + (dbErr?.message || 'db error'));
   }
 
-  // Initialize operational overlay in customer request states
+  // 1. Run AI Lead Triage
+  let aiResult: AiTriageResult;
+  try {
+    aiResult = await analyzeCustomerRequestWithAi({
+      fullname,
+      email,
+      telephone,
+      subject,
+      message,
+      formName: input.formName,
+      values: input.values,
+    });
+  } catch (triageErr) {
+    console.error('[submitCustomerInteractionAction] AI triage error:', triageErr);
+    aiResult = {
+      category: 'qualified',
+      confidence: 50,
+      priority: 'medium',
+      suggestedStatus: 'new',
+      tags: ['ai:qualified'],
+      summary: `Yêu cầu từ ${fullname || 'khách hàng'}: ${subject || 'Tư vấn'}`,
+      reason: 'Tiếp nhận thông thường.',
+      identifiedProducts: [],
+      suggestedAction: 'Liên hệ tư vấn.',
+    };
+  }
+
+  // 2. Initialize operational overlay with AI results
   try {
     const sql = getPostgresClient();
     const [state] = await sql`
       INSERT INTO cic_customer_request_states (
         workspace, source_type, source_id, status, priority, tags, created_at, updated_at
       ) VALUES (
-        'vi', 'contact', ${data.id}, 'new', 'medium', '{}', now(), now()
+        'vi', 'contact', ${data.id}, ${aiResult.suggestedStatus}, ${aiResult.priority}, ${aiResult.tags}, now(), now()
       )
-      ON CONFLICT (workspace, source_type, source_id) DO NOTHING
+      ON CONFLICT (workspace, source_type, source_id) 
+      DO UPDATE SET 
+        status = EXCLUDED.status,
+        priority = EXCLUDED.priority,
+        tags = EXCLUDED.tags,
+        updated_at = now()
       RETURNING id
     `;
     if (state?.id) {
@@ -221,7 +307,23 @@ export async function submitCustomerInteractionAction(payload: unknown) {
         INSERT INTO cic_customer_request_events (
           request_state_id, event_type, old_value, new_value, actor_id, created_at
         ) VALUES (
-          ${state.id}, 'created', NULL, ${sql.json({ formId: input.formId, source: input.source, subject })}, NULL, now()
+          ${state.id}, 'created', NULL, ${sql.json({ formId: input.formId, source: input.source, subject, ai: aiResult } as never)}, NULL, now()
+        )
+      `;
+
+      // Insert AI analysis note into cic_customer_request_notes
+      const noteContent =
+        aiResult.category === 'enterprise'
+          ? `[AI Thẩm định] ⭐ KHÁCH HÀNG DOANH NGHIỆP LỚN / VIP (Độ tin cậy: ${aiResult.confidence}%)\n- Tóm tắt: ${aiResult.summary}\n- Phần mềm nhận diện: ${aiResult.identifiedProducts.join(', ') || 'N/A'}\n- Đề xuất: ${aiResult.suggestedAction}`
+          : aiResult.category === 'irrelevant'
+          ? `[AI Thẩm định] 🚫 KHÔNG LIÊN QUAN / RÁC (Độ tin cậy: ${aiResult.confidence}%)\n- Lý do: ${aiResult.reason}\n- Tóm tắt: ${aiResult.summary}\n- Hệ thống đã tự động chuyển sang trạng thái: Không phù hợp (not_suitable).`
+          : `[AI Thẩm định] 💼 KHÁCH TIỀM NĂNG CHUẨN (Độ tin cậy: ${aiResult.confidence}%)\n- Tóm tắt: ${aiResult.summary}\n- Phần mềm nhận diện: ${aiResult.identifiedProducts.join(', ') || 'N/A'}\n- Đề xuất: ${aiResult.suggestedAction}`;
+
+      await sql`
+        INSERT INTO cic_customer_request_notes (
+          request_state_id, content, created_by, created_at
+        ) VALUES (
+          ${state.id}, ${noteContent}, NULL, now()
         )
       `;
     }
@@ -229,29 +331,36 @@ export async function submitCustomerInteractionAction(payload: unknown) {
     console.error('[submitCustomerInteractionAction] Error initializing customer request state:', err);
   }
 
-  // Trigger CMS Notification
-  const isQuoteRequest =
-    input.source?.ctaName?.toLowerCase().includes('báo giá') ||
-    input.source?.pageTitle?.toLowerCase().includes('báo giá') ||
-    input.formName?.toLowerCase().includes('báo giá') ||
-    Boolean(subject?.toLowerCase().includes('báo giá'));
-  void createCmsNotification({
-    title: `${isQuoteRequest ? 'Yêu cầu báo giá mới' : 'Yêu cầu tư vấn mới'}: ${fullname || 'Khách hàng'}`,
-    description: `${input.formName || 'Đăng ký tư vấn'} - ${email || telephone || ''}: ${subject || message?.slice(0, 100) || ''}`,
-    type: isQuoteRequest ? 'quote' : 'contact',
-    targetModule: 'customer_requests',
-    targetAction: 'view',
-    linkUrl: `/cms/customer-requests?search=${encodeURIComponent(email || fullname || '')}`,
-    metadata: {
-      contactId: data.id,
-      name: fullname,
-      email,
-      telephone,
-      formName: input.formName,
-      source: input.source,
-      subject,
-    },
-  });
+  // 3. Trigger CMS Notification (Skip notification for irrelevant/spam to avoid noise)
+  if (aiResult.category !== 'irrelevant') {
+    const isQuoteRequest =
+      input.source?.ctaName?.toLowerCase().includes('báo giá') ||
+      input.source?.pageTitle?.toLowerCase().includes('báo giá') ||
+      input.formName?.toLowerCase().includes('báo giá') ||
+      Boolean(subject?.toLowerCase().includes('báo giá'));
+    const isEnterprise = aiResult.category === 'enterprise';
+
+    void createCmsNotification({
+      title: `${isEnterprise ? '[⭐ VIP] ' : ''}${isQuoteRequest ? 'Yêu cầu báo giá mới' : 'Yêu cầu tư vấn mới'}: ${fullname || 'Khách hàng'}`,
+      description: `${aiResult.summary} (SĐT: ${telephone || 'Chưa cung cấp'})`,
+      type: isQuoteRequest ? 'quote' : 'contact',
+      priority: isEnterprise ? 'urgent' : 'normal',
+      targetModule: 'customer_requests',
+      targetAction: 'view',
+      linkUrl: `/cms/customer-requests?search=${encodeURIComponent(email || fullname || '')}`,
+      metadata: {
+        contactId: data.id,
+        name: fullname,
+        email,
+        telephone,
+        formName: input.formName,
+        source: input.source,
+        subject,
+        aiCategory: aiResult.category,
+        aiScore: aiResult.confidence,
+      },
+    });
+  }
 
   // Send automatic email notifications for customer interaction
   try {
