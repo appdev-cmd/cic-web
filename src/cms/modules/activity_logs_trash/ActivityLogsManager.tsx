@@ -127,7 +127,8 @@ export const ActivityLogsManager: React.FC<{ data: AuditGovernanceData; capabili
         onDownload={async (id) => {
           try {
             const url = await getAuditExportDownloadUrlAction(id);
-            const filename = `Audit_Export_${id}.csv`;
+            const ext = url.includes('.csv') ? 'csv' : 'xlsx';
+            const filename = `Audit_Export_${id}.${ext}`;
             const link = document.createElement('a');
             link.href = url;
             link.setAttribute('download', filename);

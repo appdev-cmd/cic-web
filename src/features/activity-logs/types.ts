@@ -47,6 +47,8 @@ export interface ExportJob {
   fileSizeMb?: number;
   downloadUrl?: string;
   expiresAt?: string;
+  filePath?: string;
+  fileExt?: 'xlsx' | 'csv';
 }
 
 export interface AuditGovernanceData {

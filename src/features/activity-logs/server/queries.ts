@@ -5,7 +5,7 @@ import type { AuditEvent, AuditGovernanceData, AuditListPage, AuditListQuery, Ex
 import { z } from 'zod';
 
 const LIST_FIELDS = 'id,occurred_at,actor_id,actor_label,action_code,category,severity,is_sensitive,entity_type,entity_id,entity_title,module,workspace,locale,result,result_message,session_id,correlation_id,source_app,environment,ip_address,user_agent,http_method,endpoint,execution_time_ms,before_data,after_data,redacted_fields';
-const JOB_FIELDS = 'id,requested_at,requested_by,workspace,filter_payload,status,total_records,file_size_bytes,expires_at,error_message,completed_at';
+const JOB_FIELDS = 'id,requested_at,requested_by,workspace,filter_payload,status,total_records,file_size_bytes,expires_at,error_message,completed_at,file_path';
 const object = (value: unknown): Record<string, unknown> => value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
 const text = (value: unknown) => value == null ? '' : String(value);
 const timestamp = (value: unknown) => {
@@ -33,8 +33,25 @@ function mapEvent(row: Record<string, unknown>, sensitive: boolean): AuditEvent 
 }
 
 function mapJob(row: Record<string, unknown>): ExportJob {
-  const filter = object(row.filter_payload); const bytes = row.file_size_bytes == null ? undefined : Number(row.file_size_bytes);
-  return { id: text(row.id), requestedAt: text(row.requested_at), requestedBy: text(row.requested_by), scopeName: text(row.workspace), dateRange: text(filter.range), filterSummary: text(filter.summary), status: row.status as ExportJob['status'], totalRecords: row.total_records == null ? undefined : Number(row.total_records), fileSizeMb: bytes == null ? undefined : Number((bytes / 1_048_576).toFixed(2)), expiresAt: text(row.expires_at) || undefined, downloadUrl: row.status === 'completed' ? `/api/cms/audit-exports/${row.id}` : undefined };
+  const filter = object(row.filter_payload);
+  const bytes = row.file_size_bytes == null ? undefined : Number(row.file_size_bytes);
+  const filePath = text(row.file_path);
+  const fileExt = filePath.endsWith('.xlsx') ? ('xlsx' as const) : filePath.endsWith('.csv') ? ('csv' as const) : ('xlsx' as const);
+  return {
+    id: text(row.id),
+    requestedAt: text(row.requested_at),
+    requestedBy: text(row.requested_by),
+    scopeName: text(row.workspace),
+    dateRange: text(filter.range),
+    filterSummary: text(filter.summary),
+    status: row.status as ExportJob['status'],
+    totalRecords: row.total_records == null ? undefined : Number(row.total_records),
+    fileSizeMb: bytes == null ? undefined : Number((bytes / 1_048_576).toFixed(2)),
+    expiresAt: text(row.expires_at) || undefined,
+    filePath: filePath || undefined,
+    fileExt,
+    downloadUrl: row.status === 'completed' ? `/api/cms/audit-exports/${row.id}` : undefined,
+  };
 }
 
 export const auditListQuerySchema = z.object({

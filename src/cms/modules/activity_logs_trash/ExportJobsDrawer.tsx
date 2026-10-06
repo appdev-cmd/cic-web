@@ -79,7 +79,7 @@ export const ExportJobsDrawer: React.FC<ExportJobsDrawerProps> = ({
                 Quản lý Tệp Xuất Nhật ký Kiểm toán (Export Audit Jobs)
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Tạo và tải báo cáo CSV từ nguồn nhật ký được phân quyền
+                Tạo và tải báo cáo Excel (.xlsx) từ nguồn nhật ký được phân quyền
               </p>
             </div>
           </div>
@@ -116,7 +116,7 @@ export const ExportJobsDrawer: React.FC<ExportJobsDrawerProps> = ({
               className="min-h-11 w-full sm:w-auto px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs rounded-xl shadow-md shadow-orange-600/20 flex items-center justify-center gap-2 cursor-pointer transition-all shrink-0"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isGenerating ? 'animate-spin' : ''}`} />
-              <span>{isGenerating ? 'Đang xuất tệp...' : 'Bắt đầu Xuất File'}</span>
+              <span>{isGenerating ? 'Đang xuất tệp...' : 'Bắt đầu Xuất File Excel'}</span>
             </button>
           </div>
         </div>
@@ -141,7 +141,7 @@ export const ExportJobsDrawer: React.FC<ExportJobsDrawerProps> = ({
                   <div className="flex items-start gap-2 min-w-0">
                     <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
                     <span className="font-bold text-slate-900 dark:text-white break-all">
-                      [{job.id}] Audit_Export_{job.dateRange.replace(/\s+/g, '_')}.csv
+                      [{job.id}] Audit_Export_{job.dateRange.replace(/\s+/g, '_')}.{job.fileExt || (job.filePath?.endsWith('.csv') ? 'csv' : 'xlsx')}
                     </span>
                   </div>
 
@@ -178,7 +178,13 @@ export const ExportJobsDrawer: React.FC<ExportJobsDrawerProps> = ({
                       ) : (
                         <Download className="w-3.5 h-3.5" />
                       )}
-                      <span>{downloadingId === job.id ? 'Đang tạo liên kết...' : 'Tải xuống File CSV'}</span>
+                      <span>
+                        {downloadingId === job.id
+                          ? 'Đang tạo liên kết...'
+                          : job.fileExt === 'csv' || job.filePath?.endsWith('.csv')
+                          ? 'Tải xuống File CSV'
+                          : 'Tải xuống File Excel (.xlsx)'}
+                      </span>
                     </button>
                   )}
                 </div>
