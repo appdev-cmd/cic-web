@@ -9,6 +9,7 @@ import {
   CheckCircle,
   Clock,
   FilePlus,
+  Layers,
 } from 'lucide-react';
 import { FormItem } from '../types';
 import { FORM_STATUS_LABELS } from '../../shared/constants/statusTypes';
@@ -154,16 +155,20 @@ export const FormList: React.FC<FormListProps> = ({
                   {/* Embedded Locations */}
                   <td className="p-3">
                     {form.usedByPages && form.usedByPages.length > 0 ? (
-                      <div className="space-y-1">
+                      <div
+                        onClick={() => onOpenUsedBy?.(form)}
+                        className="space-y-1 cursor-pointer group rounded-lg p-1 -m-1 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 transition-colors"
+                        title="Bấm để xem danh sách vị trí nhúng"
+                      >
                         <div className="flex flex-col gap-1">
                           {form.usedByPages.slice(0, 2).map((page, idx) => (
                             <div
                               key={idx}
-                              className="inline-flex items-center gap-1.5 text-[11px] text-slate-700 dark:text-slate-300"
+                              className="inline-flex items-center gap-1.5 text-[11px] text-slate-700 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
                               title={`${page.pageTitle} (${page.placementKey})`}
                             >
                               <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
-                              <span className="font-semibold text-slate-900 dark:text-white truncate max-w-[160px]">
+                              <span className="font-semibold truncate max-w-[160px]">
                                 {page.pageTitle}
                               </span>
                             </div>
@@ -172,7 +177,10 @@ export const FormList: React.FC<FormListProps> = ({
                         {form.usedByPages.length > 2 ? (
                           <button
                             type="button"
-                            onClick={() => onOpenUsedBy?.(form)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onOpenUsedBy?.(form);
+                            }}
                             className="inline-flex items-center gap-1 text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-bold cursor-pointer text-left"
                           >
                             <span>+{form.usedByPages.length - 2} vị trí khác...</span>
@@ -180,8 +188,11 @@ export const FormList: React.FC<FormListProps> = ({
                         ) : (
                           <button
                             type="button"
-                            onClick={() => onOpenUsedBy?.(form)}
-                            className="text-[10px] text-slate-400 hover:text-blue-500 hover:underline cursor-pointer block text-left"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onOpenUsedBy?.(form);
+                            }}
+                            className="text-[10px] text-slate-400 group-hover:text-blue-500 hover:underline cursor-pointer block text-left"
                           >
                             Chi tiết vị trí
                           </button>
@@ -238,6 +249,13 @@ export const FormList: React.FC<FormListProps> = ({
                         size="sm"
                         aria-label="Xem trước biểu mẫu"
                         title="Xem trước biểu mẫu"
+                      />
+                      <CmsIconButton
+                        onClick={() => onOpenUsedBy?.(form)}
+                        icon={<Layers />}
+                        size="sm"
+                        aria-label="Vị trí nhúng"
+                        title="Vị trí nhúng"
                       />
                       <CmsIconButton
                         onClick={() => onOpenSubmissions(form)}
