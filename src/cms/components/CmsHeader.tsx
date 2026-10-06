@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Plus,
   Bell,
@@ -16,14 +17,24 @@ import {
   Calendar,
   ExternalLink,
   Search,
+  Mail,
+  FileText,
+  ShieldAlert,
+  Server,
+  Volume2,
+  VolumeX,
+  CheckCheck,
+  ArrowRight,
+  Loader2,
 } from 'lucide-react';
 import { CmsUser, NotificationItem } from '../types';
 import type { CmsLocale } from '../data/CmsDataSource';
 import { getCmsDictionary } from '../i18n/cmsDictionary';
+import { useCmsNotifications } from '../hooks/useCmsNotifications';
 
 interface CmsHeaderProps {
   user: CmsUser;
-  initialNotifications: NotificationItem[];
+  initialNotifications?: NotificationItem[];
   isDarkMode: boolean;
   onToggleTheme: () => void;
   workspaceLocale: CmsLocale;
@@ -35,6 +46,26 @@ interface CmsHeaderProps {
   onOpenMyAccount?: () => void;
   onOpenChangePassword?: () => void;
   onLogout?: () => void;
+}
+
+function formatRelativeTime(dateString: string, locale: string = 'vi'): string {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffSec = Math.floor((now.getTime() - date.getTime()) / 1000);
+  if (diffSec < 60) return locale === 'en' ? 'Just now' : 'Vừa xong';
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return locale === 'en' ? `${diffMin}m ago` : `${diffMin} phút trước`;
+  const diffHour = Math.floor(diffMin / 60);
+  if (diffHour < 24) return locale === 'en' ? `${diffHour}h ago` : `${diffHour} giờ trước`;
+  const diffDay = Math.floor(diffHour / 24);
+  if (diffDay < 7) return locale === 'en' ? `${diffDay}d ago` : `${diffDay} ngày trước`;
+  return date.toLocaleDateString(locale === 'en' ? 'en-US' : 'vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 export const CmsHeader: React.FC<CmsHeaderProps> = ({
@@ -52,18 +83,24 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
   onOpenChangePassword,
   onLogout,
 }) => {
+  const router = useRouter();
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(initialNotifications);
+  const [notifTab, setNotifTab] = useState<'all' | 'unread'>('all');
+
+  const {
+    notifications,
+    unreadCount,
+    isLoading: isNotifLoading,
+    soundEnabled,
+    toggleSound,
+    markAsRead,
+    markAllAsRead,
+  } = useCmsNotifications();
 
   const dict = getCmsDictionary(workspaceLocale);
   const tHeader = dict.header;
-  const unreadCount = notifications.filter((n) => n.unread).length;
-
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
-  };
 
   const getRoleDisplayName = (role: string) => {
     switch (role) {
@@ -274,66 +311,157 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
               <span className="absolute top-1 right-1 w-4 h-4 bg-red-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
-                {unreadCount}
+                {unreadCount > 99 ? '99+' : unreadCount}
               </span>
             )}
           </button>
 
           {isNotifOpen && (
-            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl py-2 z-50 text-xs">
-              <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700/80 flex items-center justify-between">
-                <span className="font-bold text-slate-900 dark:text-white text-sm">
-                  {tHeader.notifications} ({unreadCount})
-                </span>
+            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl py-2 z-50 text-xs animate-in fade-in zoom-in-95 duration-150">
+              {/* Header */}
+              <div className="px-3.5 py-2.5 border-b border-slate-100 dark:border-slate-700/80 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-slate-900 dark:text-white text-xs">
+                    {tHeader.notifications} ({unreadCount})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={toggleSound}
+                    className="p-1 rounded text-slate-400 hover:text-orange-500 transition-colors cursor-pointer"
+                    title={soundEnabled ? 'Chuông thông báo: Đang bật' : 'Chuông thông báo: Đang tắt'}
+                    aria-label="Cài đặt chuông thông báo"
+                  >
+                    {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-orange-500" /> : <VolumeX className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
                 {unreadCount > 0 && (
                   <button
-                    onClick={markAllRead}
-                    className="text-orange-600 dark:text-orange-400 hover:underline text-[11px] font-medium"
+                    type="button"
+                    onClick={() => void markAllAsRead()}
+                    className="text-orange-600 dark:text-orange-400 hover:underline text-[11px] font-medium flex items-center gap-1 cursor-pointer"
                   >
-                    {tHeader.markAllRead}
+                    <CheckCheck className="w-3.5 h-3.5" />
+                    <span>{tHeader.markAllRead}</span>
                   </button>
                 )}
               </div>
 
-              <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700/50">
-                {notifications.length === 0 && (
-                  <p className="px-4 py-8 text-center text-[11px] text-slate-500 dark:text-slate-400">
-                    {tHeader.noNotifications}
-                  </p>
-                )}
-                {notifications.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`p-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex gap-2.5 ${
-                      item.unread ? 'bg-orange-50/50 dark:bg-orange-950/20' : ''
-                    }`}
-                  >
-                    <div
-                      className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
-                        item.unread ? 'bg-orange-500' : 'bg-slate-300 dark:bg-slate-600'
-                      }`}
-                    />
-                    <div className="flex-1 space-y-0.5">
-                      <p className="font-semibold text-slate-800 dark:text-slate-200">
-                        {item.title}
-                      </p>
-                      <p className="text-slate-500 dark:text-slate-400 text-[11px] line-clamp-2">
-                        {item.description}
-                      </p>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500">
-                        {item.created_time}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+              {/* Quick filter tabs */}
+              <div className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-800/50 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setNotifTab('all')}
+                  className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors cursor-pointer ${
+                    notifTab === 'all'
+                      ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-2xs font-semibold'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-800'
+                  }`}
+                >
+                  Tất cả ({notifications.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNotifTab('unread')}
+                  className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors cursor-pointer ${
+                    notifTab === 'unread'
+                      ? 'bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-2xs font-semibold'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-800'
+                  }`}
+                >
+                  Chưa đọc ({unreadCount})
+                </button>
               </div>
 
-              <div className="px-4 py-2 border-t border-slate-100 dark:border-slate-700/80 text-center">
+              {/* Notification list */}
+              <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700/50">
+                {isNotifLoading && notifications.length === 0 ? (
+                  <div className="p-8 text-center flex flex-col items-center justify-center gap-2 text-slate-400">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="text-[11px]">Đang tải thông báo...</span>
+                  </div>
+                ) : notifications.filter((item) => (notifTab === 'unread' ? item.unread : true)).length === 0 ? (
+                  <p className="px-4 py-8 text-center text-[11px] text-slate-500 dark:text-slate-400">
+                    {notifTab === 'unread' ? 'Không có thông báo chưa đọc nào.' : tHeader.noNotifications}
+                  </p>
+                ) : (
+                  notifications
+                    .filter((item) => (notifTab === 'unread' ? item.unread : true))
+                    .map((item) => {
+                      const icon =
+                        item.type === 'quote' ? (
+                          <FileText className="w-4 h-4 text-amber-500 shrink-0" />
+                        ) : item.type === 'registration' ? (
+                          <Calendar className="w-4 h-4 text-emerald-500 shrink-0" />
+                        ) : item.type === 'contact' ? (
+                          <Mail className="w-4 h-4 text-blue-500 shrink-0" />
+                        ) : item.type === 'editorial' ? (
+                          <Sparkles className="w-4 h-4 text-indigo-500 shrink-0" />
+                        ) : (
+                          <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0" />
+                        );
+
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => {
+                            void markAsRead(item.id);
+                            setIsNotifOpen(false);
+                            if (item.linkUrl) {
+                              router.push(item.linkUrl);
+                            }
+                          }}
+                          className={`p-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex gap-2.5 cursor-pointer group ${
+                            item.unread ? 'bg-orange-50/50 dark:bg-orange-950/20' : ''
+                          }`}
+                        >
+                          <div className="mt-0.5 shrink-0">{icon}</div>
+                          <div className="flex-1 space-y-0.5 min-w-0">
+                            <div className="flex items-center justify-between gap-1">
+                              <p
+                                className={`truncate text-xs ${
+                                  item.unread
+                                    ? 'font-bold text-slate-900 dark:text-white'
+                                    : 'font-medium text-slate-700 dark:text-slate-300'
+                                }`}
+                              >
+                                {item.title}
+                              </p>
+                              {item.unread && (
+                                <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
+                              )}
+                            </div>
+                            <p className="text-slate-500 dark:text-slate-400 text-[11px] line-clamp-2">
+                              {item.description}
+                            </p>
+                            <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                              {formatRelativeTime(item.createdAt, workspaceLocale)}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="px-3.5 py-2 border-t border-slate-100 dark:border-slate-700/80 flex items-center justify-between text-[11px]">
                 <button
-                  onClick={() => setIsNotifOpen(false)}
-                  className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 text-[11px]"
+                  type="button"
+                  onClick={() => {
+                    setIsNotifOpen(false);
+                    router.push('/cms/notifications');
+                  }}
+                  className="text-orange-600 dark:text-orange-400 hover:underline font-semibold flex items-center gap-1 cursor-pointer"
                 >
-                  Đóng thông báo
+                  <span>Xem tất cả lịch sử</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsNotifOpen(false)}
+                  className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
+                >
+                  Đóng
                 </button>
               </div>
             </div>
