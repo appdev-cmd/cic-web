@@ -82,7 +82,20 @@ async function runTests() {
   if (test5.category !== 'irrelevant' || test5.suggestedStatus !== 'not_suitable') {
     throw new Error(`Test 5 FAILED! Expected category 'irrelevant' and status 'not_suitable', got ${test5.category}`);
   }
-  console.log('-> TEST 5 PASSED! (Phát hiện chính xác tiếng Việt không dấu: kiem tra no xau -> irrelevant)');
+  // Test Case 6: Cá nhân dùng Gmail hỏi bản network không có tên công ty -> Phải là qualified
+  console.log('\n[TEST 6] Cá nhân dùng Gmail hỏi mua bản network (Nguyễn Hiên Nhân):');
+  const test6 = await analyzeCustomerRequestWithAi({
+    fullname: 'Nguyễn Hiên Nhân',
+    email: 'nhan111958@gmail.com',
+    telephone: '0913419958',
+    subject: 'Tôi muốn mua Enjicad 2026 pro bản network',
+    message: 'Tôi muốn mua Enjicad 2026 pro bản network. Xin báo giá',
+  });
+  console.log('Result 6:', JSON.stringify(test6, null, 2));
+  if (test6.category !== 'qualified' || test6.priority !== 'medium') {
+    throw new Error(`Test 6 FAILED! Expected category 'qualified' and priority 'medium', got category '${test6.category}', priority '${test6.priority}'`);
+  }
+  console.log('-> TEST 6 PASSED! (Cá nhân dùng Gmail hỏi bản network tuyệt đối không bị đôn lên Enterprise VIP)');
 
   console.log('\n--- TẤT CẢ CÁC BÀI TEST ĐÃ VƯỢT QUA 100%! ---');
 }
