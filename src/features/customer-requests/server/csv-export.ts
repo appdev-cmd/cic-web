@@ -164,7 +164,7 @@ export function buildCustomerRequestsWorkbook(
       email,
       company,
       address,
-      r.sourceConfig?.formName || r.sourceType,
+      r.sourceConfig?.formName || r.sourceType || '',
       r.sourceConfig?.ctaName || '',
       productDisplay,
       statusLabel,
