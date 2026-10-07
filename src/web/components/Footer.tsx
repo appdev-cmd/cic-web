@@ -99,14 +99,9 @@ export const Footer = ({
                 className="h-26 sm:h-30 w-auto mb-4 rounded-[10px]"
               />
             </div>
-            <p className={`${typeH4} text-white mb-4 leading-tight`}>
-              {values.legal_name || 'Công ty cổ phần Công nghệ và Tư vấn CIC'}
+            <p className={`${typeH4} text-white mb-4 leading-tight whitespace-nowrap`}>
+              Công ty cổ phần Công nghệ và Tư vấn CIC
             </p>
-            {values.tax_id && (
-              <p className="text-xs text-slate-400 mb-3">
-                {t.footer.taxCodeLabel} <span className="text-white font-mono">{values.tax_id}</span>
-              </p>
-            )}
             <div className="mb-8">
               <h4 className={`${typeCaption} text-white/60 mb-4`}>{t.footer.newsletterTitle}</h4>
               {newsletterSubscribed ? (
@@ -225,14 +220,7 @@ export const Footer = ({
 
         <div className={`pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 ${typeMeta}`}>
           <div className="flex items-center gap-4 flex-wrap">
-            {values.footer_bottom ? (
-              <div
-                className="[&_a]:text-orange-400 [&_a]:hover:underline inline [&_p]:inline [&_p]:m-0"
-                dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(values.footer_bottom) }}
-              />
-            ) : (
-              <p>{t.footer.copyright}</p>
-            )}
+            <p>© {new Date().getFullYear()} CIC TECHNOLOGY. ALL RIGHTS RESERVED.</p>
             {values.bct_badge_url && (
               <a href={values.bct_badge_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-orange-400 hover:underline">
                 <span>{locale === 'en' ? 'Ministry of Industry & Trade Certified' : 'Chứng nhận Bộ Công Thương'}</span>
