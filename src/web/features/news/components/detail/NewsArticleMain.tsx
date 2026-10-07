@@ -202,10 +202,11 @@ export function NewsArticleMain({
             flushList();
           });
 
+          const hasH3 = blocks.some((b) => b.type === 'h3');
           let headingCounter = 0;
           return blocks.map((block, idx) => {
             if (block.type === 'h3') {
-              const sectionId = `sec-heading-${headingCounter++}`;
+              const sectionId = hasH3 ? `sec-heading-${headingCounter++}` : undefined;
               return (
                 <h3
                   key={idx}
@@ -217,7 +218,7 @@ export function NewsArticleMain({
               );
             }
             if (block.type === 'h4') {
-              const sectionId = `sec-heading-${headingCounter++}`;
+              const sectionId = !hasH3 ? `sec-heading-${headingCounter++}` : undefined;
               return (
                 <h4
                   key={idx}

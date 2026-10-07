@@ -83,8 +83,10 @@ export function NewsDetailSidebar({
                           : 'text-slate-700 hover:text-orange-600 hover:bg-slate-50'
                       }`}
                     >
-                      <span className="text-orange-600 font-bold mr-1.5 text-[10px]">{idx + 1}.</span>
-                      <span className="line-clamp-1 inline">{item.title}</span>
+                      <div className="flex items-start gap-1.5">
+                        <span className="text-orange-600 font-bold shrink-0 text-[10px] mt-0.5">{idx + 1}.</span>
+                        <span className="line-clamp-2 leading-relaxed">{item.title}</span>
+                      </div>
                     </button>
                   ))}
                 </nav>

@@ -5,23 +5,51 @@ export interface TocItem {
 }
 
 /**
- * Trích xuất các mục lục (TOC) từ nội dung bài viết HTML hoặc Markdown.
- * Hỗ trợ thẻ h2, h3, h4 đối với HTML và '### ', '#### ' đối với Markdown.
+ * Xác định cấp tiêu đề HTML lớn nhất thực tế có trong bài viết (ưu tiên h2, rồi đến h3, h4).
+ * Giúp mục lục chỉ tập trung vào các tiêu đề lớn nhất, loại bỏ hoàn toàn các tiêu đề con.
+ */
+export function getHighestHtmlHeadingLevel(html: string): number | null {
+  if (/<h2\b[^>]*>/i.test(html)) return 2;
+  if (/<h3\b[^>]*>/i.test(html)) return 3;
+  if (/<h4\b[^>]*>/i.test(html)) return 4;
+  return null;
+}
+
+/**
+ * Xác định cấp tiêu đề Markdown lớn nhất có trong bài viết (ưu tiên '## ', rồi đến '### ', '#### ').
+ */
+export function getHighestMarkdownHeadingPrefix(lines: string[]): string | null {
+  const hasH2 = lines.some((l) => l.trim().startsWith('## '));
+  if (hasH2) return '## ';
+  const hasH3 = lines.some((l) => l.trim().startsWith('### '));
+  if (hasH3) return '### ';
+  const hasH4 = lines.some((l) => l.trim().startsWith('#### '));
+  if (hasH4) return '#### ';
+  return null;
+}
+
+/**
+ * Trích xuất CHỈ CÁC TIÊU ĐỀ LỚN NHẤT từ nội dung bài viết HTML hoặc Markdown.
+ * Tự động bỏ qua các tiêu đề con để mục lục gọn gàng, súc tích và đúng trọng tâm.
  */
 export function extractTocItems(content: string | null | undefined): TocItem[] {
   if (!content) return [];
   const items: TocItem[] = [];
 
-  // Trường hợp nội dung là HTML
+  // Trường hợp nội dung là HTML (CKEditor)
   if (/<[a-z][\s\S]*>/i.test(content)) {
-    const headingMatches = content.matchAll(/<h([2-4])([^>]*)>([\s\S]*?)<\/h\1>/gi);
+    const highestLevel = getHighestHtmlHeadingLevel(content);
+    if (!highestLevel) return [];
+
+    const regex = new RegExp(`<h${highestLevel}([^>]*)>([\\s\\S]*?)<\\/h${highestLevel}>`, 'gi');
+    const headingMatches = content.matchAll(regex);
     let idx = 0;
     for (const match of headingMatches) {
-      const text = match[3].replace(/<[^>]+>/g, '').trim();
+      const text = match[2].replace(/<[^>]+>/g, '').trim();
       if (text) {
         items.push({
           id: `sec-heading-${idx}`,
-          title: text.length > 36 ? text.substring(0, 36) + '...' : text,
+          title: text,
           fullTitle: text,
         });
         idx++;
@@ -32,15 +60,18 @@ export function extractTocItems(content: string | null | undefined): TocItem[] {
 
   // Trường hợp nội dung là Markdown fallback
   const lines = content.split('\n');
+  const highestPrefix = getHighestMarkdownHeadingPrefix(lines);
+  if (!highestPrefix) return [];
+
   let idx = 0;
   lines.forEach((line) => {
     const trimmed = line.trim();
-    if (trimmed.startsWith('### ') || trimmed.startsWith('#### ')) {
-      const title = trimmed.replace(/^#{3,4}\s+/, '').replace(/\*\*/g, '').trim();
+    if (trimmed.startsWith(highestPrefix)) {
+      const title = trimmed.slice(highestPrefix.length).replace(/\*\*/g, '').trim();
       if (title) {
         items.push({
           id: `sec-heading-${idx}`,
-          title: title.length > 36 ? title.substring(0, 36) + '...' : title,
+          title: title,
           fullTitle: title,
         });
         idx++;
@@ -52,13 +83,18 @@ export function extractTocItems(content: string | null | undefined): TocItem[] {
 }
 
 /**
- * Tiêm thuộc tính `id="sec-heading-${idx}"` và class `scroll-mt-28` vào các thẻ heading <h2-h4>
+ * Tiêm thuộc tính `id="sec-heading-${idx}"` và class `scroll-mt-28` CHỈ VÀO CÁC TIÊU ĐỀ LỚN NHẤT
  * của chuỗi HTML trước khi render ra DOM để đảm bảo đồng bộ 100% với TOC trích xuất.
  */
 export function injectHeadingIds(html: string): string {
   if (!html) return '';
+  const highestLevel = getHighestHtmlHeadingLevel(html);
+  if (!highestLevel) return html;
+
   let idx = 0;
-  return html.replace(/<h([2-4])([^>]*)>([\s\S]*?)<\/h\1>/gi, (match, level, attrs, innerHtml) => {
+  const regex = new RegExp(`<h${highestLevel}([^>]*)>([\\s\\S]*?)<\\/h${highestLevel}>`, 'gi');
+
+  return html.replace(regex, (match, attrs, innerHtml) => {
     const text = innerHtml.replace(/<[^>]+>/g, '').trim();
     if (!text) return match;
     const sectionId = `sec-heading-${idx++}`;
@@ -79,6 +115,6 @@ export function injectHeadingIds(html: string): string {
       updatedAttrs = ` class="scroll-mt-28"${updatedAttrs}`;
     }
 
-    return `<h${level}${updatedAttrs}>${innerHtml}</h${level}>`;
+    return `<h${highestLevel}${updatedAttrs}>${innerHtml}</h${highestLevel}>`;
   });
 }
