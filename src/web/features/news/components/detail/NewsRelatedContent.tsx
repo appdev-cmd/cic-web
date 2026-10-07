@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import type { EventItem } from '@/shared/types';
 import type { NewsRelatedProject } from '../../types';
+import { useI18n } from '@/shared/i18n';
 
 interface NewsRelatedContentProps {
   relatedProjects: NewsRelatedProject[];
@@ -23,6 +24,8 @@ export function NewsRelatedContent({
   onNavigateToProject,
   onNavigateToEvent,
 }: NewsRelatedContentProps) {
+  const { locale } = useI18n();
+
   if (relatedProjects.length === 0 && relatedEvents.length === 0) return null;
 
   return (
@@ -32,7 +35,7 @@ export function NewsRelatedContent({
         <div className="space-y-4">
           <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
             <Building2 size={18} className="text-orange-600" />
-            <span>Dự án liên quan</span>
+            <span>{locale === 'en' ? 'Related Projects' : 'Dự án liên quan'}</span>
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -49,7 +52,7 @@ export function NewsRelatedContent({
                 />
                 <div className="min-w-0 flex-1 space-y-1">
                   <span className="inline-block text-[10px] font-bold px-2 py-0.5 bg-orange-50 text-orange-600 rounded">
-                    {proj.sector || 'Dự án tiêu biểu'}
+                    {proj.sector || (locale === 'en' ? 'Featured Project' : 'Dự án tiêu biểu')}
                   </span>
                   <h4 className="text-xs font-bold text-slate-950 group-hover:text-orange-600 transition-colors line-clamp-2 leading-snug">
                     {proj.name}
@@ -60,7 +63,7 @@ export function NewsRelatedContent({
                     </p>
                   )}
                   <div className="pt-1 flex items-center text-[10px] font-bold text-orange-600 group-hover:translate-x-1 transition-transform">
-                    <span>Xem chi tiết dự án</span>
+                    <span>{locale === 'en' ? 'View Project Details' : 'Xem chi tiết dự án'}</span>
                     <ChevronRight size={12} className="ml-0.5" />
                   </div>
                 </div>
@@ -75,7 +78,7 @@ export function NewsRelatedContent({
         <div className="space-y-4">
           <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
             <Calendar size={18} className="text-orange-600" />
-            <span>Sự kiện liên quan</span>
+            <span>{locale === 'en' ? 'Related Events' : 'Sự kiện liên quan'}</span>
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -87,7 +90,7 @@ export function NewsRelatedContent({
               >
                 <div className="px-3 py-2 bg-orange-600 text-white rounded-[8px] text-center shrink-0 group-hover:bg-orange-700 transition-colors">
                   <span className="block text-[10px] font-extrabold uppercase tracking-wider">
-                    {evt.date.split('/')[1] ? `Thg ${evt.date.split('/')[1]}` : 'Sự kiện'}
+                    {evt.date.split('/')[1] ? (locale === 'en' ? `Month ${evt.date.split('/')[1]}` : `Thg ${evt.date.split('/')[1]}`) : (locale === 'en' ? 'Event' : 'Sự kiện')}
                   </span>
                   <span className="block text-base font-black leading-none mt-0.5">
                     {evt.date.split('/')[0]}
@@ -102,7 +105,7 @@ export function NewsRelatedContent({
                     <span className="line-clamp-1">{evt.location}</span>
                   </p>
                   <div className="pt-1 flex items-center text-[10px] font-bold text-orange-600 group-hover:translate-x-1 transition-transform">
-                    <span>Xem chi tiết sự kiện</span>
+                    <span>{locale === 'en' ? 'View Event Details' : 'Xem chi tiết sự kiện'}</span>
                     <ChevronRight size={12} className="ml-0.5" />
                   </div>
                 </div>

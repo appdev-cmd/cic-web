@@ -16,6 +16,7 @@ import {
 import type { ProjectDetailViewModel } from '@/features/projects/types';
 import { ConsultationModal } from '@/web/components/ConsultationModal';
 import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
+import { useI18n } from '@/shared/i18n';
 
 interface ProjectDetailRuntimeViewProps {
   project: ProjectDetailViewModel;
@@ -34,7 +35,12 @@ export function ProjectDetailRuntimeView({
   onNavigateToService,
   onOpenConsultation,
 }: ProjectDetailRuntimeViewProps) {
+  const { t, locale } = useI18n();
+  const isEn = locale === 'en';
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
+
+  const homeHref = locale === 'en' ? '/en' : '/';
+  const projectsHref = locale === 'en' ? '/en/projects' : '/projects';
 
   const handleOpenConsultation = () => {
     if (onOpenConsultation) {
@@ -62,36 +68,36 @@ export function ProjectDetailRuntimeView({
                 className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-orange-600 transition-colors py-1 group cursor-pointer"
               >
                 <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
-                Quay lại danh sách dự án
+                {t.projects.backToList}
               </button>
             ) : (
               <Link
-                href="/projects"
+                href={projectsHref}
                 className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-orange-600 transition-colors py-1 group cursor-pointer"
               >
                 <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
-                Quay lại danh sách dự án
+                {t.projects.backToList}
               </Link>
             )}
 
             <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
               {onNavigateHome ? (
                 <span onClick={onNavigateHome} className="hover:text-orange-600 cursor-pointer">
-                  Trang chủ
+                  {isEn ? 'Home' : 'Trang chủ'}
                 </span>
               ) : (
-                <Link href="/" className="hover:text-orange-600 cursor-pointer">
-                  Trang chủ
+                <Link href={homeHref} className="hover:text-orange-600 cursor-pointer">
+                  {isEn ? 'Home' : 'Trang chủ'}
                 </Link>
               )}
               <ChevronRight size={12} />
               {onBack ? (
                 <span onClick={onBack} className="hover:text-orange-600 cursor-pointer">
-                  Dự án
+                  {isEn ? 'Projects' : 'Dự án'}
                 </span>
               ) : (
-                <Link href="/projects" className="hover:text-orange-600 cursor-pointer">
-                  Dự án
+                <Link href={projectsHref} className="hover:text-orange-600 cursor-pointer">
+                  {isEn ? 'Projects' : 'Dự án'}
                 </Link>
               )}
               <ChevronRight size={12} />
@@ -144,7 +150,7 @@ export function ProjectDetailRuntimeView({
                 project.summary && (
                   <div className="space-y-4">
                     <h2 className="text-base sm:text-lg font-bold text-slate-950 uppercase tracking-tight pb-2 border-b border-slate-100">
-                      Tổng quan dự án
+                      {isEn ? 'Project Overview' : 'Tổng quan dự án'}
                     </h2>
                     <p className="text-sm text-slate-700 leading-relaxed font-normal">
                       {project.summary}
@@ -159,21 +165,21 @@ export function ProjectDetailRuntimeView({
               <div className="bg-white border border-slate-200/80 p-6 rounded-[12px] shadow-xs space-y-6 sticky top-28">
                 <div className="border-b border-slate-100 pb-3">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">
-                    Thông tin dự án
+                    {isEn ? 'Project Information' : 'Thông tin dự án'}
                   </h3>
                 </div>
 
                 <dl className="space-y-4 text-xs">
                   {project.customerName && (
                     <div className="flex flex-col space-y-1">
-                      <dt className="text-slate-400 font-medium">Chủ đầu tư / Khách hàng:</dt>
+                      <dt className="text-slate-400 font-medium">{isEn ? 'Client / Investor:' : 'Chủ đầu tư / Khách hàng:'}</dt>
                       <dd className="font-bold text-slate-900">{project.customerName}</dd>
                     </div>
                   )}
 
                   {project.location && (
                     <div className="flex flex-col space-y-1">
-                      <dt className="text-slate-400 font-medium">Địa điểm thực hiện:</dt>
+                      <dt className="text-slate-400 font-medium">{isEn ? 'Location:' : 'Địa điểm thực hiện:'}</dt>
                       <dd className="font-bold text-slate-900 flex items-center gap-1.5">
                         <MapPin size={13} className="text-orange-600" />
                         {project.location}
@@ -183,7 +189,7 @@ export function ProjectDetailRuntimeView({
 
                   {project.timeDisplay && (
                     <div className="flex flex-col space-y-1">
-                      <dt className="text-slate-400 font-medium">Thời gian triển khai:</dt>
+                      <dt className="text-slate-400 font-medium">{isEn ? 'Timeline:' : 'Thời gian triển khai:'}</dt>
                       <dd className="font-bold text-slate-900 flex items-center gap-1.5">
                         <Calendar size={13} className="text-orange-600" />
                         {project.timeDisplay}
@@ -193,7 +199,7 @@ export function ProjectDetailRuntimeView({
 
                   {project.solution && (
                     <div className="flex flex-col space-y-1">
-                      <dt className="text-slate-400 font-medium">Lĩnh vực & Giải pháp:</dt>
+                      <dt className="text-slate-400 font-medium">{isEn ? 'Sector & Solution:' : 'Lĩnh vực & Giải pháp:'}</dt>
                       <dd className="font-bold text-slate-900">{project.solution}</dd>
                     </div>
                   )}
@@ -203,7 +209,7 @@ export function ProjectDetailRuntimeView({
                 {project.technologies && project.technologies.length > 0 && (
                   <div className="pt-4 border-t border-slate-100 space-y-2.5">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">
-                      Công nghệ / Giải pháp ứng dụng
+                      {isEn ? 'Applied Technologies & Solutions' : 'Công nghệ / Giải pháp ứng dụng'}
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {project.technologies.map((tech, idx) => (
@@ -223,7 +229,7 @@ export function ProjectDetailRuntimeView({
                 {project.relatedLinks && project.relatedLinks.length > 0 && (
                   <div className="pt-4 border-t border-slate-100 space-y-3">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">
-                      Sản phẩm & Dịch vụ liên quan
+                      {isEn ? 'Related Products & Services' : 'Sản phẩm & Dịch vụ liên quan'}
                     </span>
                     <div className="space-y-2">
                       {project.relatedLinks.map((link) => (
@@ -240,7 +246,7 @@ export function ProjectDetailRuntimeView({
                         >
                           <div className="space-y-0.5">
                             <span className="text-[10px] font-bold uppercase text-orange-600 block">
-                              {link.view === 'products' ? 'Sản Phẩm' : 'Dịch Vụ'}
+                              {isEn ? (link.view === 'products' ? 'Product' : 'Service') : (link.view === 'products' ? 'Sản Phẩm' : 'Dịch Vụ')}
                             </span>
                             <p className="text-xs font-bold text-slate-900 group-hover:text-orange-600 transition-colors">
                               {link.label}
@@ -262,7 +268,7 @@ export function ProjectDetailRuntimeView({
                   onClick={handleOpenConsultation}
                   className="w-full py-3 px-4 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs uppercase tracking-wider rounded-[8px] shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <MessageSquare size={15} /> Yêu cầu tư vấn ngay
+                  <MessageSquare size={15} /> {isEn ? 'Request Consultation' : 'Yêu cầu tư vấn ngay'}
                 </button>
               </div>
             </aside>
@@ -272,14 +278,16 @@ export function ProjectDetailRuntimeView({
           <section className="py-8 px-6 sm:px-10 bg-orange-50/60 border border-orange-200/80 rounded-[12px] text-center space-y-4 my-8">
             <Quote className="mx-auto text-orange-600 opacity-30" size={36} />
             <blockquote className="text-sm sm:text-base font-normal text-slate-800 italic leading-snug max-w-3xl mx-auto">
-              "Sự đồng hành của CIC Technology đã mang lại hiệu quả vượt trội trong việc tối ưu hóa quy trình kỹ thuật, số hóa và quản lý chất lượng cho dự án."
+              {isEn
+                ? '"CIC Technology partnership delivered outstanding efficiency in optimizing engineering workflows, digitalization, and project quality control."'
+                : '"Sự đồng hành của CIC Technology đã mang lại hiệu quả vượt trội trong việc tối ưu hóa quy trình kỹ thuật, số hóa và quản lý chất lượng cho dự án."'}
             </blockquote>
             <div className="text-center space-y-0.5">
               <p className="font-bold text-xs uppercase text-slate-900 tracking-wider">
-                Ban Quản lý Dự án
+                {isEn ? 'Project Management Unit' : 'Ban Quản lý Dự án'}
               </p>
               <p className="text-xs font-bold text-orange-600 uppercase tracking-wider">
-                {project.customerName || 'Chủ đầu tư'}
+                {project.customerName || (isEn ? 'Project Investor' : 'Chủ đầu tư')}
               </p>
             </div>
           </section>
@@ -290,10 +298,10 @@ export function ProjectDetailRuntimeView({
               <div className="flex justify-between items-end">
                 <div>
                   <span className="text-xs font-bold uppercase tracking-wider text-orange-600 block">
-                    Dự án khác
+                    {isEn ? 'Other Projects' : 'Dự án khác'}
                   </span>
                   <h3 className="text-lg sm:text-xl font-extrabold text-slate-950 mt-1">
-                    Dự án tiêu biểu
+                    {isEn ? 'Featured Projects' : 'Dự án tiêu biểu'}
                   </h3>
                 </div>
               </div>
@@ -302,7 +310,7 @@ export function ProjectDetailRuntimeView({
                 {project.relatedProjects.map((proj) => (
                   <Link
                     key={proj.id}
-                    href={`/projects/${proj.slug}`}
+                    href={locale === 'en' ? `/en/projects/${proj.slug}` : `/projects/${proj.slug}`}
                     className="bg-white border border-slate-200 hover:border-orange-500 group cursor-pointer flex flex-col hover:shadow-md transition-all duration-300 rounded-[10px] overflow-hidden"
                   >
                     <div className="aspect-video overflow-hidden relative">
@@ -334,7 +342,7 @@ export function ProjectDetailRuntimeView({
                         </h4>
                       </div>
                       <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 pt-2">
-                        Xem chi tiết{' '}
+                        {isEn ? 'View details' : 'Xem chi tiết'}{' '}
                         <ArrowRight
                           size={12}
                           className="transition-transform group-hover:translate-x-1 text-orange-600"
@@ -351,10 +359,12 @@ export function ProjectDetailRuntimeView({
           <section className="py-12 px-6 sm:px-10 rounded-[12px] bg-gradient-to-br from-orange-600 via-amber-600 to-orange-700 text-white text-center relative overflow-hidden shadow-md space-y-5">
             <div className="relative z-10 max-w-2xl mx-auto space-y-3">
               <h2 className="text-xl sm:text-2xl font-extrabold leading-tight">
-                Sẵn sàng khởi đầu hành trình số hóa dự án của bạn?
+                {isEn ? 'Ready to digitalize your project journey?' : 'Sẵn sàng khởi đầu hành trình số hóa dự án của bạn?'}
               </h2>
               <p className="text-white/90 text-xs sm:text-sm font-normal leading-relaxed">
-                Hãy để đội ngũ chuyên gia CIC Technology hỗ trợ bạn tối ưu hóa thiết kế, ứng dụng mô hình BIM và chuyển đổi số quy trình quản lý hạ tầng ngay hôm nay.
+                {isEn
+                  ? 'Let CIC Technology experts support your engineering optimization, BIM adoption, and infrastructure digital transformation today.'
+                  : 'Hãy để đội ngũ chuyên gia CIC Technology hỗ trợ bạn tối ưu hóa thiết kế, ứng dụng mô hình BIM và chuyển đổi số quy trình quản lý hạ tầng ngay hôm nay.'}
               </p>
               <div className="flex flex-wrap justify-center gap-3 pt-2">
                 <button
@@ -362,7 +372,7 @@ export function ProjectDetailRuntimeView({
                   onClick={handleOpenConsultation}
                   className="bg-white text-orange-600 hover:bg-slate-100 px-6 py-3 rounded-[8px] font-bold text-xs uppercase tracking-wider shadow-md transition-all hover:scale-105 cursor-pointer"
                 >
-                  Yêu cầu tư vấn ngay
+                  {isEn ? 'Request Consultation' : 'Yêu cầu tư vấn ngay'}
                 </button>
                 {onBack ? (
                   <button
@@ -370,14 +380,14 @@ export function ProjectDetailRuntimeView({
                     onClick={onBack}
                     className="border border-white/60 hover:border-white text-white px-6 py-3 rounded-[8px] font-bold text-xs uppercase tracking-wider hover:bg-white/10 transition-all cursor-pointer inline-flex items-center justify-center"
                   >
-                    Khám phá tất cả dự án
+                    {isEn ? 'Explore All Projects' : 'Khám phá tất cả dự án'}
                   </button>
                 ) : (
                   <Link
-                    href="/projects"
+                    href={projectsHref}
                     className="border border-white/60 hover:border-white text-white px-6 py-3 rounded-[8px] font-bold text-xs uppercase tracking-wider hover:bg-white/10 transition-all cursor-pointer inline-flex items-center justify-center"
                   >
-                    Khám phá tất cả dự án
+                    {isEn ? 'Explore All Projects' : 'Khám phá tất cả dự án'}
                   </Link>
                 )}
               </div>

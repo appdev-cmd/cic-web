@@ -13,6 +13,7 @@ import {
   Twitter,
 } from 'lucide-react';
 import type { PublicNewsItem } from '../../types';
+import { useI18n } from '@/shared/i18n';
 
 interface NewsDetailHeroProps {
   article: PublicNewsItem;
@@ -25,7 +26,16 @@ interface NewsDetailHeroProps {
   onExportPDF: () => void;
 }
 
-const getTypeSimpleText = (item: PublicNewsItem): string => {
+const getTypeSimpleText = (item: PublicNewsItem, locale: string): string => {
+  if (locale === 'en') {
+    if (item.category === 'company') return item.subType || 'Company News';
+    if (item.category === 'specialty') return item.subType || 'Technical Insights';
+    if (item.category === 'international') return item.subType || 'International';
+    if (item.category === 'recruitment') return item.department || 'Careers';
+    if (item.category === 'promotion') return 'Promotions';
+    if (item.category === 'shareholder') return item.docType || 'Investor Relations';
+    return 'News';
+  }
   if (item.category === 'company') return item.subType || 'Tin CIC';
   if (item.category === 'specialty') return item.subType || 'Tin chuyên ngành';
   if (item.category === 'international') return item.subType || 'Hợp tác quốc tế';
@@ -45,6 +55,8 @@ export function NewsDetailHero({
   onShareClick,
   onExportPDF,
 }: NewsDetailHeroProps) {
+  const { t, locale } = useI18n();
+
   return (
     <section className="relative w-full p-6 sm:p-10 bg-slate-100/90 border border-slate-200/80 shadow-sm overflow-hidden">
       <div
@@ -63,14 +75,14 @@ export function NewsDetailHero({
               onClick={onNavigateHome}
               className="hover:text-orange-600 transition-colors cursor-pointer font-medium"
             >
-              Trang chủ
+              {locale === 'en' ? 'Home' : 'Trang chủ'}
             </button>
             <span>/</span>
             <button
               onClick={onBackToList}
               className="hover:text-orange-600 transition-colors cursor-pointer font-medium"
             >
-              Tin tức
+              {locale === 'en' ? 'News' : 'Tin tức'}
             </button>
             <span>/</span>
             <span className="text-slate-900 font-semibold line-clamp-1 max-w-xs sm:max-w-md">
@@ -83,14 +95,14 @@ export function NewsDetailHero({
             className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-orange-600 transition-colors bg-white px-3.5 py-1.5 border border-slate-200 shadow-xs cursor-pointer rounded-[8px] shrink-0"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Quay lại</span>
+            <span>{locale === 'en' ? 'Back' : 'Quay lại'}</span>
           </button>
         </div>
 
         {/* Tags & Meta Row */}
         <div className="flex flex-wrap items-center gap-3 text-xs">
           <span className="bg-orange-600/10 border border-orange-500/20 text-orange-600 font-black px-3 py-1 uppercase tracking-wider text-[10px]">
-            {getTypeSimpleText(article)}
+            {getTypeSimpleText(article, locale)}
           </span>
           <span className="text-slate-500 font-medium flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5 text-orange-600" />
@@ -99,7 +111,7 @@ export function NewsDetailHero({
           {article.views !== undefined && (
             <span className="text-slate-500 font-medium flex items-center gap-1">
               <Eye className="w-3.5 h-3.5 text-orange-600" />
-              {article.views} lượt xem
+              {locale === 'en' ? `${article.views} views` : `${article.views} lượt xem`}
             </span>
           )}
         </div>
@@ -111,39 +123,41 @@ export function NewsDetailHero({
         {/* Hero Actions Row: Social Share & Bookmark */}
         <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-slate-200/60">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 hidden sm:inline">Chia sẻ:</span>
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 hidden sm:inline">
+              {locale === 'en' ? 'Share:' : 'Chia sẻ:'}
+            </span>
             <button
               onClick={() => onSharePlatform('facebook')}
               className="w-9 h-9 bg-white shadow-sm flex items-center justify-center text-slate-600 hover:text-[#1877F2] transition-colors border border-slate-200 cursor-pointer"
-              title="Chia sẻ lên Facebook"
+              title={locale === 'en' ? 'Share on Facebook' : 'Chia sẻ lên Facebook'}
             >
               <Facebook className="w-4 h-4" />
             </button>
             <button
               onClick={() => onSharePlatform('linkedin')}
               className="w-9 h-9 bg-white shadow-sm flex items-center justify-center text-slate-600 hover:text-[#0A66C2] transition-colors border border-slate-200 cursor-pointer"
-              title="Chia sẻ lên LinkedIn"
+              title={locale === 'en' ? 'Share on LinkedIn' : 'Chia sẻ lên LinkedIn'}
             >
               <Linkedin className="w-4 h-4" />
             </button>
             <button
               onClick={() => onSharePlatform('twitter')}
               className="w-9 h-9 bg-white shadow-sm flex items-center justify-center text-slate-600 hover:text-black transition-colors border border-slate-200 cursor-pointer"
-              title="Chia sẻ lên X (Twitter)"
+              title={locale === 'en' ? 'Share on X (Twitter)' : 'Chia sẻ lên X (Twitter)'}
             >
               <Twitter className="w-4 h-4" />
             </button>
             <button
               onClick={() => onSharePlatform('zalo')}
               className="px-2.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase transition-all cursor-pointer"
-              title="Chia sẻ qua Zalo"
+              title={locale === 'en' ? 'Share via Zalo' : 'Chia sẻ qua Zalo'}
             >
               ZALO
             </button>
             <button
               onClick={onShareClick}
               className="w-9 h-9 bg-white shadow-sm flex items-center justify-center text-slate-600 hover:text-orange-600 transition-colors border border-slate-200 cursor-pointer"
-              title="Sao chép đường dẫn"
+              title={locale === 'en' ? 'Copy link' : 'Sao chép đường dẫn'}
             >
               {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
             </button>
@@ -154,10 +168,12 @@ export function NewsDetailHero({
               onClick={onExportPDF}
               disabled={isExportingPDF}
               className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 hover:border-orange-600 text-slate-700 hover:text-orange-600 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer"
-              title="In / Xuất bài viết PDF"
+              title={locale === 'en' ? 'Print / Export PDF' : 'In / Xuất bài viết PDF'}
             >
               <FileCheck size={14} className={isExportingPDF ? 'animate-spin' : ''} />
-              <span className="hidden sm:inline">{isExportingPDF ? 'Đang xử lý...' : 'In / PDF'}</span>
+              <span className="hidden sm:inline">
+                {isExportingPDF ? (locale === 'en' ? 'Processing...' : 'Đang xử lý...') : (locale === 'en' ? 'Print / PDF' : 'In / PDF')}
+              </span>
             </button>
           </div>
         </div>

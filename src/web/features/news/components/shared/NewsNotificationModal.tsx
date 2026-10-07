@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Bell, Check, Clock, Globe, Shield, Sparkles, X } from 'lucide-react';
 import type { PublicNewsItem } from '../../types';
+import { useI18n } from '@/shared/i18n';
 
 interface NewsNotificationModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export function NewsNotificationModal({
   breakingNews,
   onSelectNews,
 }: NewsNotificationModalProps) {
+  const { locale } = useI18n();
   const [bellSubscribed, setBellSubscribed] = useState(true);
   const [bellEmail, setBellEmail] = useState('');
   const [bellToast, setBellToast] = useState<string | null>(null);
@@ -26,7 +28,11 @@ export function NewsNotificationModal({
     e.preventDefault();
     if (!bellEmail) return;
     setBellSubscribed(true);
-    setBellToast(`Đã đăng ký nhận tin thành công cho email: ${bellEmail}`);
+    setBellToast(
+      locale === 'en'
+        ? `Successfully subscribed with email: ${bellEmail}`
+        : `Đã đăng ký nhận tin thành công cho email: ${bellEmail}`
+    );
     setBellEmail('');
     setTimeout(() => setBellToast(null), 3500);
   };
@@ -34,7 +40,11 @@ export function NewsNotificationModal({
   const handleToggle = () => {
     const nextState = !bellSubscribed;
     setBellSubscribed(nextState);
-    setBellToast(nextState ? 'Đã bật thông báo tin tức nổi bật!' : 'Đã tắt thông báo tin tức');
+    setBellToast(
+      nextState
+        ? (locale === 'en' ? 'Featured news notifications enabled!' : 'Đã bật thông báo tin tức nổi bật!')
+        : (locale === 'en' ? 'News notifications disabled' : 'Đã tắt thông báo tin tức')
+    );
     setTimeout(() => setBellToast(null), 3000);
   };
 
@@ -72,11 +82,13 @@ export function NewsNotificationModal({
                 </div>
                 <div>
                   <h3 className="text-base font-black uppercase tracking-tight flex items-center gap-2">
-                    <span>Bảng Tin Nổi Bật & Thông Báo</span>
+                    <span>{locale === 'en' ? 'Featured News & Alerts' : 'Bảng Tin Nổi Bật & Thông Báo'}</span>
                     <span className="px-2 py-0.5 bg-orange-600 text-white text-[10px] font-bold rounded-full">CIC Tech</span>
                   </h3>
                   <p className="text-xs text-slate-300 font-medium mt-0.5">
-                    Cập nhật thời gian thực các tin tức công nghệ và sự kiện độc quyền
+                    {locale === 'en'
+                      ? 'Real-time updates on technology news and exclusive announcements'
+                      : 'Cập nhật thời gian thực các tin tức công nghệ và sự kiện độc quyền'}
                   </p>
                 </div>
               </div>
@@ -96,10 +108,14 @@ export function NewsNotificationModal({
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
                     <Sparkles size={14} className="text-[#FC5115]" />
-                    <span className="text-xs font-bold text-slate-900">Thông báo từ trình duyệt</span>
+                    <span className="text-xs font-bold text-slate-900">
+                      {locale === 'en' ? 'Browser notifications' : 'Thông báo từ trình duyệt'}
+                    </span>
                   </div>
                   <p className="text-[11px] text-slate-600">
-                    Nhận cảnh báo sớm khi có nghị quyết ĐHĐCĐ hoặc thông báo khẩn cấp
+                    {locale === 'en'
+                      ? 'Receive early alerts for major resolutions or urgent announcements'
+                      : 'Nhận cảnh báo sớm khi có nghị quyết ĐHĐCĐ hoặc thông báo khẩn cấp'}
                   </p>
                 </div>
 
@@ -123,9 +139,11 @@ export function NewsNotificationModal({
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                     <Globe size={13} className="text-[#FC5115]" />
-                    <span>Dòng tin đang phát</span>
+                    <span>{locale === 'en' ? 'Live News Feed' : 'Dòng tin đang phát'}</span>
                   </h4>
-                  <span className="text-[10px] text-orange-600 font-bold">{breakingNews.length} tin mới</span>
+                  <span className="text-[10px] text-orange-600 font-bold">
+                    {breakingNews.length} {locale === 'en' ? 'new updates' : 'tin mới'}
+                  </span>
                 </div>
 
                 <div className="space-y-2">
@@ -160,14 +178,16 @@ export function NewsNotificationModal({
               <div className="pt-2 border-t border-slate-100 space-y-2.5">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
                   <Shield size={13} className="text-slate-400" />
-                  <span>Đăng ký nhận bản tin qua Email (Miễn phí)</span>
+                  <span>
+                    {locale === 'en' ? 'Subscribe to Newsletter via Email (Free)' : 'Đăng ký nhận bản tin qua Email (Miễn phí)'}
+                  </span>
                 </div>
                 <form onSubmit={handleSubscribe} className="flex gap-2">
                   <input
                     type="email"
                     value={bellEmail}
                     onChange={(e) => setBellEmail(e.target.value)}
-                    placeholder="Nhập email của bạn..."
+                    placeholder={locale === 'en' ? 'Enter your email...' : 'Nhập email của bạn...'}
                     required
                     className="flex-1 text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                   />
@@ -175,11 +195,13 @@ export function NewsNotificationModal({
                     type="submit"
                     className="px-4 py-2 bg-slate-900 hover:bg-orange-600 text-white text-xs font-bold rounded-lg transition-colors shrink-0 cursor-pointer"
                   >
-                    Đăng ký
+                    {locale === 'en' ? 'Subscribe' : 'Đăng ký'}
                   </button>
                 </form>
                 <p className="text-[10px] text-slate-400">
-                  Cam kết bảo mật thông tin. Bạn có thể hủy nhận tin bất cứ lúc nào qua liên kết ở cuối email.
+                  {locale === 'en'
+                    ? 'We respect your privacy. You can unsubscribe at any time via the link in the footer of our emails.'
+                    : 'Cam kết bảo mật thông tin. Bạn có thể hủy nhận tin bất cứ lúc nào qua liên kết ở cuối email.'}
                 </p>
               </div>
             </div>
@@ -190,7 +212,7 @@ export function NewsNotificationModal({
                 onClick={onClose}
                 className="px-4 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-lg transition-colors cursor-pointer shadow-xs"
               >
-                Đóng
+                {locale === 'en' ? 'Close' : 'Đóng'}
               </button>
             </div>
           </motion.div>

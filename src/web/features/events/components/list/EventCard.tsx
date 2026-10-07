@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Clock, MapPin } from 'lucide-react';
 import type { EventItem } from '@shared/types';
 import { getDaysRemaining } from '../eventUtils';
+import { useI18n } from '@/shared/i18n';
 
 interface EventCardProps {
   event: EventItem;
@@ -10,6 +11,7 @@ interface EventCardProps {
 }
 
 export const EventCard: React.FC<EventCardProps> = ({ event, onSelect }) => {
+  const { locale } = useI18n();
   const [isLoaded, setIsLoaded] = React.useState(false);
 
   return (
@@ -41,22 +43,22 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onSelect }) => {
           <div className="absolute top-2.5 left-2.5 z-10 flex items-center gap-1.5 flex-wrap">
             {event.status === 'upcoming' && (
               <span className="bg-orange-600 text-white px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider shadow-sm rounded-[6px]">
-                SẮP DIỄN RA
+                {locale === 'en' ? 'UPCOMING' : 'SẮP DIỄN RA'}
               </span>
             )}
             {event.status === 'ongoing' && (
               <span className="bg-emerald-600 text-white px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider shadow-sm rounded-[6px]">
-                ĐANG DIỄN RA
+                {locale === 'en' ? 'ONGOING' : 'ĐANG DIỄN RA'}
               </span>
             )}
             {event.status === 'past' && (
               <span className="bg-slate-800 text-white px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider shadow-sm rounded-[6px]">
-                ĐÃ KẾT THÚC
+                {locale === 'en' ? 'ENDED' : 'ĐÃ KẾT THÚC'}
               </span>
             )}
             {event.isFeatured && (
               <span className="bg-amber-500 text-white px-2 py-0.5 text-[10px] font-black uppercase tracking-wider shadow-sm rounded-[6px]">
-                NỔI BẬT
+                {locale === 'en' ? 'FEATURED' : 'NỔI BẬT'}
               </span>
             )}
           </div>
@@ -64,7 +66,9 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onSelect }) => {
           {/* Days Remaining Pill for Upcoming */}
           {event.status === 'upcoming' && (
             <div className="absolute bottom-2.5 right-2.5 bg-slate-950/90 text-orange-400 border border-slate-800 text-[10px] font-bold px-2 py-0.5 shadow-sm rounded-[8px]">
-              Còn {getDaysRemaining(event.startDate)} ngày
+              {locale === 'en'
+                ? `${getDaysRemaining(event.startDate)} days left`
+                : `Còn ${getDaysRemaining(event.startDate)} ngày`}
             </div>
           )}
         </div>
@@ -91,7 +95,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onSelect }) => {
           </p>
 
           <div className="pt-2 flex items-center text-[11px] font-bold text-[#FC5115] group-hover:translate-x-1 transition-transform">
-            <span>Xem chi tiết</span>
+            <span>{locale === 'en' ? 'View details' : 'Xem chi tiết'}</span>
             <span className="ml-1">→</span>
           </div>
         </div>

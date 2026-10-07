@@ -3,6 +3,7 @@
 import React from 'react';
 import { Download, FileText } from 'lucide-react';
 import type { PublicNewsItem } from '../../types';
+import { useI18n } from '@/shared/i18n';
 
 interface ShareholderDocumentListProps {
   items: PublicNewsItem[];
@@ -19,6 +20,8 @@ export function ShareholderDocumentList({
   pdfDownloadedId,
   downloadProgress,
 }: ShareholderDocumentListProps) {
+  const { locale } = useI18n();
+
   return (
     <div className="space-y-3">
       {items.map((news) => (
@@ -35,9 +38,11 @@ export function ShareholderDocumentList({
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="px-2 py-0.5 bg-orange-100 text-[#FC5115] text-[10px] font-bold rounded">
-                  {news.docType || 'Tài liệu'}
+                  {news.docType || (locale === 'en' ? 'Document' : 'Tài liệu')}
                 </span>
-                <span className="text-xs text-slate-400">Năm {news.year || '2026'}</span>
+                <span className="text-xs text-slate-400">
+                  {locale === 'en' ? `Year ${news.year || '2026'}` : `Năm ${news.year || '2026'}`}
+                </span>
                 <span className="text-xs text-slate-300">•</span>
                 <span className="text-xs text-slate-500">{news.date}</span>
               </div>
@@ -61,7 +66,9 @@ export function ShareholderDocumentList({
                   className="px-3.5 py-2 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-600 text-xs font-bold rounded-[8px] transition-colors flex items-center gap-2 cursor-pointer"
                 >
                   <Download size={14} />
-                  <span>Tải PDF ({news.pdfSize || '2.5 MB'})</span>
+                  <span>
+                    {locale === 'en' ? `Download PDF (${news.pdfSize || '2.5 MB'})` : `Tải PDF (${news.pdfSize || '2.5 MB'})`}
+                  </span>
                 </button>
                 {pdfDownloadedId === news.id && (
                   <div className="absolute -bottom-2 left-0 right-0 h-1 bg-slate-200 rounded-full overflow-hidden">
@@ -78,7 +85,7 @@ export function ShareholderDocumentList({
               type="button"
               className="px-3.5 py-2 bg-white border border-slate-200 group-hover:border-[#FC5115] group-hover:text-[#FC5115] text-slate-700 text-xs font-bold rounded-[8px] transition-colors"
             >
-              Chi tiết
+              {locale === 'en' ? 'Details' : 'Chi tiết'}
             </button>
           </div>
         </div>

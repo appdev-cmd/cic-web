@@ -53,16 +53,20 @@ export const getStatusBadgeStyle = (status: 'upcoming' | 'ongoing' | 'past') => 
 
 export const getStatusColor = getStatusBadgeStyle;
 
-export const formatAgendaDate = (isoStr: string, dateStr: string) => {
+export const formatAgendaDate = (isoStr: string, dateStr: string, locale: 'vi' | 'en' = 'vi') => {
   try {
     const d = new Date(isoStr);
     const day = d.getDate() < 10 ? `0${d.getDate()}` : `${d.getDate()}`;
     const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-    const month = monthNames[d.getMonth()] || 'T' + (d.getMonth() + 1);
+    const month = monthNames[d.getMonth()] || (locale === 'en' ? 'M' : 'T') + (d.getMonth() + 1);
     const time = isoStr.includes('T') ? isoStr.split('T')[1].slice(0, 5) : '08:30';
     return { day, month, time };
   } catch {
     const parts = dateStr.split('/');
-    return { day: parts[0] || '15', month: 'THÁNG ' + (parts[1] || '8'), time: '08:30' };
+    return {
+      day: parts[0] || '15',
+      month: (locale === 'en' ? 'MONTH ' : 'THÁNG ') + (parts[1] || '8'),
+      time: '08:30',
+    };
   }
 };

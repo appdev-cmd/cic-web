@@ -102,6 +102,22 @@ export function NewsCategoryTabs({
     currentCategoryObj?.alias === 'quan-he-co-dong' ||
     currentCategoryObj?.id === '11';
 
+  const getCategoryDisplayName = (cat: { alias?: string; name: string }) => {
+    if (locale !== 'en') return cat.name;
+    const a = (cat.alias || '').toLowerCase();
+    const n = cat.name.toLowerCase();
+    if (a.includes('cong-ty') || n.includes('công ty')) return 'Company News';
+    if (a.includes('chuyen-nganh') || n.includes('chuyên ngành') || n.includes('phần mềm')) return 'Technical Insights';
+    if (a.includes('khuyen-mai') || n.includes('khuyến mại')) return 'Promotions';
+    if (a.includes('tuyen-dung') || n.includes('tuyển dụng')) return 'Careers';
+    if (a.includes('quan-he-co-dong') || n.includes('cổ đông')) return 'Investor Relations';
+    if (a.includes('thong-bao') || n.includes('thông báo')) return 'Announcements';
+    if (a.includes('bao-cao-thuong-nien') || n.includes('thường niên')) return 'Annual Reports';
+    if (a.includes('dieu-le') || n.includes('điều lệ')) return 'Corporate Charter';
+    if (a.includes('bao-cao-tai-chinh') || n.includes('tài chính')) return 'Financial Reports';
+    return cat.name;
+  };
+
   return (
     <div className="space-y-4 pt-4 border-t border-slate-200">
       <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
@@ -151,7 +167,7 @@ export function NewsCategoryTabs({
                   isSelected ? 'text-white' : 'text-orange-500 group-hover:text-orange-600'
                 }`}
               />
-              <span>{cat.name}</span>
+              <span>{getCategoryDisplayName(cat)}</span>
             </button>
           );
         })}
@@ -169,7 +185,7 @@ export function NewsCategoryTabs({
                 : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
             }`}
           >
-            Tất cả tài liệu
+            {locale === 'en' ? 'All Documents' : 'Tất cả tài liệu'}
           </button>
 
           {/* Child categories from DB */}
@@ -189,7 +205,7 @@ export function NewsCategoryTabs({
                     : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
-                {child.name}
+                {getCategoryDisplayName(child)}
               </button>
             );
           })}

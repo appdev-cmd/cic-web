@@ -4,6 +4,7 @@ import React from 'react';
 import { Search } from 'lucide-react';
 import type { PublicNewsItem } from '../../types';
 import { NewsCard } from './NewsCard';
+import { useI18n } from '@/shared/i18n';
 
 interface NewsGridProps {
   items: PublicNewsItem[];
@@ -18,6 +19,8 @@ export function NewsGrid({
   getTypeSimpleText,
   onResetFilters,
 }: NewsGridProps) {
+  const { locale } = useI18n();
+
   if (items.length === 0) {
     return (
       <div className="text-center py-16 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-3">
@@ -25,16 +28,18 @@ export function NewsGrid({
           <Search size={22} />
         </div>
         <h4 className="text-base font-bold text-slate-800">
-          Không tìm thấy bài viết phù hợp
+          {locale === 'en' ? 'No articles found matching your criteria' : 'Không tìm thấy bài viết phù hợp'}
         </h4>
         <p className="text-xs text-slate-500 max-w-sm mx-auto">
-          Vui lòng thử tìm kiếm với từ khóa khác hoặc điều chỉnh lại các tiêu chí bộ lọc.
+          {locale === 'en'
+            ? 'Please try searching with different keywords or adjusting your filter criteria.'
+            : 'Vui lòng thử tìm kiếm với từ khóa khác hoặc điều chỉnh lại các tiêu chí bộ lọc.'}
         </p>
         <button
           onClick={onResetFilters}
           className="mt-2 px-4 py-2 bg-[#FC5115] hover:bg-[#e0440e] text-white text-xs font-bold rounded-[8px] transition-colors cursor-pointer"
         >
-          Xóa toàn bộ bộ lọc
+          {locale === 'en' ? 'Reset all filters' : 'Xóa toàn bộ bộ lọc'}
         </button>
       </div>
     );

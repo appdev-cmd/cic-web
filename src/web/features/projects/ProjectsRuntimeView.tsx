@@ -15,6 +15,7 @@ interface ProjectsRuntimeViewProps {
 
 export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRuntimeViewProps) {
   const { t, locale } = useI18n();
+  const isEn = locale === 'en';
   const allLabel = t.projects.filterAll;
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSector, setSelectedSector] = useState('ALL');
@@ -80,7 +81,7 @@ export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRunti
           {/* Header section */}
           <div className="border-l-4 border-orange-600 pl-6 space-y-2">
             <h1 className="text-3xl md:text-4xl font-bold text-[#444] dark:text-white uppercase tracking-tight">
-              Dự Án Thực Tế
+              {t.projects.catalogTitle}
             </h1>
             <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
               {t.projects.catalogSubtitle}
@@ -93,9 +94,10 @@ export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRunti
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
               {sectors.map((sec) => {
                 const isActive = selectedSector === sec;
+                const label = sec === 'ALL' ? (isEn ? 'All' : 'Tất cả') : sec;
                 return (
                   <button
-                    key={sec === 'ALL' ? t.projects.filterAll : sec}
+                    key={sec}
                     onClick={() => setSelectedSector(sec)}
                     className={`shrink-0 px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] cursor-pointer ${
                       isActive
@@ -103,7 +105,7 @@ export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRunti
                         : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200 hover:text-slate-950'
                     }`}
                   >
-                    {sec}
+                    {label}
                   </button>
                 );
               })}
@@ -120,7 +122,7 @@ export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRunti
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Tìm tên dự án, chủ đầu tư, địa điểm..."
+                  placeholder={t.projects.searchPlaceholder || (isEn ? 'Search projects by name, client, location...' : 'Tìm tên dự án, chủ đầu tư, địa điểm...')}
                   className="w-full bg-white border border-slate-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 pl-10 pr-4 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none transition-all rounded-[8px]"
                 />
               </div>
@@ -132,11 +134,11 @@ export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRunti
                   onChange={(e) => setSelectedSolution(e.target.value)}
                   className="w-full bg-white border border-slate-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 px-3 py-2 text-xs font-normal text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
                 >
-                  <option value="Tất cả" className="font-normal">
-                    Giải pháp: Tất cả
+                  <option value="ALL" className="font-normal">
+                    {isEn ? 'Solution: All' : 'Giải pháp: Tất cả'}
                   </option>
                   {solutions
-                    .filter((s) => s !== 'Tất cả')
+                    .filter((s) => s !== 'ALL' && s !== 'Tất cả')
                     .map((sol) => (
                       <option key={sol} value={sol} className="font-normal">
                         {sol}
@@ -152,11 +154,11 @@ export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRunti
                   onChange={(e) => setSelectedCustomer(e.target.value)}
                   className="w-full bg-white border border-slate-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 px-3 py-2 text-xs font-normal text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
                 >
-                  <option value="Tất cả" className="font-normal">
-                    Chủ đầu tư: Tất cả
+                  <option value="ALL" className="font-normal">
+                    {isEn ? 'Client: All' : 'Chủ đầu tư: Tất cả'}
                   </option>
                   {customers
-                    .filter((c) => c !== 'Tất cả')
+                    .filter((c) => c !== 'ALL' && c !== 'Tất cả')
                     .map((cust) => (
                       <option key={cust} value={cust} className="font-normal">
                         {cust}
@@ -167,12 +169,12 @@ export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRunti
 
               {/* Reset Filters */}
               <div className="md:col-span-1 flex justify-end">
-                {(searchQuery || selectedSector !== 'Tất cả' || selectedSolution !== 'Tất cả' || selectedCustomer !== 'Tất cả') && (
+                {(searchQuery || selectedSector !== 'ALL' || selectedSolution !== 'ALL' || selectedCustomer !== 'ALL') && (
                   <button
                     onClick={resetFilters}
                     className="px-3 py-2 bg-slate-200 hover:bg-[#FC5115] hover:text-white text-slate-700 text-[10px] font-bold uppercase transition-colors whitespace-nowrap rounded-[8px] cursor-pointer"
                   >
-                    Xóa lọc
+                    {isEn ? 'Clear' : 'Xóa lọc'}
                   </button>
                 )}
               </div>
@@ -181,7 +183,11 @@ export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRunti
             {/* Found count indicator */}
             <div className="flex justify-between items-center text-xs font-medium text-slate-500">
               <span>
-                Hiển thị <strong className="text-slate-900 font-bold">{totalItems}</strong> dự án thực tế
+                {isEn ? (
+                  <>Showing <strong className="text-slate-900 font-bold">{totalItems}</strong> projects</>
+                ) : (
+                  <>Hiển thị <strong className="text-slate-900 font-bold">{totalItems}</strong> dự án thực tế</>
+                )}
               </span>
             </div>
           </div>
@@ -190,13 +196,13 @@ export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRunti
           {paginatedProjects.length === 0 ? (
             <div className="text-center py-20 border border-dashed border-slate-300 space-y-4 rounded-[10px]">
               <p className="text-slate-500 font-medium text-sm">
-                Không tìm thấy dự án nào phù hợp với bộ lọc hiện tại.
+                {isEn ? 'No projects match the current filter criteria.' : 'Không tìm thấy dự án nào phù hợp với bộ lọc hiện tại.'}
               </p>
               <button
                 onClick={resetFilters}
                 className="px-6 py-2.5 bg-[#FC5115] text-white text-xs font-bold uppercase tracking-wider hover:bg-orange-700 transition-all rounded-[8px] shadow-sm cursor-pointer"
               >
-                Đặt lại tất cả bộ lọc
+                {isEn ? 'Reset all filters' : 'Đặt lại tất cả bộ lọc'}
               </button>
             </div>
           ) : (
@@ -282,13 +288,15 @@ export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRunti
                         </div>
 
                         <div className="pt-2 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#FC5115]">
-                          <span>Xem chi tiết dự án</span>
+                          <span>{t.projects.viewProject}</span>
                           <ArrowRight size={16} className="transform group-hover:translate-x-2 transition-transform duration-300" />
                         </div>
                       </div>
                     </div>
                   </>
                 );
+
+                const projectHref = locale === 'en' ? `/en/projects/${project.slug}` : `/projects/${project.slug}`;
 
                 return (
                   <motion.div
@@ -307,7 +315,7 @@ export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRunti
                         {cardContent}
                       </div>
                     ) : (
-                      <Link href={`/projects/${project.slug}`} className="block w-full h-full">
+                      <Link href={projectHref} className="block w-full h-full">
                         {cardContent}
                       </Link>
                     )}

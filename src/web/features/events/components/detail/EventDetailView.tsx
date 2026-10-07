@@ -4,6 +4,7 @@ import { ArrowLeft, Calendar, MapPin, Download, ArrowRight } from 'lucide-react'
 import type { EventItem, Product } from '@shared/types';
 import { cleanEventHtml, getStatusColor, getStatusLabel } from '../eventUtils';
 import { EventCountdownTimer } from '../shared/EventCountdownTimer';
+import { useI18n } from '@/shared/i18n';
 
 interface EventDetailViewProps {
   event: EventItem;
@@ -26,6 +27,8 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
   onOpenRegistration,
   onNavigateToProduct,
 }) => {
+  const { locale } = useI18n();
+
   return (
     <motion.div
       key="detail-view"
@@ -37,9 +40,9 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
     >
       <button
         onClick={onBack}
-        className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-slate-700 hover:text-orange-600 transition-colors"
+        className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-slate-700 hover:text-orange-600 transition-colors cursor-pointer"
       >
-        <ArrowLeft size={16} /> Quay lại danh sách sự kiện
+        <ArrowLeft size={16} /> {locale === 'en' ? 'Back to events list' : 'Quay lại danh sách sự kiện'}
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -60,11 +63,11 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
                       event.status
                     )}`}
                   >
-                    {getStatusLabel(event.status)}
+                    {getStatusLabel(event.status, locale)}
                   </span>
                   {event.isOpenRegistration && (
                     <span className="bg-orange-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-md">
-                      Mở Đăng Ký
+                      {locale === 'en' ? 'Open Registration' : 'Mở Đăng Ký'}
                     </span>
                   )}
                 </div>
@@ -83,13 +86,13 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
                     </div>
                     <div>
                       <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">
-                        Thời gian
+                        {locale === 'en' ? 'Date & Time' : 'Thời gian'}
                       </span>
                       <span className="font-bold text-slate-800 text-sm leading-snug block">
                         {event.date}
                       </span>
                       <span className="text-xs text-slate-500 font-medium">
-                        Bắt đầu: {event.startDate ? event.startDate.split('T')[1]?.slice(0, 5) : '08:30'}
+                        {locale === 'en' ? 'Starts:' : 'Bắt đầu:'} {event.startDate ? event.startDate.split('T')[1]?.slice(0, 5) : '08:30'}
                       </span>
                     </div>
                   </div>
@@ -100,7 +103,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
                     </div>
                     <div>
                       <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">
-                        Địa điểm tổ chức
+                        {locale === 'en' ? 'Location' : 'Địa điểm tổ chức'}
                       </span>
                       <span className="font-bold text-slate-800 text-sm leading-snug block">
                         {event.location}
@@ -132,7 +135,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
               ) : (
                 <>
                   <h2 className="text-xl font-black uppercase tracking-tight text-slate-950 select-text">
-                    Giới thiệu chương trình
+                    {locale === 'en' ? 'Event Overview' : 'Giới thiệu chương trình'}
                   </h2>
                   <div className="text-slate-600 text-sm leading-relaxed font-medium space-y-4 whitespace-pre-line select-text">
                     {event.longDesc}
@@ -149,15 +152,17 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
           <div className="bg-white border border-slate-950 p-6 shadow-sm space-y-6 sticky top-24 rounded-[10px]">
             <div className="text-center pb-4 border-b border-slate-100">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                Đăng ký tham dự
+                {locale === 'en' ? 'Event Registration' : 'Đăng ký tham dự'}
               </span>
-              <h3 className="text-base font-bold text-slate-950 uppercase">Giữ chỗ sự kiện</h3>
+              <h3 className="text-base font-bold text-slate-950 uppercase">
+                {locale === 'en' ? 'Reserve your seat' : 'Giữ chỗ sự kiện'}
+              </h3>
             </div>
 
             <div className="space-y-4">
               <div className="bg-slate-50 p-4 border border-slate-200 rounded-[8px]">
                 <span className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-                  Trạng thái
+                  {locale === 'en' ? 'Status' : 'Trạng thái'}
                 </span>
                 <div className="flex items-center gap-2">
                   <span
@@ -167,36 +172,36 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
                   ></span>
                   <span className="text-xs font-bold uppercase text-slate-700">
                     {event.isOpenRegistration
-                      ? 'Đang mở đăng ký trực tuyến'
-                      : 'Đã dừng đăng ký trực tuyến'}
+                      ? (locale === 'en' ? 'Online registration open' : 'Đang mở đăng ký trực tuyến')
+                      : (locale === 'en' ? 'Online registration closed' : 'Đã dừng đăng ký trực tuyến')}
                   </span>
                 </div>
               </div>
 
               <div className="space-y-2 text-xs font-bold text-slate-600">
                 <div className="flex justify-between">
-                  <span>Chi phí:</span>
-                  <span className="text-orange-600 font-extrabold">MIỄN PHÍ</span>
+                  <span>{locale === 'en' ? 'Fee:' : 'Chi phí:'}</span>
+                  <span className="text-orange-600 font-extrabold">{locale === 'en' ? 'FREE' : 'MIỄN PHÍ'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Hình thức:</span>
-                  <span className="text-slate-800">Trực tiếp / Hybrid</span>
+                  <span>{locale === 'en' ? 'Format:' : 'Hình thức:'}</span>
+                  <span className="text-slate-800">{locale === 'en' ? 'In-person / Hybrid' : 'Trực tiếp / Hybrid'}</span>
                 </div>
               </div>
 
               {event.isOpenRegistration ? (
                 <button
                   onClick={() => onOpenRegistration(event)}
-                  className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3.5 text-xs font-bold uppercase tracking-wider text-center transition-all flex items-center justify-center gap-2 shadow-sm rounded-[8px]"
+                  className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3.5 text-xs font-bold uppercase tracking-wider text-center transition-all flex items-center justify-center gap-2 shadow-sm rounded-[8px] cursor-pointer"
                 >
-                  Đăng ký ngay tại đây <ArrowRight size={14} />
+                  {locale === 'en' ? 'Register Now' : 'Đăng ký ngay tại đây'} <ArrowRight size={14} />
                 </button>
               ) : (
                 <button
                   disabled
                   className="w-full bg-slate-200 text-slate-400 py-3.5 text-xs font-bold uppercase tracking-wider text-center cursor-not-allowed rounded-[8px]"
                 >
-                  Đã đóng đăng ký
+                  {locale === 'en' ? 'Registration Closed' : 'Đã đóng đăng ký'}
                 </button>
               )}
             </div>
@@ -205,7 +210,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
             {event.documents && event.documents.length > 0 && (
               <div className="pt-6 border-t border-slate-100 space-y-3.5">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
-                  Tài liệu đính kèm
+                  {locale === 'en' ? 'Attached Documents' : 'Tài liệu đính kèm'}
                 </span>
                 <div className="space-y-2">
                   {event.documents.map((doc, idx) => (
@@ -230,9 +235,9 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
             {/* NAVIGATE BUTTON */}
             <button
               onClick={onBack}
-              className="w-full text-center border border-slate-200 hover:border-slate-950 text-xs font-black uppercase tracking-widest text-slate-600 hover:text-slate-950 py-2.5 transition-all rounded-[8px]"
+              className="w-full text-center border border-slate-200 hover:border-slate-950 text-xs font-black uppercase tracking-widest text-slate-600 hover:text-slate-950 py-2.5 transition-all rounded-[8px] cursor-pointer"
             >
-              Quay về danh sách
+              {locale === 'en' ? 'Back to list' : 'Quay về danh sách'}
             </button>
           </div>
         </div>
@@ -242,7 +247,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
           {/* SỰ KIỆN LIÊN QUAN */}
           <div className="space-y-4 sm:space-y-5">
             <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">
-              Sự kiện liên quan
+              {locale === 'en' ? 'Related Events' : 'Sự kiện liên quan'}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
               {eventsData
@@ -275,7 +280,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
                         {item.shortDesc}
                       </p>
                       <div className="pt-1 flex items-center text-[10px] font-bold text-orange-600 group-hover:translate-x-1 transition-transform">
-                        <span>Xem chi tiết</span>
+                        <span>{locale === 'en' ? 'View details' : 'Xem chi tiết'}</span>
                         <span className="ml-1">→</span>
                       </div>
                     </div>
@@ -288,7 +293,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
           {productsData.length > 0 && (
             <div className="space-y-4 sm:space-y-5">
               <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">
-                Sản phẩm liên quan
+                {locale === 'en' ? 'Related Products' : 'Sản phẩm liên quan'}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
                 {productsData.slice(0, 4).map((prod) => (
@@ -318,7 +323,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
                       {prod.price && (
                         <div className="flex items-center gap-1.5">
                           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                            Giá:
+                            {locale === 'en' ? 'Price:' : 'Giá:'}
                           </span>
                           <span className="text-xs font-bold text-orange-600">{prod.price}</span>
                         </div>

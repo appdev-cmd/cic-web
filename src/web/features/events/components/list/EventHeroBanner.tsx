@@ -2,6 +2,7 @@ import React from 'react';
 import { Calendar, MapPin } from 'lucide-react';
 import type { EventItem } from '@shared/types';
 import { EventCountdownTimer } from '../shared/EventCountdownTimer';
+import { useI18n } from '@/shared/i18n';
 
 interface EventHeroBannerProps {
   heroEvent: EventItem;
@@ -16,6 +17,8 @@ export const EventHeroBanner: React.FC<EventHeroBannerProps> = ({
   onSelectEvent,
   onOpenRegistration,
 }) => {
+  const { locale } = useI18n();
+
   return (
     <section className="relative bg-white border border-slate-200/80 rounded-[12px] shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden mb-8 group">
       <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch min-h-[360px] lg:min-h-[400px]">
@@ -41,25 +44,25 @@ export const EventHeroBanner: React.FC<EventHeroBannerProps> = ({
             <div className="flex items-center gap-2 flex-wrap">
               {heroEvent.status === 'upcoming' ? (
                 <span className="inline-block px-2.5 py-0.5 bg-orange-600 text-white text-[10px] font-black uppercase tracking-wider rounded-[4px] shadow-xs">
-                  SẮP DIỄN RA
+                  {locale === 'en' ? 'UPCOMING' : 'SẮP DIỄN RA'}
                 </span>
               ) : heroEvent.status === 'ongoing' ? (
                 <span className="inline-block px-2.5 py-0.5 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider rounded-[4px] shadow-xs">
-                  ĐANG DIỄN RA
+                  {locale === 'en' ? 'ONGOING' : 'ĐANG DIỄN RA'}
                 </span>
               ) : heroEvent.isFeatured ? (
                 <span className="inline-block px-2.5 py-0.5 bg-orange-600 text-white text-[10px] font-black uppercase tracking-wider rounded-[4px] shadow-xs">
-                  NỔI BẬT
+                  {locale === 'en' ? 'FEATURED' : 'NỔI BẬT'}
                 </span>
               ) : (
                 <span className="inline-block px-2.5 py-0.5 bg-slate-700 text-white text-[10px] font-black uppercase tracking-wider rounded-[4px] shadow-xs">
-                  ĐÃ KẾT THÚC
+                  {locale === 'en' ? 'ENDED' : 'ĐÃ KẾT THÚC'}
                 </span>
               )}
 
               {heroEvent.isOpenRegistration && (
                 <span className="inline-block px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider rounded-[4px] shadow-xs">
-                  MỞ ĐĂNG KÝ
+                  {locale === 'en' ? 'OPEN REGISTRATION' : 'MỞ ĐĂNG KÝ'}
                 </span>
               )}
             </div>
@@ -105,7 +108,7 @@ export const EventHeroBanner: React.FC<EventHeroBannerProps> = ({
                 onClick={() => onOpenRegistration(heroEvent)}
                 className="w-full py-3.5 px-6 bg-orange-600 hover:bg-orange-500 text-white font-black text-sm uppercase tracking-wider rounded-full shadow-md shadow-orange-600/25 hover:shadow-lg hover:shadow-orange-600/35 transition-all text-center flex items-center justify-center gap-2 cursor-pointer active:scale-95"
               >
-                ĐĂNG KÝ NGAY
+                {locale === 'en' ? 'REGISTER NOW' : 'ĐĂNG KÝ NGAY'}
               </button>
             ) : (
               <button
@@ -113,7 +116,7 @@ export const EventHeroBanner: React.FC<EventHeroBannerProps> = ({
                 onClick={() => onSelectEvent(heroEvent)}
                 className="w-full py-3.5 px-6 bg-orange-600 hover:bg-orange-500 text-white font-black text-sm uppercase tracking-wider rounded-full shadow-md shadow-orange-600/25 hover:shadow-lg hover:shadow-orange-600/35 transition-all text-center flex items-center justify-center cursor-pointer active:scale-95"
               >
-                XEM CHI TIẾT
+                {locale === 'en' ? 'VIEW DETAILS' : 'XEM CHI TIẾT'}
               </button>
             )}
           </div>

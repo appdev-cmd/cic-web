@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import type { Product } from '@/shared/types';
 import type { PublicNewsItem } from '../../types';
+import { useI18n } from '@/shared/i18n';
 
 interface NewsDetailSidebarProps {
   showTOC: boolean;
@@ -37,6 +38,8 @@ export function NewsDetailSidebar({
   onNavigateToProduct,
   onSelectNews,
 }: NewsDetailSidebarProps) {
+  const { locale } = useI18n();
+
   return (
     <aside className="lg:col-span-4 space-y-6">
       {/* 1. Collapsible Table of Contents */}
@@ -48,14 +51,18 @@ export function NewsDetailSidebar({
           >
             <h3 className="text-xs font-black uppercase tracking-wider text-orange-600 flex items-center gap-1.5">
               <ListOrdered size={15} />
-              <span>Mục lục bài viết</span>
+              <span>{locale === 'en' ? 'Table of Contents' : 'Mục lục bài viết'}</span>
               <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 ml-1 rounded-[6px]">
-                {tocItems.length} mục
+                {tocItems.length} {locale === 'en' ? 'items' : 'mục'}
               </span>
             </h3>
             <button
               type="button"
-              aria-label={isTocOpen ? 'Thu gọn mục lục' : 'Mở rộng mục lục'}
+              aria-label={
+                isTocOpen
+                  ? (locale === 'en' ? 'Collapse table of contents' : 'Thu gọn mục lục')
+                  : (locale === 'en' ? 'Expand table of contents' : 'Mở rộng mục lục')
+              }
               className="text-slate-400 hover:text-orange-600 transition-colors p-0.5 rounded-[6px] cursor-pointer"
             >
               {isTocOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -102,7 +109,7 @@ export function NewsDetailSidebar({
           <h3 className="text-xs font-black uppercase tracking-wider text-slate-950 border-b border-slate-200 pb-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Box size={16} className="text-orange-600" />
-              <span>Sản phẩm liên quan</span>
+              <span>{locale === 'en' ? 'Related Products' : 'Sản phẩm liên quan'}</span>
             </div>
           </h3>
           <div className="space-y-2.5">
@@ -138,7 +145,7 @@ export function NewsDetailSidebar({
           <h3 className="text-xs font-black uppercase tracking-wider text-slate-950 border-b border-slate-200 pb-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Clock size={16} className="text-orange-600" />
-              <span>Tin mới nhất</span>
+              <span>{locale === 'en' ? 'Latest News' : 'Tin mới nhất'}</span>
             </div>
           </h3>
 

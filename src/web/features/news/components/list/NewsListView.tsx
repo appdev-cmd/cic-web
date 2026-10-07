@@ -11,6 +11,7 @@ import { NewsGrid } from './NewsGrid';
 import { ShareholderDocumentList } from './ShareholderDocumentList';
 import { NewsPagination } from './NewsPagination';
 import { NewsCtaSection } from '../shared/NewsCtaSection';
+import { useI18n } from '@/shared/i18n';
 
 export interface NewsListViewProps {
   items: PublicNewsItem[];
@@ -27,6 +28,8 @@ export function NewsListView({
   onSelectNews,
   onOpenConsultation,
 }: NewsListViewProps) {
+  const { t, locale } = useI18n();
+  const isEn = locale === 'en';
   const [pdfDownloadedId, setPdfDownloadedId] = useState<string | null>(null);
   const [downloadProgress, setDownloadProgress] = useState(0);
 
@@ -79,13 +82,13 @@ export function NewsListView({
 
   const getTypeSimpleText = (item: PublicNewsItem): string => {
     if (item.categoryName) return item.categoryName;
-    if (item.category === 'company' || item.category === 'tin-cong-ty') return item.subType || 'Tin công ty';
-    if (item.category === 'specialty' || item.category === 'tin-chuyen-nganh') return item.subType || 'Tin chuyên ngành';
-    if (item.category === 'international') return item.subType || 'Hợp tác quốc tế';
-    if (item.category === 'recruitment' || item.category === 'tin-tuyen-dung') return item.department || 'Tuyển dụng';
-    if (item.category === 'promotion' || item.category === 'tin-khuyen-mai') return 'Khuyến mại';
-    if (item.category === 'shareholder' || item.category === 'quan-he-co-dong') return item.docType || 'Quan hệ cổ đông';
-    return 'Tin tức';
+    if (item.category === 'company' || item.category === 'tin-cong-ty') return item.subType || (isEn ? 'Company News' : 'Tin công ty');
+    if (item.category === 'specialty' || item.category === 'tin-chuyen-nganh') return item.subType || (isEn ? 'Technical Insights' : 'Tin chuyên ngành');
+    if (item.category === 'international') return item.subType || (isEn ? 'International Cooperation' : 'Hợp tác quốc tế');
+    if (item.category === 'recruitment' || item.category === 'tin-tuyen-dung') return item.department || (isEn ? 'Careers' : 'Tuyển dụng');
+    if (item.category === 'promotion' || item.category === 'tin-khuyen-mai') return isEn ? 'Promotions' : 'Khuyến mại';
+    if (item.category === 'shareholder' || item.category === 'quan-he-co-dong') return item.docType || (isEn ? 'Investor Relations' : 'Quan hệ cổ đông');
+    return isEn ? 'News' : 'Tin tức';
   };
 
   return (
@@ -95,10 +98,10 @@ export function NewsListView({
           {/* Main Title & Editorial Headline */}
           <div className="border-l-4 border-orange-600 pl-6 space-y-2">
             <h1 className="text-3xl md:text-4xl font-bold text-[#444] dark:text-white uppercase tracking-tight">
-              TIN TỨC &amp; GÓC NHÌN
+              {t.news.catalogTitle}
             </h1>
             <p className="text-sm font-normal text-slate-600 max-w-3xl leading-relaxed">
-              Cập nhật tin tức CIC, chia sẻ kiến thức chuyên ngành và góc nhìn về công nghệ trong thực tiễn
+              {t.news.catalogSubtitle}
             </p>
           </div>
 

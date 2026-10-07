@@ -5,6 +5,7 @@ import type { EventItem } from '@shared/types';
 import { EventCard } from './EventCard';
 import { EventHeroBanner } from './EventHeroBanner';
 import { EventConsultationCta } from '../shared/EventConsultationCta';
+import { useI18n } from '@/shared/i18n';
 
 interface EventListViewProps {
   eventsData: EventItem[];
@@ -23,6 +24,7 @@ export const EventListView: React.FC<EventListViewProps> = ({
   onOpenRegistration,
   onOpenConsultation,
 }) => {
+  const { locale } = useI18n();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'upcoming' | 'ongoing' | 'past'>('all');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
@@ -84,13 +86,15 @@ export const EventListView: React.FC<EventListViewProps> = ({
       <div className="border-b border-slate-200 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <span className="text-[10px] font-bold uppercase tracking-widest text-orange-600 block">
-            Sự kiện & Hội thảo CIC
+            {locale === 'en' ? 'CIC Events & Conferences' : 'Sự kiện & Hội thảo CIC'}
           </span>
           <h1 className="text-3xl sm:text-4xl font-bold uppercase tracking-tight text-[#333] dark:text-white mt-1">
-            Cổng Sự Kiện Công Nghệ
+            {locale === 'en' ? 'Tech Events & Webinars' : 'Cổng Sự Kiện Công Nghệ'}
           </h1>
           <p className="text-slate-500 text-sm mt-1 max-w-2xl font-medium">
-            Tham dự các buổi Webinar, Workshop chuyên sâu và Lễ ra mắt công nghệ BIM, AI, CAD và Hạ tầng số do CIC cùng các đối tác quốc tế tổ chức.
+            {locale === 'en'
+              ? 'Join in-depth Webinars, Workshops, and Launch Events on BIM, AI, CAD, and Digital Infrastructure hosted by CIC and international partners.'
+              : 'Tham dự các buổi Webinar, Workshop chuyên sâu và Lễ ra mắt công nghệ BIM, AI, CAD và Hạ tầng số do CIC cùng các đối tác quốc tế tổ chức.'}
           </p>
         </div>
 
@@ -100,7 +104,7 @@ export const EventListView: React.FC<EventListViewProps> = ({
               {eventsData.filter((e) => e.status === 'upcoming').length}
             </span>
             <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider">
-              Sắp diễn ra
+              {locale === 'en' ? 'Upcoming' : 'Sắp diễn ra'}
             </span>
           </div>
           <div className="bg-white border border-slate-200 px-4 py-2 text-center shadow-sm">
@@ -108,7 +112,7 @@ export const EventListView: React.FC<EventListViewProps> = ({
               {eventsData.filter((e) => e.isOpenRegistration).length}
             </span>
             <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider">
-              Mở Đăng ký
+              {locale === 'en' ? 'Open Reg' : 'Mở Đăng ký'}
             </span>
           </div>
         </div>
@@ -134,7 +138,7 @@ export const EventListView: React.FC<EventListViewProps> = ({
             </div>
             <input
               type="text"
-              placeholder="Tìm kiếm sự kiện, địa điểm, chủ đề..."
+              placeholder={locale === 'en' ? 'Search events, locations, topics...' : 'Tìm kiếm sự kiện, địa điểm, chủ đề...'}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-white border border-slate-200 focus:border-[#FC5115] pl-10 pr-4 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none transition-all rounded-[8px]"
@@ -149,10 +153,10 @@ export const EventListView: React.FC<EventListViewProps> = ({
               onChange={(e) => setStatusFilter(e.target.value as any)}
               className="bg-white border border-slate-200 focus:border-[#FC5115] px-3.5 py-2.5 text-xs font-medium text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer min-w-[150px] w-full sm:w-auto"
             >
-              <option value="all">Trạng thái: Tất cả</option>
-              <option value="upcoming">Sắp diễn ra</option>
-              <option value="ongoing">Đang diễn ra</option>
-              <option value="past">Đã kết thúc</option>
+              <option value="all">{locale === 'en' ? 'Status: All' : 'Trạng thái: Tất cả'}</option>
+              <option value="upcoming">{locale === 'en' ? 'Upcoming' : 'Sắp diễn ra'}</option>
+              <option value="ongoing">{locale === 'en' ? 'Ongoing' : 'Đang diễn ra'}</option>
+              <option value="past">{locale === 'en' ? 'Past Events' : 'Đã kết thúc'}</option>
             </select>
 
             {/* Sort Dropdown */}
@@ -161,8 +165,8 @@ export const EventListView: React.FC<EventListViewProps> = ({
               onChange={(e) => setSortBy(e.target.value as any)}
               className="bg-white border border-slate-200 focus:border-[#FC5115] px-3.5 py-2.5 text-xs font-medium text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer min-w-[150px] w-full sm:w-auto"
             >
-              <option value="newest">Sắp xếp: Mới nhất</option>
-              <option value="oldest">Sắp xếp: Cũ nhất</option>
+              <option value="newest">{locale === 'en' ? 'Sort: Newest' : 'Sắp xếp: Mới nhất'}</option>
+              <option value="oldest">{locale === 'en' ? 'Sort: Oldest' : 'Sắp xếp: Cũ nhất'}</option>
             </select>
 
             {/* Reset Filters */}
@@ -175,7 +179,7 @@ export const EventListView: React.FC<EventListViewProps> = ({
                 }}
                 className="px-3.5 py-2.5 bg-slate-200 hover:bg-[#FC5115] hover:text-white text-slate-700 text-xs font-bold uppercase transition-colors whitespace-nowrap rounded-[8px] cursor-pointer shrink-0"
               >
-                Xóa lọc
+                {locale === 'en' ? 'Clear' : 'Xóa lọc'}
               </button>
             )}
           </div>
@@ -240,19 +244,21 @@ export const EventListView: React.FC<EventListViewProps> = ({
         <div className="bg-white border border-slate-200 py-16 px-6 text-center shadow-sm">
           <Filter className="text-slate-400 mx-auto mb-3" size={32} />
           <h3 className="text-base font-black uppercase text-slate-950">
-            Không tìm thấy sự kiện nào
+            {locale === 'en' ? 'No events found' : 'Không tìm thấy sự kiện nào'}
           </h3>
           <p className="text-slate-500 text-xs mt-1 max-w-sm mx-auto">
-            Vui lòng thử điều chỉnh từ khóa tìm kiếm hoặc chọn danh mục bộ lọc khác.
+            {locale === 'en'
+              ? 'Please try adjusting your search terms or filter selection.'
+              : 'Vui lòng thử điều chỉnh từ khóa tìm kiếm hoặc chọn danh mục bộ lọc khác.'}
           </p>
           <button
             onClick={() => {
               setSearchTerm('');
               setStatusFilter('all');
             }}
-            className="mt-4 border border-slate-200 hover:border-orange-600 text-xs font-black uppercase px-6 py-2 transition-all text-slate-700 hover:text-orange-600"
+            className="mt-4 border border-slate-200 hover:border-orange-600 text-xs font-black uppercase px-6 py-2 transition-all text-slate-700 hover:text-orange-600 cursor-pointer"
           >
-            Xóa tất cả bộ lọc
+            {locale === 'en' ? 'Reset all filters' : 'Xóa tất cả bộ lọc'}
           </button>
         </div>
       )}

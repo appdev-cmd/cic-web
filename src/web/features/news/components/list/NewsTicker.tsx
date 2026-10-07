@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Bell, Flame } from 'lucide-react';
 import type { PublicNewsItem } from '../../types';
 import { NewsNotificationModal } from '../shared/NewsNotificationModal';
+import { useI18n } from '@/shared/i18n';
 
 interface NewsTickerProps {
   breakingNews: PublicNewsItem[];
@@ -11,6 +12,7 @@ interface NewsTickerProps {
 }
 
 export function NewsTicker({ breakingNews, onSelectNews }: NewsTickerProps) {
+  const { locale } = useI18n();
   const [isTickerPaused, setIsTickerPaused] = useState(false);
   const [showBellModal, setShowBellModal] = useState(false);
 
@@ -30,7 +32,11 @@ export function NewsTicker({ breakingNews, onSelectNews }: NewsTickerProps) {
             <button
               onClick={() => setShowBellModal(true)}
               className="relative group flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-[10px] font-black uppercase tracking-widest transition-all shadow-sm rounded-[6px] cursor-pointer"
-              title="Nhấn để xem bảng tin nổi bật & cài đặt thông báo"
+              title={
+                locale === 'en'
+                  ? 'Click to view highlighted news & notifications'
+                  : 'Nhấn để xem bảng tin nổi bật & cài đặt thông báo'
+              }
             >
               <span className="relative flex items-center justify-center">
                 <Bell size={13} className="text-white fill-white animate-[bounce_1.2s_infinite]" />
