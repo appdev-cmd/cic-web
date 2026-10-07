@@ -5,7 +5,7 @@ const id = z.coerce.number().int().positive();
 const nullableText = (max: number) => z.string().trim().max(max).nullable().optional();
 
 export const mediaUploadRegistrationSchema = z.object({
-  storagePath: z.string().min(3).max(1000).refine((value) => /^(vi|en|global)\//.test(value)),
+  storagePath: z.string().min(3).max(1000).refine((value) => /^(vi|en|global|editor)\//.test(value)),
   filename: z.string().trim().min(1).max(255), mimeType: z.string().trim().min(3).max(150),
   fileSizeBytes: z.number().int().nonnegative().max(MEDIA_MAX_FILE_BYTES), mediaType: z.enum(MEDIA_TYPES),
   locale: z.enum(MEDIA_LOCALES), title: z.string().trim().min(1).max(255), altText: z.string().trim().max(1000).default(''),
