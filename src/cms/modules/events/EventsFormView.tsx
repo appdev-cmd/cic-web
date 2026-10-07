@@ -18,6 +18,7 @@ import {
   X,
 } from 'lucide-react';
 import { CmsButton } from '@/shared/ui/cms/CmsButton';
+import { CmsConfirmModal } from '@/shared/ui/cms';
 import { ContentQualityPanel } from '../../components/ContentQualityPanel';
 import { SearchableMultiSelect } from '../../components/SearchableSelect';
 import type { CmsMediaPickerItem } from '../../data/MediaPickerDataSource';
@@ -112,6 +113,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittingType, setSubmittingType] = useState<'draft' | 'publish' | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [pendingAgendaHtml, setPendingAgendaHtml] = useState<string | null>(null);
 
   // AI Co-pilot State
   const [isAutoFilling, setIsAutoFilling] = useState(false);
@@ -811,14 +813,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                   });
                   if (res.outlineHtml) {
                     if (content.trim() && content.trim() !== '<p></p>') {
-                      if (
-                        window.confirm(
-                          'Nội dung hiện tại sẽ được thay thế bằng Khung chương trình chuẩn của AI. Bạn có muốn tiếp tục?'
-                        )
-                      ) {
-                        setContent(res.outlineHtml);
-                        onMessage?.('✦ Đã tạo khung Agenda sự kiện chuẩn!', 'success');
-                      }
+                      setPendingAgendaHtml(res.outlineHtml);
                     } else {
                       setContent(res.outlineHtml);
                       onMessage?.('✦ Đã tạo khung Agenda sự kiện chuẩn!', 'success');
@@ -1154,6 +1149,24 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
           }}
         />
       )}
+
+      {/* AI Agenda Confirm Modal */}
+      <CmsConfirmModal
+        isOpen={!!pendingAgendaHtml}
+        title="Thay thế nội dung bằng Agenda AI?"
+        description="Nội dung hiện tại sẽ được thay thế bằng Khung chương trình chuẩn của AI. Bạn có muốn tiếp tục?"
+        confirmLabel="Thay thế nội dung"
+        variant="warning"
+        zIndex="z-[80]"
+        onClose={() => setPendingAgendaHtml(null)}
+        onConfirm={() => {
+          if (pendingAgendaHtml) {
+            setContent(pendingAgendaHtml);
+            setPendingAgendaHtml(null);
+            onMessage?.('✦ Đã tạo khung Agenda sự kiện chuẩn!', 'success');
+          }
+        }}
+      />
     </div>
   );
 };

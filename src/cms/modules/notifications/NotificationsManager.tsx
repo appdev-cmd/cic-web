@@ -31,6 +31,7 @@ import {
   deleteNotificationAction,
 } from '@/server/notifications/actions';
 import { useCmsToast } from '@/cms/context/CmsToastContext';
+import { CmsDeleteConfirmModal } from '@/shared/ui/cms';
 
 interface NotificationsManagerProps {
   initialData: GetNotificationsResult;
@@ -121,24 +122,37 @@ export function NotificationsManager({
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const [deleteNotifTarget, setDeleteNotifTarget] = useState<CmsNotificationItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = (id: string) => {
+    const target = notifications.find((n) => n.id === id);
+    if (target) {
+      setDeleteNotifTarget(target);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteNotifTarget) return;
+    const id = deleteNotifTarget.id;
     const numId = Number(id);
     if (isNaN(numId)) return;
 
-    if (!window.confirm('Bạn có chắc chắn muốn xóa thông báo này?')) return;
-
-    const target = notifications.find((n) => n.id === id);
+    setIsDeleting(true);
     setNotifications((prev) => prev.filter((n) => n.id !== id));
-    if (target?.unread) {
+    if (deleteNotifTarget.unread) {
       setUnreadCount((prev) => Math.max(0, prev - 1));
     }
 
     try {
       await deleteNotificationAction(numId);
       showToast('Đã xóa thông báo thành công.');
+      setDeleteNotifTarget(null);
     } catch (err) {
       console.error(err);
       showToast('Không thể xóa thông báo.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -497,6 +511,17 @@ export function NotificationsManager({
           </div>
         </div>
       )}
+
+      <CmsDeleteConfirmModal
+        isOpen={!!deleteNotifTarget}
+        title="Xác nhận xóa thông báo?"
+        itemName={deleteNotifTarget?.title}
+        description="Thông báo này sẽ bị xóa vĩnh viễn khỏi danh sách thông báo hệ thống."
+        confirmLabel="Xóa thông báo"
+        isPending={isDeleting}
+        onClose={() => setDeleteNotifTarget(null)}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

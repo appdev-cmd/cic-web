@@ -17,6 +17,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { CmsButton } from '@/shared/ui/cms/CmsButton';
+import { CmsConfirmModal } from '@/shared/ui/cms';
 import { ContentQualityPanel } from '../../components/ContentQualityPanel';
 import { SearchableMultiSelect, SearchableSelect } from '../../components/SearchableSelect';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
@@ -317,22 +318,31 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
     }
   };
 
-  const handleAiOutline = async () => {
-    if (!title.trim()) return;
+  const [showOutlineConfirm, setShowOutlineConfirm] = useState(false);
+
+  const executeAiOutline = async (append = false) => {
     try {
-      const cleanLen = content.replace(/<[^>]*>?/gm, '').trim().length;
-      if (cleanLen > 30) {
-        if (!confirm('Nội dung đã có bài viết. Bạn có muốn chèn thêm khung dàn bài vào cuối bài không?')) return;
-        const res = await generateOutlineAction({ title, moduleType: 'news' });
+      const res = await generateOutlineAction({ title, moduleType: 'news' });
+      if (append) {
         setContent((prev) => `${prev}<br/><hr/><br/>${res.outlineHtml}`);
       } else {
-        const res = await generateOutlineAction({ title, moduleType: 'news' });
         setContent(res.outlineHtml);
       }
+      setShowOutlineConfirm(false);
       onMessage?.('Đã tạo khung dàn ý bài viết chuẩn B2B!', 'success');
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Không thể tạo dàn ý AI');
     }
+  };
+
+  const handleAiOutline = async () => {
+    if (!title.trim()) return;
+    const cleanLen = content.replace(/<[^>]*>?/gm, '').trim().length;
+    if (cleanLen > 30) {
+      setShowOutlineConfirm(true);
+      return;
+    }
+    await executeAiOutline(false);
   };
 
   const handleAiTags = async () => {
@@ -1039,6 +1049,18 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
           onConfirm={setImage}
         />
       )}
+
+      {/* AI Outline Confirm Modal */}
+      <CmsConfirmModal
+        isOpen={showOutlineConfirm}
+        title="Chèn thêm dàn bài AI?"
+        description="Bài viết hiện đã có nội dung. Bạn có muốn chèn thêm khung dàn bài do AI khởi tạo vào cuối bài viết hiện tại không?"
+        confirmLabel="Chèn vào cuối bài"
+        variant="warning"
+        zIndex="z-[80]"
+        onClose={() => setShowOutlineConfirm(false)}
+        onConfirm={() => executeAiOutline(true)}
+      />
 
       {/* Preview Modal */}
       {previewOpen && (

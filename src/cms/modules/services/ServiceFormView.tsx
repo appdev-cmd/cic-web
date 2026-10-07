@@ -26,6 +26,7 @@ import { SearchableMultiSelect } from '../../components/SearchableSelect';
 import { AiMagicWand } from '@/features/ai-operator/components/AiMagicWand';
 import { ContentQualityPanel } from '@/cms/components/ContentQualityPanel';
 import { CmsButton } from '@/shared/ui/cms/CmsButton';
+import { CmsConfirmModal } from '@/shared/ui/cms';
 import {
   generateServiceSmartDraftAction,
   generateSeoAction,
@@ -181,6 +182,8 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
     }
   };
 
+  const [pendingProcessHtml, setPendingProcessHtml] = useState<string | null>(null);
+
   const handleAiOutline = async () => {
     if (!formData.title.trim()) {
       showToast('Vui lòng nhập Tên dịch vụ trước khi tạo dàn ý.');
@@ -192,10 +195,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
     });
     if (res.outlineHtml) {
       if (formData.description.trim() && formData.description.trim() !== '<p></p>') {
-        if (window.confirm('Nội dung hiện tại sẽ được thay thế bằng Khung quy trình chuẩn của AI. Bạn có muốn tiếp tục?')) {
-          handleChange('description', res.outlineHtml);
-          showToast('✦ Đã tạo khung quy trình dịch vụ chuẩn!');
-        }
+        setPendingProcessHtml(res.outlineHtml);
       } else {
         handleChange('description', res.outlineHtml);
         showToast('✦ Đã tạo khung quy trình dịch vụ chuẩn!');
@@ -924,6 +924,24 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
           }}
         />
       )}
+
+      {/* AI Service Process Outline Confirm Modal */}
+      <CmsConfirmModal
+        isOpen={!!pendingProcessHtml}
+        title="Thay thế nội dung bằng Khung quy trình AI?"
+        description="Nội dung hiện tại sẽ được thay thế bằng Khung quy trình chuẩn của AI. Bạn có muốn tiếp tục?"
+        confirmLabel="Thay thế nội dung"
+        variant="warning"
+        zIndex="z-[80]"
+        onClose={() => setPendingProcessHtml(null)}
+        onConfirm={() => {
+          if (pendingProcessHtml) {
+            handleChange('description', pendingProcessHtml);
+            setPendingProcessHtml(null);
+            showToast('✦ Đã tạo khung quy trình dịch vụ chuẩn!');
+          }
+        }}
+      />
     </div>
   );
 };

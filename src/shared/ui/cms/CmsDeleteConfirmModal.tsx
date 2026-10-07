@@ -15,6 +15,8 @@ export interface CmsDeleteConfirmModalProps {
   items?: CmsDeleteConfirmModalItem[];
   confirmLabel?: string;
   cancelLabel?: string;
+  variant?: 'danger' | 'warning' | 'primary';
+  zIndex?: string;
   isPending?: boolean;
   onClose: () => void;
   onConfirm: () => void | Promise<void>;
@@ -28,6 +30,8 @@ export const CmsDeleteConfirmModal: React.FC<CmsDeleteConfirmModalProps> = ({
   items = [],
   confirmLabel = 'Xác nhận chuyển vào thùng rác',
   cancelLabel = 'Hủy bỏ',
+  variant = 'danger',
+  zIndex = 'z-[70]',
   isPending = false,
   onClose,
   onConfirm,
@@ -49,7 +53,7 @@ export const CmsDeleteConfirmModal: React.FC<CmsDeleteConfirmModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200"
+      className={`fixed inset-0 ${zIndex} flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200`}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget && !isPending) {
           onClose();
@@ -69,7 +73,7 @@ export const CmsDeleteConfirmModal: React.FC<CmsDeleteConfirmModalProps> = ({
 
         {/* Warning Icon & Header */}
         <div className="flex items-start gap-4">
-          <div className="p-3 bg-red-500/10 text-red-600 dark:text-red-400 rounded-2xl shrink-0">
+          <div className={`p-3 rounded-2xl shrink-0 ${variant === 'warning' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-red-500/10 text-red-600 dark:text-red-400'}`}>
             <AlertTriangle className="size-6" />
           </div>
           <div className="space-y-1 pr-6">
@@ -87,7 +91,7 @@ export const CmsDeleteConfirmModal: React.FC<CmsDeleteConfirmModalProps> = ({
           <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-xl p-3 max-h-40 overflow-y-auto space-y-2 text-xs">
             {items.map((item) => (
               <div key={item.id} className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
-                <span className="size-1.5 rounded-full bg-red-500 shrink-0" />
+                <span className={`size-1.5 rounded-full shrink-0 ${variant === 'warning' ? 'bg-amber-500' : 'bg-red-500'}`} />
                 <span className="font-semibold truncate">{item.label}</span>
               </div>
             ))}
@@ -106,11 +110,11 @@ export const CmsDeleteConfirmModal: React.FC<CmsDeleteConfirmModalProps> = ({
           </CmsButton>
           <CmsButton
             size="sm"
-            variant="danger"
+            variant={variant === 'warning' ? 'primary' : 'danger'}
             onClick={onConfirm}
             loading={isPending}
-            loadingText="Đang xóa..."
-            leadingIcon={<Trash2 className="size-3.5" />}
+            loadingText={variant === 'warning' ? 'Đang áp dụng...' : 'Đang xóa...'}
+            leadingIcon={variant === 'danger' ? <Trash2 className="size-3.5" /> : undefined}
           >
             {confirmLabel}
           </CmsButton>
@@ -119,3 +123,5 @@ export const CmsDeleteConfirmModal: React.FC<CmsDeleteConfirmModalProps> = ({
     </div>
   );
 };
+
+export const CmsConfirmModal = CmsDeleteConfirmModal;

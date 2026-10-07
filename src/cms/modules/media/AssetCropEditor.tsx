@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import type { MediaAsset, AssetVariant } from './types';
 import { createCropVariantAction, saveMediaFocalPointAction, deleteMediaVariantAction } from '@/features/media/server/actions';
+import { CmsDeleteConfirmModal } from '@/shared/ui/cms';
 
 interface AssetCropEditorProps {
   asset: MediaAsset;
@@ -232,14 +233,22 @@ export const AssetCropEditor: React.FC<AssetCropEditorProps> = ({
   };
 
   // Delete variant
+  const [deleteVariantTarget, setDeleteVariantTarget] = useState<{ id: string; presetName: string } | null>(null);
+
   const handleDeleteVariant = (variantId: string, presetName: string) => {
     if (!canEdit) return;
-    if (!confirm(`Bạn có chắc chắn muốn xóa biến thể "${presetName}" này không?`)) return;
+    setDeleteVariantTarget({ id: variantId, presetName });
+  };
+
+  const confirmDeleteVariant = () => {
+    if (!deleteVariantTarget) return;
+    const { id, presetName } = deleteVariantTarget;
 
     startTransition(async () => {
       try {
-        await deleteMediaVariantAction(Number(variantId));
+        await deleteMediaVariantAction(Number(id));
         onShowToast?.(`Đã xóa biến thể "${presetName}".`);
+        setDeleteVariantTarget(null);
         onRefreshAsset();
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Xóa biến thể thất bại.';
@@ -649,6 +658,18 @@ export const AssetCropEditor: React.FC<AssetCropEditorProps> = ({
           </div>
         )}
       </div>
+
+      <CmsDeleteConfirmModal
+        isOpen={!!deleteVariantTarget}
+        title="Xác nhận xóa biến thể ảnh?"
+        itemName={deleteVariantTarget?.presetName}
+        description={`Biến thể "${deleteVariantTarget?.presetName}" và tệp ảnh đã crop trong bộ lưu trữ sẽ bị xóa vĩnh viễn.`}
+        confirmLabel="Xóa biến thể"
+        zIndex="z-[70]"
+        isPending={isPending}
+        onClose={() => setDeleteVariantTarget(null)}
+        onConfirm={confirmDeleteVariant}
+      />
     </div>
   );
 };

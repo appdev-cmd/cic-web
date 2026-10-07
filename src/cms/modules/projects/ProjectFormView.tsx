@@ -17,6 +17,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
+import { CmsConfirmModal } from '@/shared/ui/cms';
 import { SearchableMultiSelect } from '../../components/SearchableSelect';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
 import { PageMediaPickerModal } from '../static_pages/PageMediaPickerModal';
@@ -234,6 +235,8 @@ export const ProjectFormView: React.FC<Props> = ({
     }
   };
 
+  const [pendingOutlineHtml, setPendingOutlineHtml] = useState<string | null>(null);
+
   const handleAiOutline = async () => {
     if (!form.title.trim()) {
       showToast('Vui lòng nhập Tên dự án trước khi tạo dàn ý.');
@@ -246,14 +249,7 @@ export const ProjectFormView: React.FC<Props> = ({
     });
     if (res.outlineHtml) {
       if (form.content.trim() && form.content.trim() !== '<p></p>') {
-        if (
-          window.confirm(
-            'Nội dung hiện tại sẽ được thay thế bằng Khung hồ sơ năng lực chuẩn của AI. Bạn có muốn tiếp tục?'
-          )
-        ) {
-          set('content', res.outlineHtml);
-          showToast('✦ Đã tạo khung hồ sơ năng lực dự án chuẩn!');
-        }
+        setPendingOutlineHtml(res.outlineHtml);
       } else {
         set('content', res.outlineHtml);
         showToast('✦ Đã tạo khung hồ sơ năng lực dự án chuẩn!');
@@ -1037,6 +1033,24 @@ export const ProjectFormView: React.FC<Props> = ({
           onConfirm={(mediaUrl) => set('image', mediaUrl)}
         />
       )}
+
+      {/* AI Project Outline Confirm Modal */}
+      <CmsConfirmModal
+        isOpen={!!pendingOutlineHtml}
+        title="Thay thế nội dung bằng Hồ sơ năng lực AI?"
+        description="Nội dung hiện tại sẽ được thay thế bằng Khung hồ sơ năng lực chuẩn của AI. Bạn có muốn tiếp tục?"
+        confirmLabel="Thay thế nội dung"
+        variant="warning"
+        zIndex="z-[80]"
+        onClose={() => setPendingOutlineHtml(null)}
+        onConfirm={() => {
+          if (pendingOutlineHtml) {
+            set('content', pendingOutlineHtml);
+            setPendingOutlineHtml(null);
+            showToast('✦ Đã tạo khung hồ sơ năng lực dự án chuẩn!');
+          }
+        }}
+      />
     </div>
   );
 };
