@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import type { EventItem, Product } from '@/shared/types';
 import type {
@@ -8,6 +8,7 @@ import type {
   PublicNewsItem,
   ShareholderNewsItem,
 } from '../../types';
+import { extractTocItems } from '../../utils/tocHelper';
 import { ReadingProgress } from './ReadingProgress';
 import { NewsTicker } from '../list/NewsTicker';
 import { NewsDetailHero } from './NewsDetailHero';
@@ -88,56 +89,49 @@ export function NewsDetailView({
 
   // TOC extraction
   const tocItems = useMemo(() => {
-    if (!selectedItem.contentMarkdown) return [];
-    const items: Array<{ id: string; title: string; fullTitle: string }> = [];
-
-    // Nếu là HTML
-    if (/<[a-z][\s\S]*>/i.test(selectedItem.contentMarkdown)) {
-      const headingMatches = selectedItem.contentMarkdown.matchAll(/<h([2-4])[^>]*>(.*?)<\/h\1>/gi);
-      let idx = 0;
-      for (const match of headingMatches) {
-        const text = match[2].replace(/<[^>]+>/g, '').trim();
-        if (text) {
-          items.push({
-            id: `sec-heading-${idx}`,
-            title: text.length > 36 ? text.substring(0, 36) + '...' : text,
-            fullTitle: text,
-          });
-          idx++;
-        }
-      }
-      return items;
-    }
-
-    // Nếu là Markdown
-    const lines = selectedItem.contentMarkdown.split('\n');
-    let idx = 0;
-    lines.forEach((line) => {
-      const trimmed = line.trim();
-      if (trimmed.startsWith('### ') || trimmed.startsWith('#### ')) {
-        const title = trimmed.replace(/^#{3,4}\s+/, '').replace(/\*\*/g, '').trim();
-        if (title) {
-          items.push({
-            id: `sec-heading-${idx}`,
-            title: title.length > 36 ? title.substring(0, 36) + '...' : title,
-            fullTitle: title,
-          });
-          idx++;
-        }
-      }
-    });
-    return items;
+    return extractTocItems(selectedItem.contentMarkdown);
   }, [selectedItem.contentMarkdown]);
 
   const showTOC = tocItems.length >= 2;
+
+  // Tự động highlight mục lục khi người dùng cuộn bài viết (Scroll spy)
+  useEffect(() => {
+    if (!showTOC || typeof window === 'undefined') return;
+
+    const handleScrollSpy = () => {
+      const scrollPosition = window.scrollY + 140;
+      let currentActiveId: string | null = null;
+
+      for (const item of tocItems) {
+        const el = document.getElementById(item.id);
+        if (el) {
+          const top = el.getBoundingClientRect().top + window.scrollY;
+          if (scrollPosition >= top) {
+            currentActiveId = item.id;
+          }
+        }
+      }
+
+      if (currentActiveId) {
+        setActiveTocId(currentActiveId);
+      }
+    };
+
+    window.addEventListener('scroll', handleScrollSpy, { passive: true });
+    handleScrollSpy();
+
+    return () => {
+      window.removeEventListener('scroll', handleScrollSpy);
+    };
+  }, [showTOC, tocItems]);
 
   const scrollToSection = (id: string) => {
     setActiveTocId(id);
     const element = document.getElementById(id);
     if (element) {
-      const offset = 120;
+      const offset = 100;
       const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - offset;
+      const offsetPosition = elementPosition + window.scrollY - offset;
       window.scrollTo({
         top: offsetPosition,
         behavior: 'smooth',

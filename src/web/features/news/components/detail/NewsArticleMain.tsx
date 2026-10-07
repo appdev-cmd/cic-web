@@ -14,6 +14,7 @@ import type {
   ShareholderNewsItem,
 } from '../../types';
 import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
+import { injectHeadingIds } from '../../utils/tocHelper';
 
 interface NewsArticleMainProps {
   article: PublicNewsItem;
@@ -131,7 +132,12 @@ export function NewsArticleMain({
       {/* RICH DETAILED ARTICLE TEXT WITH CKEDITOR HTML & MARKDOWN SUPPORT */}
       <div className="prose max-w-none text-slate-700 text-xs md:text-sm leading-relaxed space-y-4">
         {/<[a-z][\s\S]*>/i.test(article.contentMarkdown) ? (
-          <div className="ck-content" dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(article.contentMarkdown) }} />
+          <div
+            className="ck-content"
+            dangerouslySetInnerHTML={{
+              __html: sanitizeHtmlContent(injectHeadingIds(article.contentMarkdown)),
+            }}
+          />
         ) : (() => {
           type ContentBlock = {
             type: 'h3' | 'h4' | 'ol' | 'ul' | 'quote' | 'p';
@@ -196,9 +202,10 @@ export function NewsArticleMain({
             flushList();
           });
 
+          let headingCounter = 0;
           return blocks.map((block, idx) => {
-            const sectionId = `sec-heading-${idx}`;
             if (block.type === 'h3') {
+              const sectionId = `sec-heading-${headingCounter++}`;
               return (
                 <h3
                   key={idx}
@@ -210,6 +217,7 @@ export function NewsArticleMain({
               );
             }
             if (block.type === 'h4') {
+              const sectionId = `sec-heading-${headingCounter++}`;
               return (
                 <h4
                   key={idx}
