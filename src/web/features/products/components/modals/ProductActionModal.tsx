@@ -6,6 +6,7 @@ import { X, Check, Download, Loader2 } from 'lucide-react';
 import { Product } from '@shared/types';
 import { submitCustomerInteractionAction } from '@/features/contact/server/actions';
 import { useI18n } from '@/shared/i18n';
+import { enrichSubmissionSource, trackFormConversion } from '@/shared/lib/analytics';
 
 export type ProductModalType = 'contact' | 'buy' | 'download';
 
@@ -69,8 +70,11 @@ export function ProductActionModal({
       errors.name = isEn ? 'Please enter your full name' : 'Vui lòng nhập họ và tên';
     }
 
+    const phoneRegex = /^[0-9+.\s-]{8,15}$/;
     if (!formData.phone.trim()) {
       errors.phone = isEn ? 'Please enter your phone number' : 'Vui lòng nhập số điện thoại';
+    } else if (!phoneRegex.test(formData.phone.trim())) {
+      errors.phone = isEn ? 'Invalid phone number format' : 'Số điện thoại không đúng định dạng';
     }
 
     if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
@@ -92,9 +96,10 @@ export function ProductActionModal({
     setSubmitError('');
     setIsSubmitting(true);
     try {
-      await submitCustomerInteractionAction({
+      const formName = isEn ? 'Product download request' : 'Yêu cầu tải sản phẩm';
+      const result = await submitCustomerInteractionAction({
         formId: 'product-download',
-        formName: isEn ? 'Product download request' : 'Yêu cầu tải sản phẩm',
+        formName,
         values: {
           ...formData,
           productId: activeProduct.id,
@@ -102,15 +107,25 @@ export function ProductActionModal({
           requestType: 'download',
           message: formData.notes,
         },
-        source: {
+        source: enrichSubmissionSource({
           pageType: 'product',
           pageId: String(activeProduct.id),
           pageUrl: typeof window !== 'undefined' ? window.location.pathname : '',
           pageTitle: activeProduct.name,
           placementKey: 'product-download-modal',
-        },
+        }),
       });
       setDownloadFormSubmitted(true);
+
+      // Conversion tracking fires ONLY on verified server success
+      trackFormConversion({
+        formId: 'product-download',
+        formName,
+        requestId: result.requestId,
+        leadType: 'download',
+        productId: activeProduct.id,
+        productName: activeProduct.name,
+      });
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : (isEn ? 'Unable to submit download request. Please try again.' : 'Không thể gửi yêu cầu tải. Vui lòng thử lại.'));
     } finally {
@@ -125,14 +140,15 @@ export function ProductActionModal({
     setSubmitError('');
     setIsSubmitting(true);
     try {
-      await submitCustomerInteractionAction({
+      const formName =
+        modalType === 'contact'
+          ? (isEn ? 'Product quotation request' : 'Yêu cầu báo giá sản phẩm')
+          : modalType === 'buy'
+          ? (isEn ? 'Product purchase registration' : 'Đăng ký mua sản phẩm')
+          : (isEn ? 'Product download request' : 'Yêu cầu tải sản phẩm');
+      const result = await submitCustomerInteractionAction({
         formId: `product-${modalType}`,
-        formName:
-          modalType === 'contact'
-            ? (isEn ? 'Product quotation request' : 'Yêu cầu báo giá sản phẩm')
-            : modalType === 'buy'
-            ? (isEn ? 'Product purchase registration' : 'Đăng ký mua sản phẩm')
-            : (isEn ? 'Product download request' : 'Yêu cầu tải sản phẩm'),
+        formName,
         values: {
           ...formData,
           productId: activeProduct.id,
@@ -140,15 +156,25 @@ export function ProductActionModal({
           requestType: modalType,
           message: formData.notes,
         },
-        source: {
+        source: enrichSubmissionSource({
           pageType: 'product',
           pageId: String(activeProduct.id),
           pageUrl: typeof window !== 'undefined' ? window.location.pathname : '',
           pageTitle: activeProduct.name,
           placementKey: `product-${modalType}-modal`,
-        },
+        }),
       });
       setFormSubmitted(true);
+
+      // Conversion tracking fires ONLY on verified server success
+      trackFormConversion({
+        formId: `product-${modalType}`,
+        formName,
+        requestId: result.requestId,
+        leadType: modalType === 'contact' ? 'quote' : 'consultation',
+        productId: activeProduct.id,
+        productName: activeProduct.name,
+      });
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : (isEn ? 'Unable to submit request. Please try again.' : 'Không thể gửi yêu cầu. Vui lòng thử lại.'));
     } finally {

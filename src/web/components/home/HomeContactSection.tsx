@@ -9,6 +9,7 @@ import { Phone, Mail, ShieldCheck } from 'lucide-react';
 import { submitCustomerInteraction } from '../../services/customerInteractionSubmission';
 import { SYSTEM_FORM_IDS } from '../../../shared/customerInteractionContract';
 import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
+import { enrichSubmissionSource, trackFormConversion } from '@/shared/lib/analytics';
 
 interface HomeContactSectionProps {
   contactCta?: {
@@ -26,36 +27,70 @@ export const HomeContactSection: React.FC<HomeContactSectionProps> = ({ contactC
   const [interestService, setInterestService] = useState('Phần mềm kỹ thuật bản quyền');
   const [message, setMessage] = useState('');
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleContactSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
+    const trimmedName = fullName.trim();
+    const trimmedPhone = phoneNumber.trim();
+
+    if (!trimmedName) {
+      setErrorMessage('Vui lòng nhập họ và tên của bạn.');
+      return;
+    }
+
+    const phoneRegex = /^[0-9+.\s-]{8,15}$/;
+    if (!trimmedPhone || !phoneRegex.test(trimmedPhone)) {
+      setErrorMessage('Vui lòng nhập số điện thoại hợp lệ (8 - 15 chữ số).');
+      return;
+    }
+
+    setErrorMessage('');
+    setIsSubmitting(true);
+
     try {
-      await submitCustomerInteraction({
+      const result = await submitCustomerInteraction({
         formId: SYSTEM_FORM_IDS.homeConsultation,
         formName: 'Tư vấn trang chủ',
         values: {
-          fullName,
-          phoneNumber,
+          fullName: trimmedName,
+          phoneNumber: trimmedPhone,
           interestService,
-          message,
+          message: message.trim(),
         },
-        source: {
+        source: enrichSubmissionSource({
           pageType: 'home',
           pageId: 'home',
-          pageUrl: typeof window !== 'undefined' ? window.location.pathname : '',
+          pageUrl: typeof window !== 'undefined' ? window.location.pathname : '/',
           pageTitle: typeof document !== 'undefined' ? document.title : 'Trang chủ',
           placementKey: 'home.contact_cta',
-        },
+        }),
       });
+
       setFormSubmitted(true);
+
+      // Conversion tracking ONLY fires on verified server success
+      trackFormConversion({
+        formId: SYSTEM_FORM_IDS.homeConsultation,
+        formName: 'Tư vấn trang chủ',
+        requestId: result.requestId,
+        leadType: 'consultation',
+      });
+
       setTimeout(() => {
         setFormSubmitted(false);
         setFullName('');
         setPhoneNumber('');
         setMessage('');
       }, 4000);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error submitting consultation:', err);
+      setErrorMessage(err?.message || 'Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại sau.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -154,6 +189,11 @@ export const HomeContactSection: React.FC<HomeContactSectionProps> = ({ contactC
             </AnimatePresence>
 
             <form className="space-y-6" onSubmit={handleContactSubmit}>
+              {errorMessage && (
+                <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs font-semibold rounded-lg">
+                  {errorMessage}
+                </div>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Họ tên</label>
@@ -201,8 +241,14 @@ export const HomeContactSection: React.FC<HomeContactSectionProps> = ({ contactC
                   placeholder="Mô tả nhu cầu của bạn..."
                 />
               </div>
-              <button type="submit" className="w-full py-4 bg-orange-600 text-white rounded-[8px] font-black uppercase tracking-widest text-xs btn-modern-interaction shadow-xl shadow-orange-600/20">
-                {contactCta?.submitLabel || 'Gửi thông tin ngay'}
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                className={`w-full py-4 bg-orange-600 text-white rounded-[8px] font-black uppercase tracking-widest text-xs btn-modern-interaction shadow-xl shadow-orange-600/20 cursor-pointer ${
+                  isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
+                }`}
+              >
+                {isSubmitting ? 'Đang gửi...' : contactCta?.submitLabel || 'Gửi thông tin ngay'}
               </button>
             </form>
           </motion.div>

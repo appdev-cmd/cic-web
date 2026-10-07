@@ -33,6 +33,7 @@ import { createCollectionItemPath, createElementBinding } from '@shared/visual-e
 import { submitCustomerInteraction } from '../services/customerInteractionSubmission';
 import { SYSTEM_FORM_IDS } from '../../shared/customerInteractionContract';
 import { useI18n } from '@/shared/i18n';
+import { enrichSubmissionSource, trackFormConversion } from '@/shared/lib/analytics';
 
 function bindElement<T extends Element>(registry: ElementBindingRegistry, binding: ReturnType<typeof createElementBinding>): BoundElementProps<T> {
   return bindElementRuntime<T>(binding, registry);
@@ -149,7 +150,13 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
         formId: SYSTEM_FORM_IDS.contactRequest,
         formName: 'Gửi yêu cầu liên hệ',
         values: { ...formData, _hp: honeypot },
-        source: { pageType: 'contact', pageId: 'contact', pageUrl: '/lien-he', pageTitle: 'Liên hệ', placementKey: 'contact.form' },
+        source: enrichSubmissionSource({
+          pageType: 'contact',
+          pageId: 'contact',
+          pageUrl: '/lien-he',
+          pageTitle: 'Liên hệ',
+          placementKey: 'contact.form',
+        }),
       });
       const newLead: ContactLead = {
         id: submission.requestId,
@@ -158,10 +165,18 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
         phone: formData.phone,
         subject: formData.subject,
         note: formData.note,
-        submittedAt: new Date().toISOString()
+        submittedAt: new Date().toISOString(),
       };
 
       setSuccessLead(newLead);
+
+      // Fire conversion tracking ONLY after server confirms success
+      trackFormConversion({
+        formId: SYSTEM_FORM_IDS.contactRequest,
+        formName: 'Gửi yêu cầu liên hệ',
+        requestId: submission.requestId,
+        leadType: 'contact',
+      });
 
       // Reset Form fields only on success
       setFormData({

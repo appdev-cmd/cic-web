@@ -21,6 +21,8 @@ import { getNavigationData, type FooterNavigationItem, type NavigationDataResult
 import type { PublicSystemSettings } from '@/features/system-settings/domain/model';
 import { useI18n } from '@/shared/i18n';
 import { sanitizeHtmlContent, sanitizeHref } from '@/shared/lib/sanitize';
+import { submitCustomerInteractionAction } from '@/features/contact/server/actions';
+import { enrichSubmissionSource, trackFormConversion } from '@/shared/lib/analytics';
 
 interface FooterProps {
   settings?: PublicSystemSettings;
@@ -51,19 +53,58 @@ export const Footer = ({
   const { footerPrimaryLinks, footerSolutionLinks, footerServiceLinks } = navigation || getNavigationData();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
+  const [isSubmittingNewsletter, setIsSubmittingNewsletter] = useState(false);
   const values = settings?.values ?? {};
   const publicBranches = settings?.branches ?? [];
   const headOffice = publicBranches.find((branch) => branch.isHeadOffice) ?? publicBranches[0];
   const otherBranches = publicBranches.filter((branch) => branch.id !== headOffice?.id);
 
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newsletterEmail.trim() || !newsletterEmail.includes('@')) return;
-    setNewsletterSubscribed(true);
-    setTimeout(() => {
-      setNewsletterSubscribed(false);
-      setNewsletterEmail('');
-    }, 4000);
+    if (isSubmittingNewsletter) return;
+
+    const trimmed = newsletterEmail.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!trimmed || !emailRegex.test(trimmed)) return;
+
+    setIsSubmittingNewsletter(true);
+    try {
+      const result = await submitCustomerInteractionAction({
+        formId: 'newsletter_subscription',
+        formName: 'Đăng ký nhận bản tin',
+        values: {
+          email: trimmed,
+          newsletter: true,
+          subject: 'Đăng ký nhận bản tin từ chân trang (Footer)',
+        },
+        source: enrichSubmissionSource({
+          pageType: 'footer',
+          pageId: 'footer',
+          pageUrl: typeof window !== 'undefined' ? window.location.pathname : '/',
+          pageTitle: typeof document !== 'undefined' ? document.title : 'CIC',
+          placementKey: 'footer.newsletter',
+        }),
+      });
+
+      setNewsletterSubscribed(true);
+
+      // Conversion tracking ONLY fires on verified server success
+      trackFormConversion({
+        formId: 'newsletter_subscription',
+        formName: 'Đăng ký nhận bản tin',
+        requestId: result.requestId,
+        leadType: 'newsletter',
+      });
+
+      setTimeout(() => {
+        setNewsletterSubscribed(false);
+        setNewsletterEmail('');
+      }, 5000);
+    } catch (err) {
+      console.error('[Footer] Newsletter submission failed:', err);
+    } finally {
+      setIsSubmittingNewsletter(false);
+    }
   };
   const resetByView: Partial<Record<PublicNavigationView, (() => void) | undefined>> = {
     products: onResetProducts,
@@ -118,7 +159,15 @@ export const Footer = ({
                     placeholder={t.footer.newsletterPlaceholder} 
                     className="min-w-0 flex-1 bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 rounded-[8px] transition-all"
                   />
-                  <button type="submit" className={`px-5 py-2.5 bg-orange-600 text-white ${typeButton} rounded-lg hover:bg-orange-700 transition-all btn-modern-interaction cursor-pointer`}>{t.footer.newsletterButton}</button>
+                  <button 
+                    type="submit" 
+                    disabled={isSubmittingNewsletter}
+                    className={`px-5 py-2.5 bg-orange-600 text-white ${typeButton} rounded-lg hover:bg-orange-700 transition-all btn-modern-interaction cursor-pointer ${
+                      isSubmittingNewsletter ? 'opacity-70 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    {isSubmittingNewsletter ? '...' : t.footer.newsletterButton}
+                  </button>
                 </form>
               )}
             </div>

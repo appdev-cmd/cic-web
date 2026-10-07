@@ -30,6 +30,12 @@ export interface CustomerInteractionSubmissionSource {
   placementKey?: string;
   ctaId?: string;
   ctaName?: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  utmTerm?: string;
+  utmContent?: string;
+  referrer?: string;
 }
 
 export interface CustomerInteractionSubmissionInput {

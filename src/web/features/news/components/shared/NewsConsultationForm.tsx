@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Check, Mail, Send, User } from 'lucide-react';
 import { submitContactAction } from '@/features/contact/server/actions';
+import { trackFormConversion } from '@/shared/lib/analytics';
 
 interface NewsConsultationFormProps {
   articleTitle?: string;
@@ -19,23 +20,42 @@ export function NewsConsultationForm({ articleTitle, onSuccess }: NewsConsultati
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullname.trim() || !email.trim()) return;
+    if (isSubmitting) return;
+
+    const trimmedName = fullname.trim();
+    const trimmedEmail = email.trim();
+    if (!trimmedName) {
+      setError('Vui lòng nhập họ và tên của bạn.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
+      setError('Vui lòng nhập địa chỉ email hợp lệ.');
+      return;
+    }
 
     setIsSubmitting(true);
     setError(null);
     try {
       const formData = new FormData();
-      formData.set('fullname', fullname.trim());
-      formData.set('email', email.trim());
+      formData.set('fullname', trimmedName);
+      formData.set('email', trimmedEmail);
       formData.set('message', message.trim());
       formData.set('subject', articleTitle ? `Tư vấn từ bài viết: ${articleTitle}` : 'Đăng ký tư vấn tin tức');
       await submitContactAction(Object.fromEntries(formData));
       setIsSubmitted(true);
+
+      // Conversion tracking ONLY fires on verified server success
+      trackFormConversion({
+        formId: 'news_consultation',
+        formName: articleTitle ? `Tư vấn: ${articleTitle}` : 'Đăng ký tư vấn tin tức',
+        leadType: 'consultation',
+      });
+
       onSuccess?.();
-    } catch {
-      // Fallback optimistic success for smooth UX
-      setIsSubmitted(true);
-      onSuccess?.();
+    } catch (err: any) {
+      setError(err?.message || 'Có lỗi xảy ra khi gửi thông tin. Vui lòng thử lại sau.');
     } finally {
       setIsSubmitting(false);
     }

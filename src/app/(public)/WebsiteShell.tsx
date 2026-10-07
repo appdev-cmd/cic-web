@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import { Phone, Facebook, Linkedin, Bot, X, Headphones } from 'lucide-react';
@@ -14,6 +14,7 @@ import { PublicRouteProgressBar } from '@/web/components/PublicRouteProgressBar'
 import type { PublicSystemSettings } from '@/features/system-settings/domain/model';
 import type { NavigationDataResult } from '@/web/features/navigation/navigationData';
 import { I18nProvider, type Locale } from '@/shared/i18n';
+import { captureAttribution } from '@/shared/lib/analytics';
 
 export function WebsiteShell({
   children,
@@ -33,6 +34,10 @@ export function WebsiteShell({
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [isFloatingExpanded, setIsFloatingExpanded] = useState(false);
+
+  useEffect(() => {
+    captureAttribution();
+  }, [pathname]);
 
   const locale: Locale = pathname?.startsWith('/en') ? 'en' : 'vi';
   const settings = (locale === 'en' ? settingsMap?.en : settingsMap?.vi) ?? initialSettings ?? settingsMap?.vi;

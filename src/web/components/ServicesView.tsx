@@ -36,6 +36,7 @@ import { Product } from '@shared/types';
 import { submitCustomerInteractionAction } from '@/features/contact/server/actions';
 import { useI18n } from '@/shared/i18n';
 import { Loader2 } from 'lucide-react';
+import { enrichSubmissionSource, trackFormConversion } from '@/shared/lib/analytics';
 
 interface ServicesViewProps {
   key?: string | number;
@@ -191,10 +192,29 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
 
   const handleFormSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!formData.fullname || !formData.phone) {
+    if (isSubmitting) return;
+
+    const trimmedName = formData.fullname.trim();
+    const trimmedPhone = formData.phone.trim();
+    const trimmedEmail = formData.email.trim();
+
+    if (!trimmedName || !trimmedPhone) {
       setSubmitError(locale === 'en' ? 'Please provide your full name and phone number.' : 'Vui lòng điền họ tên và số điện thoại liên hệ.');
       return;
     }
+
+    const phoneRegex = /^[0-9+.\s-]{8,15}$/;
+    if (!phoneRegex.test(trimmedPhone)) {
+      setSubmitError(locale === 'en' ? 'Invalid phone number format.' : 'Số điện thoại không đúng định dạng (8 - 15 chữ số).');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (trimmedEmail && !emailRegex.test(trimmedEmail)) {
+      setSubmitError(locale === 'en' ? 'Invalid email format.' : 'Địa chỉ email không đúng định dạng.');
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -202,28 +222,38 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
       const pageTitle = activeService ? activeService.title : 'Danh mục dịch vụ';
       const pageId = activeService ? activeService.id : 'catalog';
       const pageUrl = typeof window !== 'undefined' ? window.location.href : '/services';
+      const formName = activeService ? `Tư vấn Dịch vụ: ${activeService.title}` : 'Đăng ký Tư vấn & Demo Dịch vụ';
 
-      await submitCustomerInteractionAction({
+      const result = await submitCustomerInteractionAction({
         formId: 'services_consultation',
-        formName: activeService ? `Tư vấn Dịch vụ: ${activeService.title}` : 'Đăng ký Tư vấn & Demo Dịch vụ',
+        formName,
         values: {
-          fullname: formData.fullname,
-          phone: formData.phone,
-          email: formData.email,
+          fullname: trimmedName,
+          phone: trimmedPhone,
+          email: trimmedEmail,
           service: formData.service || (activeService ? activeService.title : 'Tư vấn chung'),
-          notes: formData.notes
+          notes: formData.notes,
         },
-        source: {
+        source: enrichSubmissionSource({
           pageType: activeService ? 'service_detail' : 'services_catalog',
           pageId,
           pageUrl,
           pageTitle,
           ctaId: 'services_form_submit',
-          ctaName: 'Gửi Yêu Cầu Tư Vấn'
-        }
+          ctaName: 'Gửi Yêu Cầu Tư Vấn',
+        }),
       });
 
       setFormSubmitted(true);
+
+      // Conversion tracking ONLY fires on verified server success
+      trackFormConversion({
+        formId: 'services_consultation',
+        formName,
+        requestId: result.requestId,
+        leadType: 'consultation',
+      });
+
       setFormData({ fullname: '', phone: '', email: '', service: activeService?.title || 'Tư vấn BIM', notes: '' });
       setTimeout(() => {
         setFormSubmitted(false);

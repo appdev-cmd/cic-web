@@ -9,6 +9,7 @@ import { X, Send, Phone, Mail, User, MessageSquare, CheckCircle2, HelpCircle } f
 import { submitCustomerInteraction } from '../services/customerInteractionSubmission';
 import { SYSTEM_CTA_IDS, SYSTEM_FORM_IDS } from '../../shared/customerInteractionContract';
 import { useI18n } from '@/shared/i18n';
+import { enrichSubmissionSource, trackFormConversion } from '@/shared/lib/analytics';
 
 interface ConsultationModalProps {
   isOpen: boolean;
@@ -73,21 +74,30 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
     setSubmitError('');
     setIsSubmitting(true);
     try {
-      await submitCustomerInteraction({
+      const formName = locale === 'en' ? 'Consultation Request' : 'Đăng ký tư vấn';
+      const result = await submitCustomerInteraction({
         formId: SYSTEM_FORM_IDS.homeConsultation,
-        formName: locale === 'en' ? 'Consultation Request' : 'Đăng ký tư vấn',
+        formName,
         values: formData,
-        source: {
+        source: enrichSubmissionSource({
           pageType: 'global',
           pageId: 'consultation-modal',
           pageUrl: typeof window !== 'undefined' ? window.location.pathname : '/',
           pageTitle: typeof document !== 'undefined' ? document.title : 'CIC',
           placementKey: 'global.consultation_modal',
           ctaId: SYSTEM_CTA_IDS.contact,
-          ctaName: locale === 'en' ? 'Contact Now' : 'Liên hệ ngay'
-        },
+          ctaName: locale === 'en' ? 'Contact Now' : 'Liên hệ ngay',
+        }),
       });
       setIsSuccess(true);
+
+      // Conversion tracking fires ONLY on verified server success
+      trackFormConversion({
+        formId: SYSTEM_FORM_IDS.homeConsultation,
+        formName,
+        requestId: result.requestId,
+        leadType: 'consultation',
+      });
       setFormData({
         name: '',
         phone: '',

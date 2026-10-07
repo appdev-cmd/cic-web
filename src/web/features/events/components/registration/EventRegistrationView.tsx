@@ -6,6 +6,7 @@ import { getStatusBadgeStyle, getStatusLabel } from '../eventUtils';
 import { EventTicketSuccess } from './EventTicketSuccess';
 import { registerEventAction } from '@/features/events/server/actions';
 import { useI18n } from '@/shared/i18n';
+import { trackFormConversion } from '@/shared/lib/analytics';
 
 interface EventRegistrationViewProps {
   event: EventItem;
@@ -88,6 +89,14 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
       });
 
       setRegistrationResult(result);
+
+      // Conversion tracking ONLY fires on verified server success
+      trackFormConversion({
+        formId: 'event_registration',
+        formName: `Đăng ký sự kiện: ${event.title}`,
+        requestId: (result as any).id || result.eventId,
+        leadType: 'event',
+      });
       setFormData({
         fullName: '',
         company: '',
