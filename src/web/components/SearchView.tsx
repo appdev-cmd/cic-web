@@ -20,6 +20,7 @@ import {
   Sparkles,
   AlertCircle
 } from 'lucide-react';
+import { useI18n } from '@/shared/i18n';
 
 import { getNewsData } from '../features/news/newsData';
 import { getProjectsData } from '../features/projects/projectsData';
@@ -59,6 +60,9 @@ export function SearchView({
   onNavigateToEvent,
   onNavigateHome
 }: SearchViewProps) {
+  const { locale } = useI18n();
+  const isEn = locale === 'en';
+
   const { items: newsItems } = useMemo(getNewsData, []);
   const projectsData = useMemo(getProjectsData, []);
   const { events: eventsData } = useMemo(getEventsData, []);
@@ -103,7 +107,7 @@ export function SearchView({
           title: item.name,
           description: item.description,
           img: item.icon || item.img,
-          meta: `Hãng: ${item.brand} | Giá: ${item.price}`,
+          meta: isEn ? `Brand: ${item.brand} | Price: ${item.price}` : `Hãng: ${item.brand} | Giá: ${item.price}`,
           tags: [item.field, item.app],
           original: item
         });
@@ -124,7 +128,7 @@ export function SearchView({
           title: item.title,
           description: item.shortDesc,
           img: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80', // generic services image
-          meta: `Chuyên mục: ${item.category}`,
+          meta: isEn ? `Category: ${item.category}` : `Chuyên mục: ${item.category}`,
           tags: item.tagline ? [item.tagline] : [],
           original: item
         });
@@ -147,7 +151,7 @@ export function SearchView({
           title: item.name,
           description: item.shortDesc,
           img: item.gallery[0] || 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80',
-          meta: `Địa điểm: ${item.location} | Lĩnh vực: ${item.sector}`,
+          meta: isEn ? `Location: ${item.location} | Sector: ${item.sector}` : `Địa điểm: ${item.location} | Lĩnh vực: ${item.sector}`,
           tags: [item.solution],
           original: item
         });
@@ -167,7 +171,9 @@ export function SearchView({
           title: item.title,
           description: item.shortDesc,
           img: item.img,
-          meta: `Ngày: ${item.date} | Danh mục: ${item.category === 'company' ? 'Tin công ty' : 'Tin chuyên ngành'}`,
+          meta: isEn 
+            ? `Date: ${item.date} | Category: ${item.category === 'company' ? 'Company News' : 'Specialized News'}` 
+            : `Ngày: ${item.date} | Danh mục: ${item.category === 'company' ? 'Tin công ty' : 'Tin chuyên ngành'}`,
           original: item
         });
       }
@@ -187,15 +193,19 @@ export function SearchView({
           title: item.title,
           description: item.shortDesc,
           img: item.img,
-          meta: `Ngày diễn ra: ${item.date} | Địa điểm: ${item.location}`,
-          tags: [item.status === 'upcoming' ? 'Sắp diễn ra' : item.status === 'ongoing' ? 'Đang diễn ra' : 'Đã diễn ra'],
+          meta: isEn ? `Date: ${item.date} | Location: ${item.location}` : `Ngày diễn ra: ${item.date} | Địa điểm: ${item.location}`,
+          tags: [
+            isEn
+              ? (item.status === 'upcoming' ? 'Upcoming' : item.status === 'ongoing' ? 'Ongoing' : 'Ended')
+              : (item.status === 'upcoming' ? 'Sắp diễn ra' : item.status === 'ongoing' ? 'Đang diễn ra' : 'Đã diễn ra')
+          ],
           original: item
         });
       }
     });
 
     return results;
-  }, [query]);
+  }, [query, isEn]);
 
   // Tab counts
   const counts = useMemo(() => {
@@ -246,9 +256,11 @@ export function SearchView({
       <div className="max-w-5xl mx-auto px-6">
         {/* Breadcrumb Navigation */}
         <nav id="search-breadcrumb" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-8">
-          <span className="cursor-pointer hover:text-orange-600 transition-colors" onClick={onNavigateHome}>Trang chủ</span>
+          <span className="cursor-pointer hover:text-orange-600 transition-colors" onClick={onNavigateHome}>
+            {isEn ? 'Home' : 'Trang chủ'}
+          </span>
           <ChevronRight size={10} />
-          <span className="text-orange-600">Tra cứu thông tin</span>
+          <span className="text-orange-600">{isEn ? 'Search Information' : 'Tra cứu thông tin'}</span>
         </nav>
 
         {/* Page Title & Search Bar */}
@@ -257,7 +269,7 @@ export function SearchView({
           <div className="relative z-10 space-y-6">
             <div className="space-y-2">
               <h1 className="text-3xl md:text-4xl font-black text-slate-900 uppercase tracking-tight">
-                TRA CỨU THÔNG TIN
+                {isEn ? 'SEARCH INFORMATION' : 'TRA CỨU THÔNG TIN'}
               </h1>
             </div>
 
@@ -270,7 +282,11 @@ export function SearchView({
                   type="text"
                   value={searchInputValue}
                   onChange={(e) => setSearchInputValue(e.target.value)}
-                  placeholder="Nhập tên sản phẩm, dịch vụ tư vấn, dự án công trình, tin tức chuyên ngành..."
+                  placeholder={
+                    isEn
+                      ? 'Search products, consulting services, engineering projects, specialized news...'
+                      : 'Nhập tên sản phẩm, dịch vụ tư vấn, dự án công trình, tin tức chuyên ngành...'
+                  }
                   className="w-full bg-slate-50/80 border border-slate-200 pl-11 pr-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all font-semibold rounded-[10px]"
                 />
               </div>
@@ -278,13 +294,23 @@ export function SearchView({
                 type="submit"
                 className="px-7 py-3.5 bg-orange-600 hover:bg-orange-700 text-white font-bold uppercase text-xs tracking-wider transition-all shadow-2xs rounded-[10px] shrink-0 cursor-pointer"
               >
-                Tìm kiếm
+                {isEn ? 'Search' : 'Tìm kiếm'}
               </button>
             </form>
 
             {query.trim() && (
               <p className="text-xs text-slate-500 font-bold">
-                Tìm thấy <span className="text-orange-600 font-black">{counts.total}</span> kết quả phù hợp cho từ khóa <span className="text-slate-800 font-black">"{query}"</span>
+                {isEn ? (
+                  <>
+                    Found <span className="text-orange-600 font-black">{counts.total}</span> matching results for keyword{' '}
+                    <span className="text-slate-800 font-black">"{query}"</span>
+                  </>
+                ) : (
+                  <>
+                    Tìm thấy <span className="text-orange-600 font-black">{counts.total}</span> kết quả phù hợp cho từ khóa{' '}
+                    <span className="text-slate-800 font-black">"{query}"</span>
+                  </>
+                )}
               </p>
             )}
           </div>
@@ -294,9 +320,13 @@ export function SearchView({
         {!query.trim() ? (
           <div className="bg-white border border-slate-200/90 rounded-[16px] p-12 text-center shadow-2xs">
             <Search size={48} className="text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-black text-slate-900 mb-2 uppercase">Chào mừng đến với hệ thống tìm kiếm</h3>
+            <h3 className="text-lg font-black text-slate-900 mb-2 uppercase">
+              {isEn ? 'Welcome to search portal' : 'Chào mừng đến với hệ thống tìm kiếm'}
+            </h3>
             <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed font-medium">
-              Vui lòng nhập từ khóa vào thanh tìm kiếm ở trên để bắt đầu tra cứu thông tin sản phẩm, dự án, dịch vụ, tin tức, và sự kiện của CIC.
+              {isEn
+                ? 'Please enter keywords in the search bar above to start searching for CIC products, projects, services, news, and events.'
+                : 'Vui lòng nhập từ khóa vào thanh tìm kiếm ở trên để bắt đầu tra cứu thông tin sản phẩm, dự án, dịch vụ, tin tức, và sự kiện của CIC.'}
             </p>
           </div>
         ) : (
@@ -304,12 +334,12 @@ export function SearchView({
             {/* Filter Tabs / Phân nhóm kết quả */}
             <div className="flex flex-wrap items-center gap-2 pb-2">
               {[
-                { type: 'all', label: 'Tất cả', count: counts.total },
-                { type: 'product', label: 'Sản phẩm', count: counts.product },
-                { type: 'service', label: 'Dịch vụ', count: counts.service },
-                { type: 'project', label: 'Dự án', count: counts.project },
-                { type: 'news', label: 'Tin tức', count: counts.news },
-                { type: 'event', label: 'Sự kiện', count: counts.event }
+                { type: 'all', label: isEn ? 'All' : 'Tất cả', count: counts.total },
+                { type: 'product', label: isEn ? 'Products' : 'Sản phẩm', count: counts.product },
+                { type: 'service', label: isEn ? 'Services' : 'Dịch vụ', count: counts.service },
+                { type: 'project', label: isEn ? 'Projects' : 'Dự án', count: counts.project },
+                { type: 'news', label: isEn ? 'News' : 'Tin tức', count: counts.news },
+                { type: 'event', label: isEn ? 'Events' : 'Sự kiện', count: counts.event }
               ].map((tab) => (
                 <button
                   key={tab.type}
@@ -346,16 +376,44 @@ export function SearchView({
               /* Trạng thái không có kết quả */
               <div className="bg-white border border-slate-200/90 rounded-[16px] p-12 md:p-16 text-center shadow-2xs">
                 <AlertCircle size={48} className="text-orange-500 mx-auto mb-4" />
-                <h3 className="text-xl font-black text-slate-900 mb-2 uppercase">Không tìm thấy kết quả</h3>
+                <h3 className="text-xl font-black text-slate-900 mb-2 uppercase">
+                  {isEn ? 'No results found' : 'Không tìm thấy kết quả'}
+                </h3>
                 <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed mb-6 font-medium">
-                  Rất tiếc, chúng tôi không tìm thấy thông tin nào phù hợp với từ khóa <span className="font-bold text-slate-800">"{query}"</span> trong phân mục được chọn.
+                  {isEn ? (
+                    <>
+                      Sorry, we could not find any information matching{' '}
+                      <span className="font-bold text-slate-800">"{query}"</span> in the selected category.
+                    </>
+                  ) : (
+                    <>
+                      Rất tiếc, chúng tôi không tìm thấy thông tin nào phù hợp với từ khóa{' '}
+                      <span className="font-bold text-slate-800">"{query}"</span> trong phân mục được chọn.
+                    </>
+                  )}
                 </p>
                 <div className="inline-block text-left bg-slate-50 border border-slate-200/80 p-6 max-w-md mx-auto rounded-[12px]">
-                  <h4 className="text-xs font-black uppercase text-slate-800 mb-2">Gợi ý tìm kiếm:</h4>
+                  <h4 className="text-xs font-black uppercase text-slate-800 mb-2">
+                    {isEn ? 'Search suggestions:' : 'Gợi ý tìm kiếm:'}
+                  </h4>
                   <ul className="text-xs text-slate-500 space-y-1.5 list-disc pl-4 font-medium">
-                    <li>Kiểm tra lại chính tả của từ khóa.</li>
-                    <li>Sử dụng từ khóa tổng quát hơn hoặc ít từ hơn (ví dụ: thay vì "phần mềm enjicad 2026 chính hãng", hãy tìm "enjiCAD").</li>
-                    <li>Chuyển qua tab <span className="font-bold">"Tất cả"</span> để tìm kiếm trên phạm vi toàn bộ website.</li>
+                    {isEn ? (
+                      <>
+                        <li>Check your spelling.</li>
+                        <li>Use more general keywords or fewer words (e.g. search "enjiCAD" instead of "genuine enjicad software").</li>
+                        <li>
+                          Switch to the <span className="font-bold">"All"</span> tab to search across the entire website.
+                        </li>
+                      </>
+                    ) : (
+                      <>
+                        <li>Kiểm tra lại chính tả của từ khóa.</li>
+                        <li>Sử dụng từ khóa tổng quát hơn hoặc ít từ hơn (ví dụ: thay vì "phần mềm enjicad 2026 chính hãng", hãy tìm "enjiCAD").</li>
+                        <li>
+                          Chuyển qua tab <span className="font-bold">"Tất cả"</span> để tìm kiếm trên phạm vi toàn bộ website.
+                        </li>
+                      </>
+                    )}
                   </ul>
                 </div>
               </div>
@@ -386,10 +444,17 @@ export function SearchView({
                             item.type === 'project' ? 'bg-teal-600' :
                             item.type === 'news' ? 'bg-blue-600' : 'bg-red-600'
                           }`}>
-                            {item.type === 'product' ? 'Sản phẩm' :
-                             item.type === 'service' ? 'Dịch vụ' :
-                             item.type === 'project' ? 'Dự án' :
-                             item.type === 'news' ? 'Tin tức' : 'Sự kiện'}
+                            {isEn ? (
+                              item.type === 'product' ? 'Product' :
+                              item.type === 'service' ? 'Service' :
+                              item.type === 'project' ? 'Project' :
+                              item.type === 'news' ? 'News' : 'Event'
+                            ) : (
+                              item.type === 'product' ? 'Sản phẩm' :
+                              item.type === 'service' ? 'Dịch vụ' :
+                              item.type === 'project' ? 'Dự án' :
+                              item.type === 'news' ? 'Tin tức' : 'Sự kiện'
+                            )}
                           </span>
                         </div>
 
@@ -415,7 +480,7 @@ export function SearchView({
                               ))}
                             </div>
                             <span className="text-[10px] font-black uppercase text-orange-600 flex items-center gap-1 shrink-0">
-                              Chi tiết <ArrowRight size={12} className="transform group-hover:translate-x-1 transition-transform" />
+                              {isEn ? 'Details' : 'Chi tiết'} <ArrowRight size={12} className="transform group-hover:translate-x-1 transition-transform" />
                             </span>
                           </div>
                         </div>

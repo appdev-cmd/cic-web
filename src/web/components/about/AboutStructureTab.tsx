@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { SectionHeader } from '@shared/components/Typography';
 import { createElementBinding } from '@shared/visual-editing/elementBindingTypes';
 import type { ElementBindingRegistry } from '@shared/visual-editing/elementBindingRegistry';
+import { useI18n } from '@/shared/i18n';
 import { bindElement, textFrom } from './aboutUtils';
 
 interface AboutStructureTabProps {
@@ -10,6 +11,9 @@ interface AboutStructureTabProps {
 }
 
 export function AboutStructureTab({ orgConfig, bindingRegistry }: AboutStructureTabProps) {
+  const { locale } = useI18n();
+  const isEn = locale === 'en';
+
   return (
     <motion.div
       data-page-builder-section-key="about.organization"
@@ -21,8 +25,8 @@ export function AboutStructureTab({ orgConfig, bindingRegistry }: AboutStructure
       {/* Structural Banner */}
       <div className="relative z-10">
         <SectionHeader
-          title={textFrom(orgConfig, 'title', 'Cơ cấu tổ chức')}
-          sub={textFrom(orgConfig, 'subtitle', 'Sơ đồ cơ cấu tổ chức chuyên nghiệp và hiệu quả')}
+          title={textFrom(orgConfig, 'title', isEn ? 'Organization Structure' : 'Cơ cấu tổ chức')}
+          sub={textFrom(orgConfig, 'subtitle', isEn ? 'Professional and efficient organizational structure chart' : 'Sơ đồ cơ cấu tổ chức chuyên nghiệp và hiệu quả')}
           titleProps={
             {
               ...bindElement<HTMLHeadingElement>(
@@ -131,7 +135,7 @@ export function AboutStructureTab({ orgConfig, bindingRegistry }: AboutStructure
             <g filter="url(#shadow)" className="org-node">
               <rect x="650" y="20" width="300" height="45" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
               <text x="800" y="48" fill="#ffffff" fontSize="14" fontWeight="900" textAnchor="middle" letterSpacing="0.5">
-                ĐẠI HỘI ĐỒNG CỔ ĐÔNG
+                {isEn ? 'GENERAL MEETING OF SHAREHOLDERS' : 'ĐẠI HỘI ĐỒNG CỔ ĐÔNG'}
               </text>
             </g>
 
@@ -139,7 +143,7 @@ export function AboutStructureTab({ orgConfig, bindingRegistry }: AboutStructure
             <g filter="url(#shadow)" className="org-node">
               <rect x="1210" y="95" width="260" height="46" rx="4" fill="#fc6435" stroke="#d93800" strokeWidth="1.5" />
               <text x="1340" y="123" fill="#ffffff" fontSize="13" fontWeight="900" textAnchor="middle">
-                BAN KIỂM SOÁT
+                {isEn ? 'SUPERVISORY BOARD' : 'BAN KIỂM SOÁT'}
               </text>
             </g>
 
@@ -147,7 +151,7 @@ export function AboutStructureTab({ orgConfig, bindingRegistry }: AboutStructure
             <g filter="url(#shadow)" className="org-node">
               <rect x="650" y="95" width="300" height="46" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
               <text x="800" y="123" fill="#ffffff" fontSize="14" fontWeight="900" textAnchor="middle" letterSpacing="0.5">
-                HỘI ĐỒNG QUẢN TRỊ
+                {isEn ? 'BOARD OF DIRECTORS' : 'HỘI ĐỒNG QUẢN TRỊ'}
               </text>
             </g>
 
@@ -155,7 +159,7 @@ export function AboutStructureTab({ orgConfig, bindingRegistry }: AboutStructure
             <g filter="url(#shadow)" className="org-node">
               <rect x="650" y="175" width="300" height="46" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
               <text x="800" y="203" fill="#ffffff" fontSize="14" fontWeight="900" textAnchor="middle" letterSpacing="0.5">
-                TỔNG GIÁM ĐỐC
+                {isEn ? 'GENERAL DIRECTOR' : 'TỔNG GIÁM ĐỐC'}
               </text>
             </g>
 
@@ -163,7 +167,7 @@ export function AboutStructureTab({ orgConfig, bindingRegistry }: AboutStructure
             <g filter="url(#shadow)" className="org-node">
               <rect x="130" y="177" width="260" height="44" rx="4" fill="#fc6435" stroke="#d93800" strokeWidth="1.5" />
               <text x="260" y="204" fill="#ffffff" fontSize="13" fontWeight="800" textAnchor="middle">
-                PHÓ TỔNG GIÁM ĐỐC
+                {isEn ? 'DEPUTY GENERAL DIRECTOR' : 'PHÓ TỔNG GIÁM ĐỐC'}
               </text>
             </g>
 
@@ -171,7 +175,7 @@ export function AboutStructureTab({ orgConfig, bindingRegistry }: AboutStructure
             <g filter="url(#shadow)" className="org-node">
               <rect x="1210" y="177" width="260" height="44" rx="4" fill="#fc6435" stroke="#d93800" strokeWidth="1.5" />
               <text x="1340" y="204" fill="#ffffff" fontSize="13" fontWeight="800" textAnchor="middle">
-                PHÓ TỔNG GIÁM ĐỐC
+                {isEn ? 'DEPUTY GENERAL DIRECTOR' : 'PHÓ TỔNG GIÁM ĐỐC'}
               </text>
             </g>
 
@@ -180,7 +184,7 @@ export function AboutStructureTab({ orgConfig, bindingRegistry }: AboutStructure
             <g filter="url(#shadow)" className="org-node">
               <rect x="530" y="260" width="200" height="54" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
               <text x="630" y="293" fill="#ffffff" fontSize="12" fontWeight="800" textAnchor="middle">
-                P. TỔNG HỢP
+                {isEn ? 'ADMINISTRATION DEPT' : 'P. TỔNG HỢP'}
               </text>
             </g>
 
@@ -188,7 +192,7 @@ export function AboutStructureTab({ orgConfig, bindingRegistry }: AboutStructure
             <g filter="url(#shadow)" className="org-node">
               <rect x="870" y="260" width="200" height="54" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
               <text x="970" y="293" fill="#ffffff" fontSize="12" fontWeight="800" textAnchor="middle">
-                P. TÀI CHÍNH KẾ TOÁN
+                {isEn ? 'FINANCE & ACCOUNTING DEPT' : 'P. TÀI CHÍNH KẾ TOÁN'}
               </text>
             </g>
 
@@ -196,10 +200,10 @@ export function AboutStructureTab({ orgConfig, bindingRegistry }: AboutStructure
             <g filter="url(#shadow)" className="org-node">
               <rect x="120" y="335" width="280" height="58" rx="4" fill="#fc6435" stroke="#d93800" strokeWidth="1.5" />
               <text x="260" y="362" fill="#ffffff" fontSize="12" fontWeight="800" textAnchor="middle">
-                TT. TƯ VẤN THIẾT KẾ
+                {isEn ? 'CONSTRUCTION DESIGN' : 'TT. TƯ VẤN THIẾT KẾ'}
               </text>
               <text x="260" y="378" fill="#ffffff" fontSize="12" fontWeight="800" textAnchor="middle">
-                XÂY DỰNG
+                {isEn ? 'CONSULTING CENTER' : 'XÂY DỰNG'}
               </text>
             </g>
 
@@ -207,10 +211,10 @@ export function AboutStructureTab({ orgConfig, bindingRegistry }: AboutStructure
             <g filter="url(#shadow)" className="org-node">
               <rect x="1115" y="335" width="210" height="58" rx="4" fill="#fc6435" stroke="#d93800" strokeWidth="1.5" />
               <text x="1220" y="362" fill="#ffffff" fontSize="11.5" fontWeight="800" textAnchor="middle">
-                TTGP. PHẦN MỀM NHẬP KHẨU
+                {isEn ? 'IMPORTED SOFTWARE' : 'TTGP. PHẦN MỀM NHẬP KHẨU'}
               </text>
               <text x="1220" y="378" fill="#ffffff" fontSize="11.5" fontWeight="800" textAnchor="middle">
-                TRONG XD
+                {isEn ? 'SOLUTIONS CENTER' : 'TRONG XD'}
               </text>
             </g>
 
@@ -218,10 +222,10 @@ export function AboutStructureTab({ orgConfig, bindingRegistry }: AboutStructure
             <g filter="url(#shadow)" className="org-node">
               <rect x="1355" y="335" width="210" height="58" rx="4" fill="#fc6435" stroke="#d93800" strokeWidth="1.5" />
               <text x="1460" y="362" fill="#ffffff" fontSize="11.5" fontWeight="800" textAnchor="middle">
-                TT. TƯ VẤN BIM &amp;
+                {isEn ? 'BIM & DIGITALIZATION' : 'TT. TƯ VẤN BIM &'}
               </text>
               <text x="1460" y="378" fill="#ffffff" fontSize="11.5" fontWeight="800" textAnchor="middle">
-                SỐ HÓA CÔNG TRÌNH
+                {isEn ? 'CONSULTING CENTER' : 'SỐ HÓA CÔNG TRÌNH'}
               </text>
             </g>
 
@@ -230,7 +234,7 @@ export function AboutStructureTab({ orgConfig, bindingRegistry }: AboutStructure
             <g filter="url(#shadow)" className="org-node">
               <rect x="70" y="460" width="220" height="68" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
               <text x="180" y="499" fill="#ffffff" fontSize="12" fontWeight="800" textAnchor="middle">
-                CN. TP HỒ CHÍ MINH
+                {isEn ? 'HO CHI MINH CITY BRANCH' : 'CN. TP HỒ CHÍ MINH'}
               </text>
             </g>
 
@@ -238,10 +242,10 @@ export function AboutStructureTab({ orgConfig, bindingRegistry }: AboutStructure
             <g filter="url(#shadow)" className="org-node">
               <rect x="375" y="460" width="230" height="68" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
               <text x="490" y="491" fill="#ffffff" fontSize="11.5" fontWeight="800" textAnchor="middle">
-                TTGP. PHẦN MỀM &amp;
+                {isEn ? 'SOFTWARE & TECH' : 'TTGP. PHẦN MỀM &'}
               </text>
               <text x="490" y="509" fill="#ffffff" fontSize="11.5" fontWeight="800" textAnchor="middle">
-                THIẾT BỊ CÔNG NGHỆ
+                {isEn ? 'EQUIPMENT CENTER' : 'THIẾT BỊ CÔNG NGHỆ'}
               </text>
             </g>
 
@@ -249,7 +253,7 @@ export function AboutStructureTab({ orgConfig, bindingRegistry }: AboutStructure
             <g filter="url(#shadow)" className="org-node">
               <rect x="690" y="460" width="220" height="68" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
               <text x="800" y="499" fill="#ffffff" fontSize="12" fontWeight="800" textAnchor="middle">
-                TT. TƯ VẤN DỰ ÁN
+                {isEn ? 'PROJECT CONSULTING CENTER' : 'TT. TƯ VẤN DỰ ÁN'}
               </text>
             </g>
 
@@ -257,7 +261,7 @@ export function AboutStructureTab({ orgConfig, bindingRegistry }: AboutStructure
             <g filter="url(#shadow)" className="org-node">
               <rect x="1000" y="460" width="220" height="68" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
               <text x="1110" y="499" fill="#ffffff" fontSize="12" fontWeight="800" textAnchor="middle">
-                TT. PHẦN MỀM XÂY DỰNG
+                {isEn ? 'CONSTRUCTION SOFTWARE CENTER' : 'TT. PHẦN MỀM XÂY DỰNG'}
               </text>
             </g>
 
@@ -265,10 +269,10 @@ export function AboutStructureTab({ orgConfig, bindingRegistry }: AboutStructure
             <g filter="url(#shadow)" className="org-node">
               <rect x="1300" y="460" width="240" height="68" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
               <text x="1420" y="491" fill="#ffffff" fontSize="11.5" fontWeight="800" textAnchor="middle">
-                TT. TƯ VẤN PTPBV &amp;
+                {isEn ? 'SUSTAINABILITY & TECH' : 'TT. TƯ VẤN PTPBV &'}
               </text>
               <text x="1420" y="509" fill="#ffffff" fontSize="11.5" fontWeight="800" textAnchor="middle">
-                GIẢI PHÁP CNKT
+                {isEn ? 'SOLUTIONS CENTER' : 'GIẢI PHÁP CNKT'}
               </text>
             </g>
           </svg>

@@ -57,6 +57,7 @@ interface ContactViewProps {
 
 export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy = productionRenderPolicy, bindingRegistry = elementBindingRegistry }: ContactViewProps) => {
   const { t, locale } = useI18n();
+  const isEn = locale === 'en';
   const content = propContent ?? getPublicContactContentFromConfiguration(locale);
   // Navigation & Page State
   const [activeBranch, setActiveBranch] = useState(content.branches.branches[0]?.id ?? '');
@@ -248,16 +249,20 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                       
                       <div className="space-y-1 bg-slate-50 border border-slate-100 p-4 rounded-[8px]">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Địa chỉ văn phòng</span>
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
+                          {isEn ? 'Office Address' : 'Địa chỉ văn phòng'}
+                        </span>
                         <p {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'contact.branches', elementPath: `${activeBranchPath}.address`, semantic: 'text', ownership: 'embedded', editable: true, itemId: activeBranchModel.id, collectionPath: 'branches' }))} className="text-slate-800 leading-relaxed text-xs sm:text-[13px] font-medium">{activeBranchModel.address}</p>
                       </div>
 
                       <div className="space-y-1.5 bg-slate-50 border border-slate-100 p-4 rounded-[8px]">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Liên hệ nhanh</span>
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
+                          {isEn ? 'Quick Contact' : 'Liên hệ nhanh'}
+                        </span>
                         <div className="space-y-1 text-slate-800 text-xs sm:text-[13px] font-medium">
                           <p className="flex items-center gap-2">
                             <Phone className="text-orange-600 shrink-0" size={14} /> 
-                            <span>SĐT: <strong {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'contact.branches', elementPath: `${activeBranchPath}.phone`, semantic: 'text', ownership: 'embedded', editable: true, itemId: activeBranchModel.id, collectionPath: 'branches' }))} className="font-semibold text-slate-900">{activeBranchModel.phone}</strong></span>
+                            <span>{isEn ? 'Phone:' : 'SĐT:'} <strong {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'contact.branches', elementPath: `${activeBranchPath}.phone`, semantic: 'text', ownership: 'embedded', editable: true, itemId: activeBranchModel.id, collectionPath: 'branches' }))} className="font-semibold text-slate-900">{activeBranchModel.phone}</strong></span>
                           </p>
                           <p className="flex items-center gap-2">
                             <Mail className="text-orange-600 shrink-0" size={14} /> 
@@ -270,7 +275,9 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
                       </div>
 
                       <div className="md:col-span-2 space-y-1 bg-slate-50 border border-slate-100 p-4 rounded-[8px]">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Thời gian làm việc</span>
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
+                          {isEn ? 'Working Hours' : 'Thời gian làm việc'}
+                        </span>
                         <p className="text-slate-800 text-xs sm:text-[13px] font-medium flex items-center gap-2">
                           <Clock className="text-orange-600 shrink-0" size={14} /> <span {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'contact.branches', elementPath: `${activeBranchPath}.workingHours`, semantic: 'text', ownership: 'embedded', editable: true, itemId: activeBranchModel.id, collectionPath: 'branches' }))}>{activeBranchModel.workingHours}</span>
                         </p>
@@ -282,14 +289,16 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
                   {/* MAP CONTAINER */}
                   <div key="branch-map" className="space-y-2.5">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Bản đồ Google Maps</span>
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        {isEn ? 'Google Maps Location' : 'Bản đồ Google Maps'}
+                      </span>
                       <a
                         href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(activeBranchModel.searchQuery)}`}
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-1.5 text-xs font-semibold text-orange-600 hover:text-orange-700 hover:underline transition-all"
                       >
-                        Mở bằng ứng dụng Google Maps <ExternalLink size={13} />
+                        {isEn ? 'Open with Google Maps' : 'Mở bằng ứng dụng Google Maps'} <ExternalLink size={13} />
                       </a>
                     </div>
                     
@@ -326,7 +335,9 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
               
               {/* Form header */}
               <div className="border-b border-slate-100 pb-4">
-                <h3 className="text-xl font-black text-slate-950 uppercase tracking-tight">Gửi phiếu yêu cầu tư vấn</h3>
+                <h3 className="text-xl font-black text-slate-950 uppercase tracking-tight">
+                  {isEn ? 'Send Consultation Request' : 'Gửi phiếu yêu cầu tư vấn'}
+                </h3>
               </div>
 
               {/* Success Result Screen */}
@@ -341,28 +352,51 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
                     <div className="flex items-center gap-2.5 text-emerald-800">
                       <CheckCircle className="text-emerald-500 shrink-0" size={24} />
                       <div>
-                        <h4 className="font-black text-sm uppercase tracking-tight">Gửi Yêu Cầu Thành Công!</h4>
+                        <h4 className="font-black text-sm uppercase tracking-tight">
+                          {isEn ? 'Request Submitted Successfully!' : 'GỬI YÊU CẦU THÀNH CÔNG!'}
+                        </h4>
                         <p className="text-[10px] font-sans font-bold text-slate-500 mt-0.5">ID Lead: {successLead.id}</p>
                       </div>
                     </div>
 
                     <div className="space-y-2 border-t border-emerald-500/10 pt-4 text-xs font-bold text-slate-700">
-                      <p>Kính gửi anh/chị <span className="text-slate-950 font-black">{successLead.fullName}</span>,</p>
-                      <p>Yêu cầu tư vấn của anh/chị đã được ghi nhận thành công.</p>
+                      <p>
+                        {isEn ? 'Dear' : 'Kính gửi anh/chị'}{' '}
+                        <span className="text-slate-950 font-black">{successLead.fullName}</span>,
+                      </p>
+                      <p>
+                        {isEn
+                          ? 'Your consultation request has been recorded successfully.'
+                          : 'Yêu cầu tư vấn của anh/chị đã được ghi nhận thành công.'}
+                      </p>
                       
                       <div className="bg-white border border-emerald-100 p-3">
-                        <span className="block font-black text-slate-900 text-[11px]">Tiêu đề: {successLead.subject}</span>
+                        <span className="block font-black text-slate-900 text-[11px]">
+                          {isEn ? `Subject: ${successLead.subject}` : `Tiêu đề: ${successLead.subject}`}
+                        </span>
                         <span className="block text-[10px] font-sans text-slate-500 mt-1">
-                          Đội ngũ chuyên gia CIC sẽ chủ động phản hồi qua email <span className="font-bold text-slate-800">{successLead.email}</span> hoặc SĐT <span className="font-bold text-slate-800">{successLead.phone}</span>.
+                          {isEn ? (
+                            <>
+                              A CIC specialist team will follow up directly via email{' '}
+                              <span className="font-bold text-slate-800">{successLead.email}</span> or phone{' '}
+                              <span className="font-bold text-slate-800">{successLead.phone}</span>.
+                            </>
+                          ) : (
+                            <>
+                              Đội ngũ chuyên gia CIC sẽ chủ động phản hồi qua email{' '}
+                              <span className="font-bold text-slate-800">{successLead.email}</span> hoặc SĐT{' '}
+                              <span className="font-bold text-slate-800">{successLead.phone}</span>.
+                            </>
+                          )}
                         </span>
                       </div>
                     </div>
 
                     <button
                       onClick={() => setSuccessLead(null)}
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black uppercase tracking-widest py-2.5 text-center transition-all"
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black uppercase tracking-widest py-2.5 text-center transition-all cursor-pointer"
                     >
-                      Gửi thêm yêu cầu mới
+                      {isEn ? 'Submit another request' : 'Gửi thêm yêu cầu mới'}
                     </button>
                   </motion.div>
                 )}
@@ -375,11 +409,11 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
                   {/* Họ tên */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
-                      Họ tên <span className="text-orange-600">*</span>
+                      {isEn ? 'Full name' : 'Họ tên'} <span className="text-orange-600">*</span>
                     </label>
                     <input
                       type="text"
-                      placeholder="Nhập họ và tên"
+                      placeholder={isEn ? "Enter full name" : "Nhập họ và tên"}
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                       className={`w-full px-3.5 py-2.5 bg-slate-50 border text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:bg-white rounded-[8px] transition-all ${
@@ -397,11 +431,11 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
-                        Địa chỉ email <span className="text-orange-600">*</span>
+                        {isEn ? 'Email address' : 'Địa chỉ email'} <span className="text-orange-600">*</span>
                       </label>
                       <input
                         type="email"
-                        placeholder="Nhập email liên hệ"
+                        placeholder={isEn ? "Enter contact email" : "Nhập email liên hệ"}
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         className={`w-full px-3.5 py-2.5 bg-slate-50 border text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:bg-white rounded-[8px] transition-all ${
@@ -417,11 +451,11 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
 
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
-                        Số điện thoại <span className="text-orange-600">*</span>
+                        {isEn ? 'Phone number' : 'Số điện thoại'} <span className="text-orange-600">*</span>
                       </label>
                       <input
                         type="tel"
-                        placeholder="Nhập số điện thoại"
+                        placeholder={isEn ? "Enter phone number" : "Nhập số điện thoại"}
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         className={`w-full px-3.5 py-2.5 bg-slate-50 border text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:bg-white rounded-[8px] transition-all ${
@@ -439,11 +473,11 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
                   {/* Tiêu đề */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
-                      Tiêu đề <span className="text-orange-600">*</span>
+                      {isEn ? 'Subject' : 'Tiêu đề'} <span className="text-orange-600">*</span>
                     </label>
                     <input
                       type="text"
-                      placeholder="Nhập tiêu đề yêu cầu tư vấn..."
+                      placeholder={isEn ? "Enter inquiry subject..." : "Nhập tiêu đề yêu cầu tư vấn..."}
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                       className={`w-full px-3.5 py-2.5 bg-slate-50 border text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:bg-white rounded-[8px] transition-all ${
@@ -460,11 +494,11 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
                   {/* Nội dung */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
-                      Nội dung
+                      {isEn ? 'Message' : 'Nội dung'}
                     </label>
                     <textarea
                       rows={3}
-                      placeholder="Mô tả nhu cầu của bạn..."
+                      placeholder={isEn ? "Describe your requirements..." : "Mô tả nhu cầu của bạn..."}
                       value={formData.note}
                       onChange={(e) => setFormData({ ...formData, note: e.target.value })}
                       className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-600/20 focus:border-orange-600 focus:bg-white resize-none rounded-[8px] transition-all"
@@ -507,7 +541,7 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
                       </>
                     ) : (
                       <>
-                        <span>Gửi yêu cầu ngay</span>
+                        <span>{isEn ? 'Submit Request Now' : 'Gửi yêu cầu ngay'}</span>
                         <Send size={15} className="shrink-0" />
                       </>
                     )}
@@ -522,10 +556,14 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
             <div data-page-builder-section-key="contact.security" className="bg-slate-900 text-slate-300 p-6 border border-white/10 space-y-3 rounded-[10px]">
               <div className="flex items-center gap-2.5 text-white">
                 <ShieldCheck className="text-orange-500 shrink-0" size={22} />
-                <h4 className="text-sm font-bold uppercase tracking-wider">Chính sách bảo mật & Tiêu chuẩn ISO</h4>
+                <h4 className="text-sm font-bold uppercase tracking-wider">
+                  {isEn ? 'Security Policy & ISO Compliance' : 'Chính sách bảo mật & Tiêu chuẩn ISO'}
+                </h4>
               </div>
               <p className="text-xs sm:text-[13px] font-normal leading-relaxed text-slate-300">
-                CIC cam kết bảo mật 100% dữ liệu của khách hàng theo tiêu chuẩn ISO/IEC 27001 và Nghị định số 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân. Mọi luồng thông tin gửi qua cổng liên hệ đều được mã hóa SSL/TLS 256-bit an toàn tuyệt đối.
+                {isEn
+                  ? 'CIC is 100% committed to protecting customer data following ISO/IEC 27001 standards and privacy regulations. All data transmitted through our contact portal is protected with 256-bit SSL/TLS encryption.'
+                  : 'CIC cam kết bảo mật 100% dữ liệu của khách hàng theo tiêu chuẩn ISO/IEC 27001 và Nghị định số 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân. Mọi luồng thông tin gửi qua cổng liên hệ đều được mã hóa SSL/TLS 256-bit an toàn tuyệt đối.'}
               </p>
             </div>
 

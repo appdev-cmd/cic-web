@@ -6,6 +6,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { getHomeAwards, getHomePartners } from '../features/home/homeData';
+import { useI18n } from '@/shared/i18n';
 import type { AboutCapacityModel, AboutPageModel, PageRenderPolicy } from '@shared/page-content/models';
 import { productionRenderPolicy } from '@shared/page-content/models';
 import { getLegacyAboutCapacityContent, getLegacyAboutPageContent } from '@shared/page-content/legacyPageContent';
@@ -50,6 +51,9 @@ export const AboutView = ({
   editMode = false,
   onConfigValueChange,
 }: AboutViewProps) => {
+  const { locale } = useI18n();
+  const isEn = locale === 'en';
+
   const homeAwards = useMemo(getHomeAwards, []);
   const partners = useMemo(getHomePartners, []);
 
@@ -86,23 +90,39 @@ export const AboutView = ({
 
   // Overview Data Resolvers
   const overviewParagraphs = Array.isArray(overviewConfig.paragraphs) ? overviewConfig.paragraphs : [];
-  const defaultOverviewParagraphs = [
-    'Công ty Cổ phần Công nghệ và Tư vấn CIC tiền thân là Trung tâm tin học thuộc Bộ Xây dựng thành lập vào ngày 27/11/1990, bắt đầu hoạt động với chức năng là cơ quan tham mưu tin học thuộc Bộ Xây dựng nhằm phục vụ yêu cầu ứng dụng và phát triển Công nghệ thông tin trong ngành.',
-    'Hiện nay, chúng tôi là thành viên của VC Group, tổ hợp hàng đầu về tư vấn xây dựng, thiết bị và công nghệ tại Việt Nam.',
-    'Sau hơn 35 năm phát triển, CIC đã xây dựng được đội ngũ quản lý vững vàng cùng tập thể nhân viên có trình độ chuyên môn cao, sáng tạo và tận tâm; cung cấp sản phẩm phần mềm, thiết bị và dịch vụ công nghệ có tính ứng dụng cao cho ngành Xây dựng.',
-  ];
+  const defaultOverviewParagraphs = isEn
+    ? [
+        'CIC Technology and Consulting Joint Stock Company, formerly the Informatics Center under the Ministry of Construction, was established on November 27, 1990. It began operations as the informatics advisory body under the Ministry to fulfill the needs for information technology application and development in the construction sector.',
+        'Today, we are a member of VC Group, a leading group in construction consulting, equipment, and technology in Vietnam.',
+        'With over 35 years of growth, CIC has established a solid management team and highly qualified, creative, and dedicated staff, delivering highly applicable software products, tech equipment, and services for the construction industry.',
+      ]
+    : [
+        'Công ty Cổ phần Công nghệ và Tư vấn CIC tiền thân là Trung tâm tin học thuộc Bộ Xây dựng thành lập vào ngày 27/11/1990, bắt đầu hoạt động với chức năng là cơ quan tham mưu tin học thuộc Bộ Xây dựng nhằm phục vụ yêu cầu ứng dụng và phát triển Công nghệ thông tin trong ngành.',
+        'Hiện nay, chúng tôi là thành viên của VC Group, tổ hợp hàng đầu về tư vấn xây dựng, thiết bị và công nghệ tại Việt Nam.',
+        'Sau hơn 35 năm phát triển, CIC đã xây dựng được đội ngũ quản lý vững vàng cùng tập thể nhân viên có trình độ chuyên môn cao, sáng tạo và tận tâm; cung cấp sản phẩm phần mềm, thiết bị và dịch vụ công nghệ có tính ứng dụng cao cho ngành Xây dựng.',
+      ];
   const displayedOverviewParagraphs =
     overviewParagraphs.length > 0 ? overviewParagraphs.map(String) : defaultOverviewParagraphs;
 
-  const defaultOfferingsItems = [
-    { title: 'Phát triển phần mềm xây dựng', desc: 'Phát triển các phần mềm chuyên ngành xây dựng, quản lý, quy hoạch làm nên thương hiệu CIC (KPW, Escon, RDW, VinaSAS…) và enjiCAD – phần mềm vẽ kỹ thuật chất lượng cao, giá cạnh tranh hơn nhiều so với CAD ngoại nhập.' },
-    { title: 'Phân phối phần mềm nhập khẩu chính hãng', desc: 'Phân phối phần mềm bản quyền từ các hãng công nghệ hàng đầu thế giới như Microsoft, Autodesk, CSI, Cubicost, ANSYS, Bentley, DHI, Hexagon, DNV GL, Prokon, Risa…' },
-    { title: 'Thiết bị công nghệ', desc: 'Phân phối các thiết bị công nghệ hàm lượng khoa học cao từ những hãng uy tín thế giới như Piletest, Tecknotrove, ZXLidars, A.P. van den Berg, AQ System, Sewer Robotics, Radiodetection, Pearpoint, DJI…' },
-    { title: 'Tư vấn Xây dựng', desc: 'Tư vấn thiết kế, thẩm tra, giám sát, quản lý dự án công trình xây dựng, đảm bảo chất lượng và an toàn.' },
-    { title: 'BIM & Digital Twins', desc: 'Đồng hành chuyển đổi số, triển khai BIM chuyên sâu, xây dựng bản sao số (Digital Twins) cho công trình.' },
-    { title: 'Giải pháp Công nghệ thông minh', desc: 'Cung cấp và tư vấn ứng dụng các giải pháp công nghệ thông minh, AI, Big Data, IoT vào quản lý vận hành.' },
-    { title: 'Giải pháp phát triển bền vững', desc: 'Tư vấn phát triển bền vững, Net Zero, EPD, ESG cho các doanh nghiệp xây dựng hướng tới tương lai xanh.' },
-  ];
+  const defaultOfferingsItems = isEn
+    ? [
+        { title: 'Construction Software Development', desc: 'Developing specialized software for construction, structural engineering, and planning that define CIC brand (KPW, Escon, RDW, VinaSAS…) and enjiCAD – high quality engineering CAD at competitive pricing.' },
+        { title: 'Official Imported Software Distribution', desc: 'Distributing genuine licensed software from leading global tech firms such as Microsoft, Autodesk, CSI, Cubicost, ANSYS, Bentley, DHI, Hexagon, DNV GL, Prokon, Risa…' },
+        { title: 'High-Tech Equipment', desc: 'Distributing advanced scientific tech equipment from renowned global brands like Piletest, Tecknotrove, ZXLidars, A.P. van den Berg, AQ System, Sewer Robotics, Radiodetection, Pearpoint, DJI…' },
+        { title: 'Construction Consulting', desc: 'Consulting on engineering design, structural appraisal, supervision, and construction project management, ensuring supreme quality and safety.' },
+        { title: 'BIM & Digital Twins', desc: 'Partnering in digital transformation, specialized BIM implementation, and building Digital Twins for engineering assets.' },
+        { title: 'Smart Technology Solutions', desc: 'Providing and consulting on the application of smart technology, AI, Big Data, and IoT in operations management.' },
+        { title: 'Sustainable Development Solutions', desc: 'Consulting on sustainable development, Net Zero, EPD, and ESG for construction enterprises heading towards a green future.' },
+      ]
+    : [
+        { title: 'Phát triển phần mềm xây dựng', desc: 'Phát triển các phần mềm chuyên ngành xây dựng, quản lý, quy hoạch làm nên thương hiệu CIC (KPW, Escon, RDW, VinaSAS…) và enjiCAD – phần mềm vẽ kỹ thuật chất lượng cao, giá cạnh tranh hơn nhiều so với CAD ngoại nhập.' },
+        { title: 'Phân phối phần mềm nhập khẩu chính hãng', desc: 'Phân phối phần mềm bản quyền từ các hãng công nghệ hàng đầu thế giới như Microsoft, Autodesk, CSI, Cubicost, ANSYS, Bentley, DHI, Hexagon, DNV GL, Prokon, Risa…' },
+        { title: 'Thiết bị công nghệ', desc: 'Phân phối các thiết bị công nghệ hàm lượng khoa học cao từ những hãng uy tín thế giới như Piletest, Tecknotrove, ZXLidars, A.P. van den Berg, AQ System, Sewer Robotics, Radiodetection, Pearpoint, DJI…' },
+        { title: 'Tư vấn Xây dựng', desc: 'Tư vấn thiết kế, thẩm tra, giám sát, quản lý dự án công trình xây dựng, đảm bảo chất lượng và an toàn.' },
+        { title: 'BIM & Digital Twins', desc: 'Đồng hành chuyển đổi số, triển khai BIM chuyên sâu, xây dựng bản sao số (Digital Twins) cho công trình.' },
+        { title: 'Giải pháp Công nghệ thông minh', desc: 'Cung cấp và tư vấn ứng dụng các giải pháp công nghệ thông minh, AI, Big Data, IoT vào quản lý vận hành.' },
+        { title: 'Giải pháp phát triển bền vững', desc: 'Tư vấn phát triển bền vững, Net Zero, EPD, ESG cho các doanh nghiệp xây dựng hướng tới tương lai xanh.' },
+      ];
   const displayedOfferingsItems =
     Array.isArray(offeringsConfig.items) && offeringsConfig.items.length > 0
       ? (offeringsConfig.items as Array<Record<string, unknown>>).map((it, idx) => ({
@@ -185,23 +205,41 @@ export const AboutView = ({
   }, [awardsConfig.items, awardsConfig.syncWithHome, homeAwards, resolveMediaUrl]);
 
   // Experience Data Resolvers
-  const defaultExperienceItems = [
-    {
-      title: 'Phát triển nguồn nhân lực chất lượng cao',
-      description: 'Chú trọng đào tạo, phát triển nguồn nhân sự chất lượng cao, thu hút nhân sự trẻ, chất lượng, nhiệt huyết và sẵn sàng học hỏi, tiếp cận công nghệ mới.',
-      imageId: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80',
-    },
-    {
-      title: 'Đối tác chiến lược với các hãng công nghệ danh tiếng',
-      description: 'Hợp tác sâu rộng với hơn 100 hãng công nghệ, sản xuất phần mềm, thiết bị danh tiếng trên thế giới. Là partner chính thức tại Việt Nam.',
-      imageId: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80',
-    },
-    {
-      title: 'Cập nhật xu hướng công nghệ hàng đầu',
-      description: 'Đa dạng sản phẩm, dịch vụ về các giải pháp phần mềm, khoa học công nghệ hàng đầu trong các ngành kỹ thuật.',
-      imageId: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80',
-    },
-  ];
+  const defaultExperienceItems = isEn
+    ? [
+        {
+          title: 'Developing High-Quality Human Resources',
+          description: 'Focusing on training and fostering high-quality personnel, attracting young, talented, enthusiastic talent ready to master new technologies.',
+          imageId: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80',
+        },
+        {
+          title: 'Strategic Partnerships with Global Tech Leaders',
+          description: 'Deep and extensive cooperation with over 100 renowned software and technology manufacturers worldwide. Official partner in Vietnam.',
+          imageId: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80',
+        },
+        {
+          title: 'Leading Modern Technology Trends',
+          description: 'Diversified products and services in software solutions and advanced engineering technology across technical sectors.',
+          imageId: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80',
+        },
+      ]
+    : [
+        {
+          title: 'Phát triển nguồn nhân lực chất lượng cao',
+          description: 'Chú trọng đào tạo, phát triển nguồn nhân sự chất lượng cao, thu hút nhân sự trẻ, chất lượng, nhiệt huyết và sẵn sàng học hỏi, tiếp cận công nghệ mới.',
+          imageId: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80',
+        },
+        {
+          title: 'Đối tác chiến lược với các hãng công nghệ danh tiếng',
+          description: 'Hợp tác sâu rộng với hơn 100 hãng công nghệ, sản xuất phần mềm, thiết bị danh tiếng trên thế giới. Là partner chính thức tại Việt Nam.',
+          imageId: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80',
+        },
+        {
+          title: 'Cập nhật xu hướng công nghệ hàng đầu',
+          description: 'Đa dạng sản phẩm, dịch vụ về các giải pháp phần mềm, khoa học công nghệ hàng đầu trong các ngành kỹ thuật.',
+          imageId: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80',
+        },
+      ];
   const displayedExperienceItems =
     Array.isArray(experienceConfig.items) && experienceConfig.items.length > 0
       ? (experienceConfig.items as Array<Record<string, unknown>>)

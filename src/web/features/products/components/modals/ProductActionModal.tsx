@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Check, Download, Loader2 } from 'lucide-react';
 import { Product } from '@shared/types';
 import { submitCustomerInteractionAction } from '@/features/contact/server/actions';
+import { useI18n } from '@/shared/i18n';
 
 export type ProductModalType = 'contact' | 'buy' | 'download';
 
@@ -25,6 +26,8 @@ export function ProductActionModal({
   onClose,
   onTabChange,
 }: ProductActionModalProps) {
+  const { locale } = useI18n();
+  const isEn = locale === 'en';
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -63,19 +66,19 @@ export function ProductActionModal({
   const validateForm = () => {
     const errors: Record<string, string> = {};
     if (!formData.name.trim()) {
-      errors.name = 'Vui lòng nhập họ và tên';
+      errors.name = isEn ? 'Please enter your full name' : 'Vui lòng nhập họ và tên';
     }
 
     if (!formData.phone.trim()) {
-      errors.phone = 'Vui lòng nhập số điện thoại';
+      errors.phone = isEn ? 'Please enter your phone number' : 'Vui lòng nhập số điện thoại';
     }
 
     if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      errors.email = 'Địa chỉ email không hợp lệ';
+      errors.email = isEn ? 'Invalid email address' : 'Địa chỉ email không hợp lệ';
     }
 
     if (modalType === 'download' && !formData.version) {
-      errors.version = 'Vui lòng chọn phiên bản';
+      errors.version = isEn ? 'Please select a version' : 'Vui lòng chọn phiên bản';
     }
 
     setFormErrors(errors);
@@ -91,7 +94,7 @@ export function ProductActionModal({
     try {
       await submitCustomerInteractionAction({
         formId: 'product-download',
-        formName: 'Yêu cầu tải sản phẩm',
+        formName: isEn ? 'Product download request' : 'Yêu cầu tải sản phẩm',
         values: {
           ...formData,
           productId: activeProduct.id,
@@ -109,7 +112,7 @@ export function ProductActionModal({
       });
       setDownloadFormSubmitted(true);
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Không thể gửi yêu cầu tải. Vui lòng thử lại.');
+      setSubmitError(error instanceof Error ? error.message : (isEn ? 'Unable to submit download request. Please try again.' : 'Không thể gửi yêu cầu tải. Vui lòng thử lại.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -126,10 +129,10 @@ export function ProductActionModal({
         formId: `product-${modalType}`,
         formName:
           modalType === 'contact'
-            ? 'Yêu cầu báo giá sản phẩm'
+            ? (isEn ? 'Product quotation request' : 'Yêu cầu báo giá sản phẩm')
             : modalType === 'buy'
-            ? 'Đăng ký mua sản phẩm'
-            : 'Yêu cầu tải sản phẩm',
+            ? (isEn ? 'Product purchase registration' : 'Đăng ký mua sản phẩm')
+            : (isEn ? 'Product download request' : 'Yêu cầu tải sản phẩm'),
         values: {
           ...formData,
           productId: activeProduct.id,
@@ -147,7 +150,7 @@ export function ProductActionModal({
       });
       setFormSubmitted(true);
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Không thể gửi yêu cầu. Vui lòng thử lại.');
+      setSubmitError(error instanceof Error ? error.message : (isEn ? 'Unable to submit request. Please try again.' : 'Không thể gửi yêu cầu. Vui lòng thử lại.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -176,7 +179,7 @@ export function ProductActionModal({
           <button
             onClick={onClose}
             className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 transition-colors z-30"
-            title="Đóng"
+            title={isEn ? 'Close' : 'Đóng'}
           >
             <X size={20} />
           </button>
@@ -192,7 +195,7 @@ export function ProductActionModal({
                   : 'border-transparent text-slate-400 hover:text-slate-600'
               }`}
             >
-              Yêu cầu tư vấn
+              {isEn ? 'Consultation Request' : 'Yêu cầu tư vấn'}
             </button>
             <button
               type="button"
@@ -203,7 +206,9 @@ export function ProductActionModal({
                   : 'border-transparent text-slate-400 hover:text-slate-600'
               }`}
             >
-              {getProductType(activeProduct) === 'Thiết bị' ? 'Đăng ký mua' : 'Mua bản quyền'}
+              {getProductType(activeProduct) === 'Thiết bị'
+                ? (isEn ? 'Purchase Equipment' : 'Đăng ký mua')
+                : (isEn ? 'Buy License' : 'Mua bản quyền')}
             </button>
             {getProductType(activeProduct) !== 'Thiết bị' && (
               <button
@@ -215,7 +220,7 @@ export function ProductActionModal({
                     : 'border-transparent text-slate-400 hover:text-slate-600'
                 }`}
               >
-                Tải phần mềm
+                {isEn ? 'Download Software' : 'Tải phần mềm'}
               </button>
             )}
           </div>
@@ -224,7 +229,7 @@ export function ProductActionModal({
           <div className="p-3.5 bg-slate-50 border-l-4 border-orange-600 mb-6 rounded-r-[8px] flex items-center justify-between gap-4">
             <div>
               <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block mb-0.5">
-                Sản phẩm đang chọn
+                {isEn ? 'Selected Product' : 'Sản phẩm đang chọn'}
               </span>
               <span className="text-sm font-black text-slate-800">{activeProduct.name}</span>
             </div>
@@ -238,14 +243,14 @@ export function ProductActionModal({
                   {/* Row 1: Họ tên */}
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                      Họ tên <span className="text-red-500">*</span>
+                      {isEn ? 'Full Name' : 'Họ tên'} <span className="text-red-500">*</span>
                     </label>
                     <input
                       required
                       type="text"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="Nhập họ và tên"
+                      placeholder={isEn ? 'Enter your full name' : 'Nhập họ và tên'}
                       className={`w-full bg-slate-50 border ${
                         formErrors.name ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
                       } focus:outline-none focus:bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 rounded-[8px] transition-all`}
@@ -256,14 +261,14 @@ export function ProductActionModal({
                   {/* Row 2: Số điện thoại */}
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                      Số điện thoại <span className="text-red-500">*</span>
+                      {isEn ? 'Phone Number' : 'Số điện thoại'} <span className="text-red-500">*</span>
                     </label>
                     <input
                       required
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="Nhập số điện thoại"
+                      placeholder={isEn ? 'Enter your phone number' : 'Nhập số điện thoại'}
                       className={`w-full bg-slate-50 border ${
                         formErrors.phone ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
                       } focus:outline-none focus:bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 rounded-[8px] transition-all`}
@@ -273,12 +278,12 @@ export function ProductActionModal({
 
                   {/* Row 3: Email */}
                   <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Email</label>
+                    <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">{isEn ? 'Email' : 'Email'}</label>
                     <input
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="Nhập email liên hệ"
+                      placeholder={isEn ? 'Enter your email' : 'Nhập email liên hệ'}
                       className={`w-full bg-slate-50 border ${
                         formErrors.email ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
                       } focus:outline-none focus:bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 rounded-[8px] transition-all`}
@@ -289,7 +294,7 @@ export function ProductActionModal({
                   {/* Row 4: Chọn phiên bản * */}
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                      Chọn phiên bản <span className="text-red-500">*</span>
+                      {isEn ? 'Select Version' : 'Chọn phiên bản'} <span className="text-red-500">*</span>
                     </label>
                     <select
                       required
@@ -299,7 +304,7 @@ export function ProductActionModal({
                         formErrors.version ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
                       } focus:outline-none focus:bg-white px-3.5 py-2.5 text-sm font-bold text-slate-800 rounded-[8px] transition-all cursor-pointer`}
                     >
-                      <option value="">-- Chọn phiên bản tải về --</option>
+                      <option value="">{isEn ? '-- Select download version --' : '-- Chọn phiên bản tải về --'}</option>
                       <option value="v2026-pro">{activeProduct.name} v2026.1 (Professional Edition)</option>
                       <option value="v2026-std">{activeProduct.name} v2026.1 (Standard Edition)</option>
                       <option value="v2025-ent">{activeProduct.name} v2025.2 (Enterprise Edition)</option>
@@ -310,19 +315,19 @@ export function ProductActionModal({
 
                   {/* Row 5: Ghi chú */}
                   <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Ghi chú</label>
+                    <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">{isEn ? 'Notes' : 'Ghi chú'}</label>
                     <textarea
                       rows={2}
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      placeholder="Mô tả nhu cầu của bạn..."
+                      placeholder={isEn ? 'Describe your requirements...' : 'Mô tả nhu cầu của bạn...'}
                       className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none focus:bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 rounded-[8px] transition-all resize-none"
                     />
                   </div>
 
                   {/* Note block */}
                   <p className="text-[11px] text-orange-600 font-bold italic pt-0.5">
-                    *Vui lòng điền đúng thông tin để chúng tôi liên hệ hỗ trợ bạn
+                    {isEn ? '*Please provide accurate information for our team to contact and support you' : '*Vui lòng điền đúng thông tin để chúng tôi liên hệ hỗ trợ bạn'}
                   </p>
 
                   {submitError && <p role="alert" className="text-xs font-bold text-red-600">{submitError}</p>}
@@ -336,10 +341,10 @@ export function ProductActionModal({
                     {isSubmitting ? (
                       <>
                         <Loader2 size={16} className="animate-spin shrink-0" />
-                        <span>Đang gửi yêu cầu...</span>
+                        <span>{isEn ? 'Submitting request...' : 'Đang gửi yêu cầu...'}</span>
                       </>
                     ) : (
-                      <span>Bắt đầu tải phần mềm</span>
+                      <span>{isEn ? 'Start Software Download' : 'Bắt đầu tải phần mềm'}</span>
                     )}
                   </button>
                 </form>
@@ -349,13 +354,13 @@ export function ProductActionModal({
                     <Download size={32} className={downloading ? 'animate-bounce' : ''} />
                   </div>
                   <h3 className="text-lg font-black uppercase text-slate-950 tracking-tight mb-2">
-                    Tải phần mềm {activeProduct.name}
+                    {isEn ? `Download software ${activeProduct.name}` : `Tải phần mềm ${activeProduct.name}`}
                   </h3>
 
                   {downloading ? (
                     <div className="space-y-4">
                       <p className="text-xs text-slate-500 font-medium">
-                        Đang chuẩn bị bộ cài dùng thử, brochure hướng dẫn và tài liệu đi kèm...
+                        {isEn ? 'Preparing trial package, guides and documents...' : 'Đang chuẩn bị bộ cài dùng thử, brochure hướng dẫn và tài liệu đi kèm...'}
                       </p>
                       <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden relative">
                         <div
@@ -368,13 +373,13 @@ export function ProductActionModal({
                   ) : (
                     <div className="space-y-4">
                       <p className="text-sm font-bold text-emerald-700">
-                        Đã ghi nhận yêu cầu tải. CIC sẽ kiểm tra và gửi bộ cài phù hợp tới bạn.
+                        {isEn ? 'Download request recorded. CIC will review and send the installer to your email.' : 'Đã ghi nhận yêu cầu tải. CIC sẽ kiểm tra và gửi bộ cài phù hợp tới bạn.'}
                       </p>
                       <button
                         onClick={onClose}
                         className="px-6 py-2.5 bg-slate-950 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-colors rounded-[8px]"
                       >
-                        Đóng cửa sổ
+                        {isEn ? 'Close Window' : 'Đóng cửa sổ'}
                       </button>
                     </div>
                   )}
@@ -391,16 +396,19 @@ export function ProductActionModal({
                   <div className="w-12 h-12 bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto rounded-full">
                     <Check size={24} />
                   </div>
-                  <h4 className="text-lg font-black uppercase text-slate-950 tracking-tight">Gửi thông tin thành công!</h4>
+                  <h4 className="text-lg font-black uppercase text-slate-950 tracking-tight">
+                    {isEn ? 'Request Submitted Successfully!' : 'Gửi thông tin thành công!'}
+                  </h4>
                   <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed font-bold">
-                    Cảm ơn bạn đã quan tâm. Đại diện kinh doanh và bộ phận kỹ thuật của chúng tôi sẽ liên hệ lại với bạn
-                    trong vòng 1 giờ làm việc.
+                    {isEn
+                      ? 'Thank you for your interest. Our sales and engineering specialists will contact you within 1 business hour.'
+                      : 'Cảm ơn bạn đã quan tâm. Đại diện kinh doanh và bộ phận kỹ thuật của chúng tôi sẽ liên hệ lại với bạn trong vòng 1 giờ làm việc.'}
                   </p>
                   <button
                     onClick={onClose}
                     className="mt-2 px-6 py-2.5 bg-slate-950 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-colors rounded-[8px]"
                   >
-                    Đóng
+                    {isEn ? 'Close' : 'Đóng'}
                   </button>
                 </motion.div>
               ) : (
@@ -408,14 +416,14 @@ export function ProductActionModal({
                   {/* Row 1: Họ tên */}
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                      Họ tên <span className="text-red-500">*</span>
+                      {isEn ? 'Full Name' : 'Họ tên'} <span className="text-red-500">*</span>
                     </label>
                     <input
                       required
                       type="text"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="Nhập họ và tên"
+                      placeholder={isEn ? 'Enter your full name' : 'Nhập họ và tên'}
                       className={`w-full bg-slate-50 border ${
                         formErrors.name ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
                       } focus:outline-none focus:bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 rounded-[8px] transition-all`}
@@ -426,14 +434,14 @@ export function ProductActionModal({
                   {/* Row 2: Số điện thoại */}
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                      Số điện thoại <span className="text-red-500">*</span>
+                      {isEn ? 'Phone Number' : 'Số điện thoại'} <span className="text-red-500">*</span>
                     </label>
                     <input
                       required
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="Nhập số điện thoại"
+                      placeholder={isEn ? 'Enter your phone number' : 'Nhập số điện thoại'}
                       className={`w-full bg-slate-50 border ${
                         formErrors.phone ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
                       } focus:outline-none focus:bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 rounded-[8px] transition-all`}
@@ -443,12 +451,12 @@ export function ProductActionModal({
 
                   {/* Row 3: Email */}
                   <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Email</label>
+                    <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">{isEn ? 'Email' : 'Email'}</label>
                     <input
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="Nhập email liên hệ"
+                      placeholder={isEn ? 'Enter your email' : 'Nhập email liên hệ'}
                       className={`w-full bg-slate-50 border ${
                         formErrors.email ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
                       } focus:outline-none focus:bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 rounded-[8px] transition-all`}
@@ -458,19 +466,19 @@ export function ProductActionModal({
 
                   {/* Row 4: Ghi chú */}
                   <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Ghi chú</label>
+                    <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">{isEn ? 'Notes' : 'Ghi chú'}</label>
                     <textarea
                       rows={2}
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      placeholder="Mô tả nhu cầu của bạn..."
+                      placeholder={isEn ? 'Describe your requirements...' : 'Mô tả nhu cầu của bạn...'}
                       className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none focus:bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 rounded-[8px] transition-all resize-none"
                     />
                   </div>
 
                   {/* Note block */}
                   <p className="text-[11px] text-orange-600 font-bold italic pt-0.5">
-                    *Vui lòng điền đúng thông tin để chúng tôi liên hệ hỗ trợ bạn
+                    {isEn ? '*Please provide accurate information for our team to contact and support you' : '*Vui lòng điền đúng thông tin để chúng tôi liên hệ hỗ trợ bạn'}
                   </p>
 
                   {submitError && <p role="alert" className="text-xs font-bold text-red-600">{submitError}</p>}
@@ -484,10 +492,14 @@ export function ProductActionModal({
                     {isSubmitting ? (
                       <>
                         <Loader2 size={16} className="animate-spin shrink-0" />
-                        <span>Đang gửi yêu cầu...</span>
+                        <span>{isEn ? 'Submitting request...' : 'Đang gửi yêu cầu...'}</span>
                       </>
                     ) : (
-                      <span>{modalType === 'contact' ? 'Gửi yêu cầu báo giá' : 'Đăng ký ngay'}</span>
+                      <span>
+                        {modalType === 'contact'
+                          ? (isEn ? 'Request Quotation' : 'Gửi yêu cầu báo giá')
+                          : (isEn ? 'Register Now' : 'Đăng ký ngay')}
+                      </span>
                     )}
                   </button>
                 </form>

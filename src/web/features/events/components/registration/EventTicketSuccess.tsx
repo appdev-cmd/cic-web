@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { CheckCircle, Check } from 'lucide-react';
 import type { EventItem, EventRegistration } from '@shared/types';
+import { useI18n } from '@/shared/i18n';
 
 interface EventTicketSuccessProps {
   event: EventItem;
@@ -14,6 +15,9 @@ export const EventTicketSuccess: React.FC<EventTicketSuccessProps> = ({
   registrationResult,
   onBack,
 }) => {
+  const { locale } = useI18n();
+  const isEn = locale === 'en';
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -25,41 +29,54 @@ export const EventTicketSuccess: React.FC<EventTicketSuccessProps> = ({
       </div>
 
       <div className="space-y-2">
-        <h3 className="text-2xl font-bold uppercase text-slate-950">Đăng ký tham dự thành công!</h3>
+        <h3 className="text-2xl font-bold uppercase text-slate-950">
+          {isEn ? 'Registration Successful!' : 'Đăng ký tham dự thành công!'}
+        </h3>
         <p className="text-slate-600 text-sm max-w-md mx-auto leading-relaxed">
-          Cảm ơn quý khách <strong className="text-slate-900">{registrationResult.fullName}</strong>. Mã xác nhận vé điện tử của bạn đã được khởi tạo thành công trên hệ thống CIC Tech.
+          {isEn ? (
+            <>Thank you, <strong className="text-slate-900">{registrationResult.fullName}</strong>. Your electronic ticket confirmation code has been generated in the CIC Tech system.</>
+          ) : (
+            <>Cảm ơn quý khách <strong className="text-slate-900">{registrationResult.fullName}</strong>. Mã xác nhận vé điện tử của bạn đã được khởi tạo thành công trên hệ thống CIC Tech.</>
+          )}
         </p>
       </div>
 
       <div className="bg-orange-50/50 border border-orange-200 p-4 text-left space-y-2">
         <div className="flex items-center gap-2 text-orange-900 font-bold text-xs uppercase">
           <Check size={16} className="bg-orange-600 text-white rounded-full p-0.5" />
-          <span>Email xác nhận đã được gửi thành công</span>
+          <span>{isEn ? 'Confirmation email sent successfully' : 'Email xác nhận đã được gửi thành công'}</span>
         </div>
         <p className="text-slate-600 text-xs leading-relaxed">
-          Ban tổ chức đã gửi vé điện tử cùng link tham dự/QR code check-in tới email:{' '}
-          <strong className="text-slate-900">{registrationResult.email}</strong>.
+          {isEn ? (
+            <>The organizers have sent the electronic ticket along with check-in QR code to email: <strong className="text-slate-900">{registrationResult.email}</strong>.</>
+          ) : (
+            <>Ban tổ chức đã gửi vé điện tử cùng link tham dự/QR code check-in tới email: <strong className="text-slate-900">{registrationResult.email}</strong>.</>
+          )}
         </p>
       </div>
 
       <div className="bg-slate-50 border border-slate-200 p-6 text-left space-y-4 font-sans">
-        <h4 className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Thông tin vé điện tử</h4>
+        <h4 className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+          {isEn ? 'Electronic Ticket Details' : 'Thông tin vé điện tử'}
+        </h4>
         <div className="grid grid-cols-2 gap-y-2 text-xs">
-          <span className="text-slate-500">Mã vé:</span>
+          <span className="text-slate-500">{isEn ? 'Ticket ID:' : 'Mã vé:'}</span>
           <strong className="text-slate-900 text-right font-semibold">
             CIC-EVT-{Math.floor(10000 + Math.random() * 90000)}
           </strong>
 
-          <span className="text-slate-500">Họ tên:</span>
+          <span className="text-slate-500">{isEn ? 'Full Name:' : 'Họ tên:'}</span>
           <span className="text-slate-800 text-right font-bold">{registrationResult.fullName}</span>
 
-          <span className="text-slate-500">Đơn vị:</span>
+          <span className="text-slate-500">{isEn ? 'Company:' : 'Đơn vị:'}</span>
           <span className="text-slate-800 text-right font-medium truncate">{registrationResult.company}</span>
 
-          <span className="text-slate-500">Số lượng:</span>
-          <span className="text-slate-800 text-right font-bold">{registrationResult.attendeesCount} vé</span>
+          <span className="text-slate-500">{isEn ? 'Quantity:' : 'Số lượng:'}</span>
+          <span className="text-slate-800 text-right font-bold">
+            {registrationResult.attendeesCount} {isEn ? (registrationResult.attendeesCount === 1 ? 'ticket' : 'tickets') : 'vé'}
+          </span>
 
-          <span className="text-slate-500">Thời gian:</span>
+          <span className="text-slate-500">{isEn ? 'Date & Time:' : 'Thời gian:'}</span>
           <span className="text-slate-800 text-right font-medium">{event.date}</span>
         </div>
 
@@ -83,7 +100,7 @@ export const EventTicketSuccess: React.FC<EventTicketSuccessProps> = ({
           onClick={onBack}
           className="bg-slate-950 hover:bg-orange-600 text-white px-8 py-3 text-xs font-black uppercase tracking-widest transition-all"
         >
-          Quay lại trang sự kiện
+          {isEn ? 'Back to Events' : 'Quay lại trang sự kiện'}
         </button>
       </div>
     </motion.div>

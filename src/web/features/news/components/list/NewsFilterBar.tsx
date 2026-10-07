@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Filter, RotateCcw, Search } from 'lucide-react';
+import { useI18n } from '@/shared/i18n';
 import type { NewsCategoryTabId } from './NewsCategoryTabs';
 
 interface NewsFilterBarProps {
@@ -54,6 +55,9 @@ export function NewsFilterBar({
   totalFilteredCount,
   hasActiveFilters,
 }: NewsFilterBarProps) {
+  const { locale } = useI18n();
+  const isEn = locale === 'en';
+
   return (
     <div className="bg-slate-50 border border-slate-200/80 p-4 rounded-[12px] space-y-3">
       <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
@@ -64,7 +68,7 @@ export function NewsFilterBar({
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Tìm kiếm tiêu đề, từ khóa, nội dung tin tức..."
+            placeholder={isEn ? "Search title, keywords, news content..." : "Tìm kiếm tiêu đề, từ khóa, nội dung tin tức..."}
             className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm bg-white border border-slate-200 rounded-[8px] focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
           />
         </div>
@@ -77,10 +81,10 @@ export function NewsFilterBar({
               onChange={(e) => onCompanySubTypeChange(e.target.value)}
               className="text-xs font-semibold bg-white border border-slate-200 rounded-[8px] px-3 py-2 text-slate-700 focus:outline-none focus:border-orange-500"
             >
-              <option value="Tất cả">Tất cả chủ đề</option>
-              <option value="Hoạt động CIC">Hoạt động CIC</option>
-              <option value="Thông báo">Thông báo</option>
-              <option value="Văn hóa doanh nghiệp">Văn hóa doanh nghiệp</option>
+              <option value="Tất cả">{isEn ? 'All topics' : 'Tất cả chủ đề'}</option>
+              <option value="Hoạt động CIC">{isEn ? 'CIC Activities' : 'Hoạt động CIC'}</option>
+              <option value="Thông báo">{isEn ? 'Announcements' : 'Thông báo'}</option>
+              <option value="Văn hóa doanh nghiệp">{isEn ? 'Corporate Culture' : 'Văn hóa doanh nghiệp'}</option>
             </select>
           )}
 
@@ -90,11 +94,11 @@ export function NewsFilterBar({
               onChange={(e) => onSpecialtySubTypeChange(e.target.value as any)}
               className="text-xs font-semibold bg-white border border-slate-200 rounded-[8px] px-3 py-2 text-slate-700 focus:outline-none focus:border-orange-500"
             >
-              <option value="Tất cả">Tất cả chủ đề</option>
-              <option value="Kiến thức">Kiến thức</option>
-              <option value="Cập nhật công nghệ">Cập nhật công nghệ</option>
-              <option value="Chính sách">Chính sách</option>
-              <option value="Giải pháp">Giải pháp</option>
+              <option value="Tất cả">{isEn ? 'All topics' : 'Tất cả chủ đề'}</option>
+              <option value="Kiến thức">{isEn ? 'Knowledge' : 'Kiến thức'}</option>
+              <option value="Cập nhật công nghệ">{isEn ? 'Tech Updates' : 'Cập nhật công nghệ'}</option>
+              <option value="Chính sách">{isEn ? 'Policies' : 'Chính sách'}</option>
+              <option value="Giải pháp">{isEn ? 'Solutions' : 'Giải pháp'}</option>
             </select>
           )}
 
@@ -104,11 +108,11 @@ export function NewsFilterBar({
               onChange={(e) => onInternationalSubTypeChange(e.target.value)}
               className="text-xs font-semibold bg-white border border-slate-200 rounded-[8px] px-3 py-2 text-slate-700 focus:outline-none focus:border-orange-500"
             >
-              <option value="Tất cả">Tất cả đối tác & chủ đề</option>
-              <option value="Đối tác chiến lược">Đối tác chiến lược</option>
-              <option value="Chuyển giao công nghệ">Chuyển giao công nghệ</option>
-              <option value="Hội nghị quốc tế">Hội nghị quốc tế</option>
-              <option value="Dự án quốc tế">Dự án quốc tế</option>
+              <option value="Tất cả">{isEn ? 'All partners & topics' : 'Tất cả đối tác & chủ đề'}</option>
+              <option value="Đối tác chiến lược">{isEn ? 'Strategic Partners' : 'Đối tác chiến lược'}</option>
+              <option value="Chuyển giao công nghệ">{isEn ? 'Technology Transfer' : 'Chuyển giao công nghệ'}</option>
+              <option value="Hội nghị quốc tế">{isEn ? 'International Conferences' : 'Hội nghị quốc tế'}</option>
+              <option value="Dự án quốc tế">{isEn ? 'International Projects' : 'Dự án quốc tế'}</option>
             </select>
           )}
 
@@ -119,11 +123,11 @@ export function NewsFilterBar({
                 onChange={(e) => onRecruitmentDeptChange(e.target.value as any)}
                 className="text-xs font-semibold bg-white border border-slate-200 rounded-[8px] px-3 py-2 text-slate-700 focus:outline-none focus:border-orange-500"
               >
-                <option value="Tất cả">Tất cả phòng ban</option>
-                <option value="Khối Kỹ thuật">Khối Kỹ thuật</option>
-                <option value="Khối Kinh doanh">Khối Kinh doanh</option>
-                <option value="Khối Hỗ trợ">Khối Hỗ trợ</option>
-                <option value="Khối Nghiên cứu & Phát triển">Khối R&D</option>
+                <option value="Tất cả">{isEn ? 'All departments' : 'Tất cả phòng ban'}</option>
+                <option value="Khối Kỹ thuật">{isEn ? 'Technical Division' : 'Khối Kỹ thuật'}</option>
+                <option value="Khối Kinh doanh">{isEn ? 'Sales Division' : 'Khối Kinh doanh'}</option>
+                <option value="Khối Hỗ trợ">{isEn ? 'Support Division' : 'Khối Hỗ trợ'}</option>
+                <option value="Khối Nghiên cứu & Phát triển">{isEn ? 'R&D Division' : 'Khối R&D'}</option>
               </select>
 
               <select
@@ -131,10 +135,10 @@ export function NewsFilterBar({
                 onChange={(e) => onRecruitmentLocChange(e.target.value as any)}
                 className="text-xs font-semibold bg-white border border-slate-200 rounded-[8px] px-3 py-2 text-slate-700 focus:outline-none focus:border-orange-500"
               >
-                <option value="Tất cả">Tất cả địa điểm</option>
-                <option value="Hà Nội">Hà Nội</option>
-                <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                <option value="Đà Nẵng">Đà Nẵng</option>
+                <option value="Tất cả">{isEn ? 'All locations' : 'Tất cả địa điểm'}</option>
+                <option value="Hà Nội">{isEn ? 'Hanoi' : 'Hà Nội'}</option>
+                <option value="TP. Hồ Chí Minh">{isEn ? 'Ho Chi Minh City' : 'TP. Hồ Chí Minh'}</option>
+                <option value="Đà Nẵng">{isEn ? 'Da Nang' : 'Đà Nẵng'}</option>
               </select>
 
               <select
@@ -142,9 +146,9 @@ export function NewsFilterBar({
                 onChange={(e) => onRecruitmentStatusChange(e.target.value as any)}
                 className="text-xs font-semibold bg-white border border-slate-200 rounded-[8px] px-3 py-2 text-slate-700 focus:outline-none focus:border-orange-500"
               >
-                <option value="Tất cả">Tất cả trạng thái</option>
-                <option value="Đang tuyển">Đang tuyển</option>
-                <option value="Đã hết hạn">Đã hết hạn</option>
+                <option value="Tất cả">{isEn ? 'All statuses' : 'Tất cả trạng thái'}</option>
+                <option value="Đang tuyển">{isEn ? 'Hiring' : 'Đang tuyển'}</option>
+                <option value="Đã hết hạn">{isEn ? 'Expired' : 'Đã hết hạn'}</option>
               </select>
             </>
           )}
@@ -155,9 +159,9 @@ export function NewsFilterBar({
               onChange={(e) => onPromotionStatusChange(e.target.value as any)}
               className="text-xs font-semibold bg-white border border-slate-200 rounded-[8px] px-3 py-2 text-slate-700 focus:outline-none focus:border-orange-500"
             >
-              <option value="Tất cả">Tất cả ưu đãi</option>
-              <option value="Đang diễn ra">Đang diễn ra</option>
-              <option value="Đã kết thúc">Đã kết thúc</option>
+              <option value="Tất cả">{isEn ? 'All promotions' : 'Tất cả ưu đãi'}</option>
+              <option value="Đang diễn ra">{isEn ? 'Ongoing' : 'Đang diễn ra'}</option>
+              <option value="Đã kết thúc">{isEn ? 'Ended' : 'Đã kết thúc'}</option>
             </select>
           )}
 
@@ -167,11 +171,11 @@ export function NewsFilterBar({
               onChange={(e) => onShareholderYearChange(Number(e.target.value))}
               className="text-xs font-semibold bg-white border border-slate-200 rounded-[8px] px-3 py-2 text-slate-700 focus:outline-none focus:border-orange-500"
             >
-              <option value={0}>Tất cả các năm</option>
-              <option value={2026}>Năm 2026</option>
-              <option value={2025}>Năm 2025</option>
-              <option value={2024}>Năm 2024</option>
-              <option value={2023}>Năm 2023</option>
+              <option value={0}>{isEn ? 'All years' : 'Tất cả các năm'}</option>
+              <option value={2026}>{isEn ? 'Year 2026' : 'Năm 2026'}</option>
+              <option value={2025}>{isEn ? 'Year 2025' : 'Năm 2025'}</option>
+              <option value={2024}>{isEn ? 'Year 2024' : 'Năm 2024'}</option>
+              <option value={2023}>{isEn ? 'Year 2023' : 'Năm 2023'}</option>
             </select>
           )}
 
@@ -182,7 +186,7 @@ export function NewsFilterBar({
               className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-[8px] transition-colors cursor-pointer"
             >
               <RotateCcw size={13} />
-              <span>Xóa bộ lọc</span>
+              <span>{isEn ? 'Reset filters' : 'Xóa bộ lọc'}</span>
             </button>
           )}
         </div>
@@ -192,7 +196,13 @@ export function NewsFilterBar({
       <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-200/60">
         <div className="flex items-center gap-1.5">
           <Filter size={13} className="text-[#FC5115]" />
-          <span>Tìm thấy <strong>{totalFilteredCount}</strong> bài viết</span>
+          <span>
+            {isEn ? (
+              <>Found <strong>{totalFilteredCount}</strong> articles</>
+            ) : (
+              <>Tìm thấy <strong>{totalFilteredCount}</strong> bài viết</>
+            )}
+          </span>
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@ import { createElementBinding, createCollectionItemPath } from '@shared/visual-e
 import { bindElement as bindElementRuntime } from '@shared/visual-editing/bindElement';
 import type { ElementBindingRegistry } from '@shared/visual-editing/elementBindingRegistry';
 import type { AboutCapacityModel, PageRenderPolicy } from '@shared/page-content/models';
+import { useI18n } from '@/shared/i18n';
 import { textFrom } from './aboutUtils';
 
 interface AboutExperienceTabProps {
@@ -39,6 +40,9 @@ export function AboutExperienceTab({
   editMode = false,
   onConfigValueChange,
 }: AboutExperienceTabProps) {
+  const { locale } = useI18n();
+  const isEn = locale === 'en';
+
   return (
     <motion.div
       key="capacity"
@@ -71,7 +75,7 @@ export function AboutExperienceTab({
               className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter leading-tight"
             >
               {(() => {
-                const rawTitle = textFrom(capacityConfig, 'title', 'Tiềm lực vững vàng, vươn tầm quốc tế');
+                const rawTitle = textFrom(capacityConfig, 'title', isEn ? 'Solid Capability, Global Reach' : 'Tiềm lực vững vàng, vươn tầm quốc tế');
                 if (rawTitle.includes(',')) {
                   const [part1, ...rest] = rawTitle.split(',');
                   return (
@@ -125,7 +129,9 @@ export function AboutExperienceTab({
                 capacityConfig,
                 'description',
                 capacityContent.description ||
-                  'Trải qua 35 năm hình thành và phát triển, CIC đã xây dựng được một đội ngũ nhân sự chất lượng cao, mạng lưới đối tác toàn cầu và danh mục khách hàng rộng khắp, khẳng định vị thế vững chắc trong lĩnh vực công nghệ và xây dựng.'
+                  (isEn
+                    ? 'Through 35 years of establishment and growth, CIC has established a high-caliber workforce, a global partner network, and an extensive client portfolio, affirming a steadfast position in technology and construction.'
+                    : 'Trải qua 35 năm hình thành và phát triển, CIC đã xây dựng được một đội ngũ nhân sự chất lượng cao, mạng lưới đối tác toàn cầu và danh mục khách hàng rộng khắp, khẳng định vị thế vững chắc trong lĩnh vực công nghệ và xây dựng.')
               )}
             </p>
 
@@ -249,7 +255,7 @@ export function AboutExperienceTab({
                 title={textFrom(
                   experienceConfig,
                   'partnerMapTitle',
-                  textFrom(capacityConfig, 'partnerMapTitle', 'Mạng lưới đối tác công nghệ tiêu biểu')
+                  textFrom(capacityConfig, 'partnerMapTitle', isEn ? 'Key Technology Partner Network' : 'Mạng lưới đối tác công nghệ tiêu biểu')
                 )}
                 subtitle={textFrom(
                   experienceConfig,
@@ -257,7 +263,9 @@ export function AboutExperienceTab({
                   textFrom(
                     capacityConfig,
                     'partnerMapSubtitle',
-                    'Từ Việt Nam, CIC kết nối với các hãng công nghệ hàng đầu trong mạng lưới hợp tác quốc tế.'
+                    isEn
+                      ? 'From Vietnam, CIC connects with world-leading tech corporations in an extensive international cooperation network.'
+                      : 'Từ Việt Nam, CIC kết nối với các hãng công nghệ hàng đầu trong mạng lưới hợp tác quốc tế.'
                   )
                 )}
                 editMode={editMode}
@@ -310,7 +318,7 @@ export function AboutExperienceTab({
             >
               <ArrowUpRight size={20} />
               <span data-page-builder-config-path={JSON.stringify(['ctaLabel'])}>
-                {textFrom(ctaConfig, 'ctaLabel', textFrom(ctaConfig, 'title', 'Hồ sơ năng lực (Profile)'))}
+                {textFrom(ctaConfig, 'ctaLabel', textFrom(ctaConfig, 'title', isEn ? 'Company Profile' : 'Hồ sơ năng lực (Profile)'))}
               </span>
             </a>
           </div>

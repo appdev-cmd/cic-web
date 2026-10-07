@@ -103,6 +103,7 @@ const getServiceExcerpt = (service: ServiceDetail): string => {
 
 export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewService, services, products, onNavigateToService, onNavigateToList }: ServicesViewProps) => {
   const { t, locale } = useI18n();
+  const isEn = locale === 'en';
   const servicesData = useMemo(() => {
     const source = services ?? getServicesData().services;
     return previewService ? [previewService, ...source.filter((item) => item.id !== previewService.id)] : source;
@@ -260,10 +261,12 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
               {/* Header section */}
               <div className="border-l-4 border-orange-600 pl-6 space-y-2">
                 <h1 className="text-3xl md:text-4xl font-bold text-[#444] dark:text-white uppercase tracking-tight">
-                  GIẢI PHÁP &amp; DỊCH VỤ CÔNG NGHỆ
+                  {isEn ? 'TECHNOLOGY SOLUTIONS & SERVICES' : 'GIẢI PHÁP & DỊCH VỤ CÔNG NGHỆ'}
                 </h1>
                 <p className="max-w-4xl text-sm leading-relaxed text-slate-600">
-                  Thúc đẩy chuyển đổi số với tư vấn chiến lược và kỹ thuật công nghệ tiên tiến từ CIC. Chúng tôi kết nối giữa hạ tầng truyền thống và đổi mới sáng tạo sẵn sàng cho tương lai, đồng hành cùng hơn 5.000+ dự án cấp quốc gia.
+                  {isEn
+                    ? 'Drive digital transformation with strategic consulting and cutting-edge engineering from CIC. Connecting traditional infrastructure with future-ready innovation across 5,000+ national projects.'
+                    : 'Thúc đẩy chuyển đổi số với tư vấn chiến lược và kỹ thuật công nghệ tiên tiến từ CIC. Chúng tôi kết nối giữa hạ tầng truyền thống và đổi mới sáng tạo sẵn sàng cho tương lai, đồng hành cùng hơn 5.000+ dự án cấp quốc gia.'}
                 </p>
               </div>
 
@@ -283,13 +286,13 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Tìm kiếm dịch vụ, giải pháp..."
+                        placeholder={isEn ? "Search services, solutions..." : "Tìm kiếm dịch vụ, giải pháp..."}
                         className="w-full bg-white border border-slate-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 pl-10 pr-9 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none transition-all rounded-[8px]"
                       />
                       {searchQuery && (
                         <button 
                           onClick={() => setSearchQuery('')}
-                          aria-label="Xóa nội dung tìm kiếm"
+                          aria-label={isEn ? "Clear search content" : "Xóa nội dung tìm kiếm"}
                           className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
                         >
                           <X size={14} />
@@ -299,7 +302,11 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
 
                     <div className="flex items-center gap-2 text-xs font-bold text-slate-500 shrink-0">
                       <SlidersHorizontal size={14} className="text-orange-600" />
-                      <span>Hiển thị {filteredServices.length} trên {servicesData.length} dịch vụ</span>
+                      <span>
+                        {isEn
+                          ? `Showing ${filteredServices.length} of ${servicesData.length} services`
+                          : `Hiển thị ${filteredServices.length} trên ${servicesData.length} dịch vụ`}
+                      </span>
                     </div>
                   </div>
 
@@ -307,14 +314,16 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                   {paginatedServices.length === 0 ? (
                     <div className="text-center py-16 bg-white border border-slate-200/90 rounded-[14px] p-8 space-y-4">
                       <p className="text-slate-400 font-bold text-sm">
-                        {searchQuery ? `Không tìm thấy dịch vụ nào phù hợp với từ khóa "${searchQuery}".` : 'Không tìm thấy dịch vụ nào.'}
+                        {isEn
+                          ? (searchQuery ? `No services found matching "${searchQuery}".` : 'No services found.')
+                          : (searchQuery ? `Không tìm thấy dịch vụ nào phù hợp với từ khóa "${searchQuery}".` : 'Không tìm thấy dịch vụ nào.')}
                       </p>
                       {searchQuery && (
                         <button
                           onClick={() => setSearchQuery('')}
                           className="px-5 py-2 bg-slate-950 text-white text-xs font-bold uppercase tracking-wider hover:bg-orange-600 transition-all rounded-[8px] cursor-pointer"
                         >
-                          Xóa tìm kiếm
+                          {isEn ? 'Clear search' : 'Xóa tìm kiếm'}
                         </button>
                       )}
                     </div>
@@ -358,7 +367,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
 
                             {/* Card Footer Action Button */}
                             <div className="pt-3 border-t border-slate-200 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-orange-600 group-hover:text-orange-700 transition-colors">
-                              <span>Xem Chi Tiết Dịch Vụ</span>
+                              <span>{isEn ? 'View Service Details' : 'Xem Chi Tiết Dịch Vụ'}</span>
                               <ArrowRight size={15} className="transition-transform group-hover:translate-x-1.5" />
                             </div>
                           </motion.div>
@@ -416,13 +425,15 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                       <div className="relative z-10 space-y-5">
                         <div className="space-y-2">
                           <span className="inline-block px-2.5 py-0.5 bg-orange-50 text-orange-600 border border-orange-100 text-[10px] font-bold uppercase tracking-wider rounded-md">
-                            TƯ VẤN TRỰC TIẾP
+                            {isEn ? 'DIRECT CONSULTATION' : 'TƯ VẤN TRỰC TIẾP'}
                           </span>
                           <h3 className="text-xl font-extrabold uppercase tracking-tight text-slate-950 leading-tight">
-                            Đăng Ký Tư Vấn & Demo
+                            {isEn ? 'Request Consultation & Demo' : 'Đăng Ký Tư Vấn & Demo'}
                           </h3>
                           <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                            Sẵn sàng chuyển đổi số cùng CIC? Hãy để lại thông tin, chuyên gia của chúng tôi sẽ liên hệ trong 15 phút.
+                            {isEn
+                              ? 'Ready to digitally transform with CIC? Leave your details and our experts will contact you within 15 minutes.'
+                              : 'Sẵn sàng chuyển đổi số cùng CIC? Hãy để lại thông tin, chuyên gia của chúng tôi sẽ liên hệ trong 15 phút.'}
                           </p>
                         </div>
 
@@ -441,16 +452,22 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                             className="bg-orange-600 p-6 text-center space-y-3 rounded-[12px]"
                           >
                             <CheckCircle2 size={36} className="mx-auto text-white animate-bounce" />
-                            <h4 className="text-sm font-bold uppercase tracking-wider text-white">GỬI YÊU CẦU THÀNH CÔNG!</h4>
+                            <h4 className="text-sm font-bold uppercase tracking-wider text-white">
+                              {isEn ? 'REQUEST SUBMITTED SUCCESSFULLY!' : 'GỬI YÊU CẦU THÀNH CÔNG!'}
+                            </h4>
                             <p className="text-xs text-white/90 leading-relaxed font-normal">
-                              Chuyên viên CIC sẽ gọi lại ngay theo số điện thoại bạn cung cấp. Xin trân trọng cảm ơn!
+                              {isEn
+                                ? 'A CIC specialist will call you shortly at your provided phone number. Thank you!'
+                                : 'Chuyên viên CIC sẽ gọi lại ngay theo số điện thoại bạn cung cấp. Xin trân trọng cảm ơn!'}
                             </p>
                           </motion.div>
                         ) : (
                           <form className="space-y-4" onSubmit={handleFormSubmit}>
                             
                             <div className="space-y-1">
-                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">Họ và tên *</label>
+                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">
+                                {isEn ? 'Full name *' : 'Họ và tên *'}
+                              </label>
                               <div className="relative">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><User size={14} /></span>
                                 <input 
@@ -458,14 +475,16 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                                   required
                                   value={formData.fullname}
                                   onChange={(e) => setFormData({...formData, fullname: e.target.value})}
-                                  placeholder="Nhập họ và tên" 
+                                  placeholder={isEn ? "Enter full name" : "Nhập họ và tên"} 
                                   className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-all font-normal rounded-[8px]"
                                 />
                               </div>
                             </div>
 
                             <div className="space-y-1">
-                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">Số điện thoại *</label>
+                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">
+                                {isEn ? 'Phone number *' : 'Số điện thoại *'}
+                              </label>
                               <div className="relative">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Phone size={14} /></span>
                                 <input 
@@ -473,28 +492,32 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                                   required
                                   value={formData.phone}
                                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                                  placeholder="Nhập số điện thoại" 
+                                  placeholder={isEn ? "Enter phone number" : "Nhập số điện thoại"} 
                                   className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-all font-normal rounded-[8px]"
                                 />
                               </div>
                             </div>
 
                             <div className="space-y-1">
-                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">Địa chỉ Email</label>
+                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">
+                                {isEn ? 'Email address' : 'Địa chỉ Email'}
+                              </label>
                               <div className="relative">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Mail size={14} /></span>
                                 <input 
                                   type="email"
                                   value={formData.email}
                                   onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                  placeholder="Nhập email liên hệ" 
+                                  placeholder={isEn ? "Enter contact email" : "Nhập email liên hệ"} 
                                   className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-all font-normal rounded-[8px]"
                                 />
                               </div>
                             </div>
 
                             <div className="space-y-1">
-                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">Dịch vụ quan tâm</label>
+                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">
+                                {isEn ? 'Service of interest' : 'Dịch vụ quan tâm'}
+                              </label>
                               <select 
                                 value={formData.service}
                                 onChange={(e) => setFormData({...formData, service: e.target.value})}
@@ -507,12 +530,14 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                             </div>
 
                             <div className="space-y-1">
-                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">Nội dung yêu cầu</label>
+                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">
+                                {isEn ? 'Request details' : 'Nội dung yêu cầu'}
+                              </label>
                               <textarea 
                                 rows={2}
                                 value={formData.notes}
                                 onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                                placeholder="Mô tả nhu cầu của bạn..." 
+                                placeholder={isEn ? "Describe your requirements..." : "Mô tả nhu cầu của bạn..."} 
                                 className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-all font-normal resize-none rounded-[8px]"
                               ></textarea>
                             </div>
@@ -524,11 +549,11 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                             >
                               {isSubmitting ? (
                                 <>
-                                  <Loader2 size={14} className="animate-spin" /> Đang gửi yêu cầu...
+                                  <Loader2 size={14} className="animate-spin" /> {isEn ? 'Submitting request...' : 'Đang gửi yêu cầu...'}
                                 </>
                               ) : (
                                 <>
-                                  Gửi Yêu Cầu Tư Vấn <Send size={14} />
+                                  {isEn ? 'Submit Consultation Request' : 'Gửi Yêu Cầu Tư Vấn'} <Send size={14} />
                                 </>
                               )}
                             </button>
@@ -541,7 +566,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                     {/* Support Contact Box */}
                     <div className="bg-white border border-slate-200/90 p-5 rounded-[14px] space-y-3.5 shadow-xs">
                       <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2">
-                        HỖ TRỢ TRỰC TIẾP 24/7
+                        {isEn ? '24/7 DIRECT SUPPORT' : 'HỖ TRỢ TRỰC TIẾP 24/7'}
                       </h4>
                       <div className="space-y-3">
                         <div className="flex gap-3 items-center">
@@ -549,7 +574,9 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                             <Phone size={14} />
                           </div>
                           <div>
-                            <span className="text-[10px] font-bold text-slate-400 block uppercase">Tổng đài tư vấn</span>
+                            <span className="text-[10px] font-bold text-slate-400 block uppercase">
+                              {isEn ? 'Consultation Hotline' : 'Tổng đài tư vấn'}
+                            </span>
                             <span className="text-xs font-bold text-slate-900">086 893 4576 / 024 3976 1381</span>
                           </div>
                         </div>
@@ -558,7 +585,9 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                             <Mail size={14} />
                           </div>
                           <div>
-                            <span className="text-[10px] font-bold text-slate-400 block uppercase">Hộp thư hỗ trợ</span>
+                            <span className="text-[10px] font-bold text-slate-400 block uppercase">
+                              {isEn ? 'Support Email' : 'Hộp thư hỗ trợ'}
+                            </span>
                             <span className="text-xs font-bold text-slate-900">info@cic.com.vn</span>
                           </div>
                         </div>
@@ -590,13 +619,17 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                   onClick={() => { setActiveServiceId(null); onNavigateToList?.(); }}
                   className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 text-slate-800 hover:text-orange-600 hover:border-orange-500 text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] cursor-pointer shadow-xs"
                 >
-                  <ArrowLeft size={14} /> Trở về danh mục dịch vụ
+                  <ArrowLeft size={14} /> {isEn ? 'Back to Services Catalog' : 'Trở về danh mục dịch vụ'}
                 </button>
 
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
-                  <span className="hover:text-orange-600 cursor-pointer" onClick={() => onNavigateHome?.()}>Trang chủ</span>
+                  <span className="hover:text-orange-600 cursor-pointer" onClick={() => onNavigateHome?.()}>
+                    {isEn ? 'Home' : 'Trang chủ'}
+                  </span>
                   <ChevronRight size={12} />
-                  <span className="hover:text-orange-600 cursor-pointer" onClick={() => { setActiveServiceId(null); onNavigateToList?.(); }}>Dịch vụ</span>
+                  <span className="hover:text-orange-600 cursor-pointer" onClick={() => { setActiveServiceId(null); onNavigateToList?.(); }}>
+                    {isEn ? 'Services' : 'Dịch vụ'}
+                  </span>
                   <ChevronRight size={12} />
                   <span className="text-slate-800 truncate max-w-[200px]">{activeService?.title}</span>
                 </div>
@@ -642,9 +675,17 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                   <div id="consultation-form" className="bg-white text-slate-900 p-7 sm:p-8 rounded-[16px] border border-slate-200/90 shadow-sm relative scroll-mt-32">
                     <div className="space-y-4">
                       <div className="space-y-1">
-                        <span className="text-orange-600 font-bold text-[10px] uppercase tracking-wider block">YÊU CẦU DỊCH VỤ</span>
-                        <h3 className="text-lg font-extrabold uppercase text-slate-950 leading-tight">Tư Vấn Giải Pháp Thích Hợp</h3>
-                        <p className="text-xs text-slate-600 font-normal">Chuyên gia CIC sẽ kết nối trực tiếp tư vấn chi tiết trong 15 phút.</p>
+                        <span className="text-orange-600 font-bold text-[10px] uppercase tracking-wider block">
+                          {isEn ? 'SERVICE REQUEST' : 'YÊU CẦU DỊCH VỤ'}
+                        </span>
+                        <h3 className="text-lg font-extrabold uppercase text-slate-950 leading-tight">
+                          {isEn ? 'Consult Suitable Solution' : 'Tư Vấn Giải Pháp Thích Hợp'}
+                        </h3>
+                        <p className="text-xs text-slate-600 font-normal">
+                          {isEn
+                            ? 'CIC experts will connect and consult with you in detail within 15 minutes.'
+                            : 'Chuyên gia CIC sẽ kết nối trực tiếp tư vấn chi tiết trong 15 phút.'}
+                        </p>
                       </div>
 
                       <div className="w-full h-[1px] bg-slate-100 my-3"></div>
@@ -658,53 +699,65 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                       {formSubmitted ? (
                         <div className="bg-orange-600 p-5 text-center space-y-2 rounded-[10px]">
                           <CheckCircle2 size={32} className="mx-auto text-white animate-bounce" />
-                          <h4 className="text-xs font-bold uppercase text-white">GỬI YÊU CẦU THÀNH CÔNG!</h4>
-                          <p className="text-[11px] text-white/90">Cảm ơn bạn. Chuyên viên CIC sẽ liên hệ ngay.</p>
+                          <h4 className="text-xs font-bold uppercase text-white">
+                            {isEn ? 'REQUEST SUBMITTED SUCCESSFULLY!' : 'GỬI YÊU CẦU THÀNH CÔNG!'}
+                          </h4>
+                          <p className="text-[11px] text-white/90">
+                            {isEn ? 'Thank you. A CIC specialist will contact you shortly.' : 'Cảm ơn bạn. Chuyên viên CIC sẽ liên hệ ngay.'}
+                          </p>
                         </div>
                       ) : (
                         <form className="space-y-3.5" onSubmit={handleFormSubmit}>
                           <div className="space-y-1">
-                            <label className="text-[10px] font-bold uppercase text-slate-700 block">Họ tên *</label>
+                            <label className="text-[10px] font-bold uppercase text-slate-700 block">
+                              {isEn ? 'Full name *' : 'Họ tên *'}
+                            </label>
                             <input 
                               type="text"
                               required
                               value={formData.fullname}
                               onChange={(e) => setFormData({...formData, fullname: e.target.value})}
-                              placeholder="Nhập họ và tên" 
+                              placeholder={isEn ? "Enter full name" : "Nhập họ và tên"} 
                               className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-normal rounded-[8px]"
                             />
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-[10px] font-bold uppercase text-slate-700 block">Số điện thoại *</label>
+                            <label className="text-[10px] font-bold uppercase text-slate-700 block">
+                              {isEn ? 'Phone number *' : 'Số điện thoại *'}
+                            </label>
                             <input 
                               type="tel"
                               required
                               value={formData.phone}
                               onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                              placeholder="Nhập số điện thoại" 
+                              placeholder={isEn ? "Enter phone number" : "Nhập số điện thoại"} 
                               className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-normal rounded-[8px]"
                             />
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-[10px] font-bold uppercase text-slate-700 block">Email</label>
+                            <label className="text-[10px] font-bold uppercase text-slate-700 block">
+                              {isEn ? 'Email address' : 'Email'}
+                            </label>
                             <input 
                               type="email"
                               value={formData.email}
                               onChange={(e) => setFormData({...formData, email: e.target.value})}
-                              placeholder="Nhập email liên hệ" 
+                              placeholder={isEn ? "Enter contact email" : "Nhập email liên hệ"} 
                               className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-normal rounded-[8px]"
                             />
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-[10px] font-bold uppercase text-slate-700 block">Ghi chú nhu cầu</label>
+                            <label className="text-[10px] font-bold uppercase text-slate-700 block">
+                              {isEn ? 'Request details' : 'Ghi chú nhu cầu'}
+                            </label>
                             <textarea 
                               rows={2}
                               value={formData.notes}
                               onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                              placeholder="Mô tả nhu cầu của bạn..." 
+                              placeholder={isEn ? "Describe your requirements..." : "Mô tả nhu cầu của bạn..."} 
                               className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-normal resize-none rounded-[8px]"
                             ></textarea>
                           </div>
@@ -716,11 +769,11 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                           >
                             {isSubmitting ? (
                               <>
-                                <Loader2 size={14} className="animate-spin" /> Đang gửi yêu cầu...
+                                <Loader2 size={14} className="animate-spin" /> {isEn ? 'Submitting request...' : 'Đang gửi yêu cầu...'}
                               </>
                             ) : (
                               <>
-                                Đăng Ký Tư Vấn <Send size={14} />
+                                {isEn ? 'Request Consultation' : 'Đăng Ký Tư Vấn'} <Send size={14} />
                               </>
                             )}
                           </button>
@@ -733,7 +786,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                   {currentRelatedProducts.length > 0 && (
                     <div className="bg-white border border-slate-200/90 p-5 rounded-[14px] space-y-3.5 shadow-xs">
                       <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2">
-                        SẢN PHẨM PHẦN MỀM LIÊN QUAN
+                        {isEn ? 'RELATED SOFTWARE SOLUTIONS' : 'SẢN PHẨM PHẦN MỀM LIÊN QUAN'}
                       </h4>
 
                       <div className="divide-y divide-slate-100">
@@ -772,10 +825,12 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                 <div className="pt-14 border-t border-slate-200 mt-14 space-y-8">
                   <div>
                     <h3 className="text-xl font-extrabold uppercase tracking-tight text-slate-900">
-                      Dịch Vụ Liên Quan
+                      {isEn ? 'Related Services' : 'Dịch Vụ Liên Quan'}
                     </h3>
                     <p className="text-xs text-slate-500 font-medium mt-0.5">
-                      Các gói giải pháp và tư vấn chuyển đổi số kỹ thuật nổi bật khác của CIC
+                      {isEn
+                        ? 'Other prominent engineering and digital transformation packages by CIC'
+                        : 'Các gói giải pháp và tư vấn chuyển đổi số kỹ thuật nổi bật khác của CIC'}
                     </p>
                   </div>
 
@@ -815,7 +870,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
 
                           {/* Card Footer Action Button */}
                           <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-orange-600 group-hover:text-orange-700 transition-colors">
-                            <span>Xem Chi Tiết Dịch Vụ</span>
+                            <span>{isEn ? 'View Service Details' : 'Xem Chi Tiết Dịch Vụ'}</span>
                             <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
                           </div>
                         </div>
@@ -857,12 +912,12 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                   setFormData(prev => ({
                     ...prev,
                     service: selectedProductModal.name,
-                    notes: `Quan tâm sản phẩm: ${selectedProductModal.name}`
+                    notes: isEn ? `Interested in product: ${selectedProductModal.name}` : `Quan tâm sản phẩm: ${selectedProductModal.name}`
                   }));
                 }}
                 className="w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold uppercase tracking-wider rounded-[8px] transition-all"
               >
-                Yêu cầu báo giá sản phẩm
+                {isEn ? 'Request product quotation' : 'Yêu cầu báo giá sản phẩm'}
               </button>
             </div>
           </div>

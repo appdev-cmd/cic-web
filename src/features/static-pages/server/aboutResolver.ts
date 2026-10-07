@@ -33,15 +33,23 @@ export async function getPublishedAboutPage(
   workspace: 'vi' | 'en' = 'vi',
   code: 'about' | 'organization' | 'capacity_experience' = 'about'
 ): Promise<ResolvedAboutResult> {
-  const legacyAbout = getLegacyAboutPageContent();
-  const legacyCapacity = getLegacyAboutCapacityContent();
+  const legacyAbout = getLegacyAboutPageContent(workspace);
+  const legacyCapacity = getLegacyAboutCapacityContent(workspace);
 
   const defaultResult: ResolvedAboutResult = {
     page: {
       id: code === 'about' ? 2 : code === 'organization' ? 3 : 4,
       code,
-      slug: code === 'about' ? '/gioi-thieu' : code === 'organization' ? '/gioi-thieu/co-cau-to-chuc' : '/gioi-thieu/nang-luc-kinh-nghiem',
-      name: code === 'about' ? 'Giới thiệu' : code === 'organization' ? 'Cơ cấu tổ chức' : 'Năng lực & Kinh nghiệm',
+      slug: code === 'about'
+        ? (workspace === 'en' ? '/en/about' : '/gioi-thieu')
+        : code === 'organization'
+        ? (workspace === 'en' ? '/en/about/organization' : '/gioi-thieu/co-cau-to-chuc')
+        : (workspace === 'en' ? '/en/about/capacity-experience' : '/gioi-thieu/nang-luc-kinh-nghiem'),
+      name: code === 'about'
+        ? (workspace === 'en' ? 'About Us' : 'Giới thiệu')
+        : code === 'organization'
+        ? (workspace === 'en' ? 'Organization Structure' : 'Cơ cấu tổ chức')
+        : (workspace === 'en' ? 'Capacity & Experience' : 'Năng lực & Kinh nghiệm'),
       seoTitle: '',
       seoDescription: '',
       isPublished: false,

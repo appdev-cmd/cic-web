@@ -3,6 +3,7 @@ import { Building2, Users, Award } from 'lucide-react';
 import { createElementBinding } from '@shared/visual-editing/elementBindingTypes';
 import type { ElementBindingRegistry } from '@shared/visual-editing/elementBindingRegistry';
 import type { PageRenderPolicy } from '@shared/page-content/models';
+import { useI18n } from '@/shared/i18n';
 import { bindElement, textFrom } from './aboutUtils';
 
 export type AboutTabKey = 'overview' | 'structure' | 'experience';
@@ -24,10 +25,13 @@ export function AboutHeroBanner({
   renderPolicy,
   resolveMediaUrl,
 }: AboutHeroBannerProps) {
+  const { locale } = useI18n();
+  const isEn = locale === 'en';
+
   const tabs: Array<{ id: AboutTabKey; label: string }> = [
-    { id: 'overview', label: 'Tổng quan doanh nghiệp' },
-    { id: 'structure', label: 'Cơ cấu tổ chức' },
-    { id: 'experience', label: 'Năng lực & Kinh nghiệm' },
+    { id: 'overview', label: isEn ? 'Corporate Overview' : 'Tổng quan doanh nghiệp' },
+    { id: 'structure', label: isEn ? 'Organization Structure' : 'Cơ cấu tổ chức' },
+    { id: 'experience', label: isEn ? 'Capacity & Experience' : 'Năng lực & Kinh nghiệm' },
   ];
 
   return (
@@ -88,7 +92,7 @@ export function AboutHeroBanner({
               data-page-builder-config-path={JSON.stringify(['badge'])}
               className="text-[10px] font-black uppercase tracking-[0.3em] text-white"
             >
-              {textFrom(heroConfig, 'badge', 'Về chúng tôi')}
+              {textFrom(heroConfig, 'badge', isEn ? 'About Us' : 'Về chúng tôi')}
             </span>
           </div>
 
@@ -106,7 +110,7 @@ export function AboutHeroBanner({
             data-page-builder-config-path={JSON.stringify(['title'])}
             className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight mb-3 lg:mb-4 tracking-tighter max-w-4xl mx-auto [text-shadow:_0_4px_12px_rgb(0_0_0_/_80%)]"
           >
-            {textFrom(heroConfig, 'title', 'HƠN 35 NĂM NHỊP BƯỚC CÙNG CÔNG NGHỆ')}
+            {textFrom(heroConfig, 'title', isEn ? 'OVER 35 YEARS OF ADVANCING WITH TECHNOLOGY' : 'HƠN 35 NĂM NHỊP BƯỚC CÙNG CÔNG NGHỆ')}
           </h1>
 
           <p
@@ -126,7 +130,9 @@ export function AboutHeroBanner({
             {textFrom(
               heroConfig,
               'subtitle',
-              'Tiên phong cung cấp giải pháp phần mềm kỹ thuật, thiết bị công nghệ và tư vấn chuyển đổi số toàn diện cho ngành Xây dựng Việt Nam.'
+              isEn
+                ? 'Pioneering in engineering software solutions, technological equipment, and comprehensive digital transformation consulting for Vietnam construction industry.'
+                : 'Tiên phong cung cấp giải pháp phần mềm kỹ thuật, thiết bị công nghệ và tư vấn chuyển đổi số toàn diện cho ngành Xây dựng Việt Nam.'
             )}
           </p>
         </div>

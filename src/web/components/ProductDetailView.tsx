@@ -163,7 +163,8 @@ export function ProductDetailView({
   onSelectProduct,
   contacts
 }: ProductDetailViewProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const isEn = locale === 'en';
   const [activeTab, setActiveTab] = useState<'overview' | 'features' | 'video' | 'documents'>('overview');
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -257,7 +258,9 @@ export function ProductDetailView({
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-slate-400 select-none">
                     <ImageIcon className="w-12 h-12 text-slate-300 stroke-[1.5]" />
-                    <span className="text-xs font-medium text-slate-400">Chưa có hình ảnh sản phẩm</span>
+                    <span className="text-xs font-medium text-slate-400">
+                      {isEn ? 'No product image available' : 'Chưa có hình ảnh sản phẩm'}
+                    </span>
                   </div>
                 )}
 
@@ -352,7 +355,7 @@ export function ProductDetailView({
                 className="w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold uppercase tracking-wider text-xs transition-all shadow-md shadow-orange-600/15 flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-lg"
               >
                 <MessageSquare size={16} />
-                Yêu cầu tư vấn
+                {isEn ? 'Request Consultation' : 'Yêu cầu tư vấn'}
               </button>
               
               {!isEquipment && (
@@ -361,7 +364,7 @@ export function ProductDetailView({
                   className="w-full py-2.5 bg-slate-900 hover:bg-orange-600 text-white font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-lg"
                 >
                   <Download size={16} />
-                  Tải phần mềm
+                  {isEn ? 'Download Software' : 'Tải phần mềm'}
                 </button>
               )}
 
@@ -425,7 +428,9 @@ export function ProductDetailView({
                     ) : (
                       <div className="p-8 text-center bg-slate-50 border border-dashed border-slate-200 rounded-[8px]">
                         <FileText size={32} className="mx-auto text-slate-400 mb-2" />
-                        <p className="text-slate-500 text-sm font-medium">Chưa có thông tin tổng quan cho sản phẩm này.</p>
+                        <p className="text-slate-500 text-sm font-medium">
+                          {isEn ? 'No overview information available for this product.' : 'Chưa có thông tin tổng quan cho sản phẩm này.'}
+                        </p>
                       </div>
                     )}
                   </CollapsibleContent>
@@ -447,7 +452,9 @@ export function ProductDetailView({
                     ) : (
                       <div className="p-8 text-center bg-slate-50 border border-dashed border-slate-200 rounded-[8px]">
                         <Layers size={32} className="mx-auto text-slate-400 mb-2" />
-                        <p className="text-slate-500 text-sm font-medium">Không có thông tin tính năng cho sản phẩm này.</p>
+                        <p className="text-slate-500 text-sm font-medium">
+                          {isEn ? 'No feature details available for this product.' : 'Không có thông tin tính năng cho sản phẩm này.'}
+                        </p>
                       </div>
                     )}
                   </CollapsibleContent>
@@ -471,12 +478,18 @@ export function ProductDetailView({
                           className="w-full h-full border-0"
                         />
                       </div>
-                      <p className="text-xs text-slate-500 font-medium">Video giới thiệu tính năng thực tế, hướng dẫn cài đặt và ứng dụng của {product.name}</p>
+                      <p className="text-xs text-slate-500 font-medium">
+                        {isEn
+                          ? `Introduction video, tutorial, and applications for ${product.name}`
+                          : `Video giới thiệu tính năng thực tế, hướng dẫn cài đặt và ứng dụng của ${product.name}`}
+                      </p>
                     </>
                   ) : (
                     <div className="p-8 text-center bg-slate-50 border border-dashed border-slate-200 rounded-[8px]">
                       <Play size={32} className="mx-auto text-slate-400 mb-2" />
-                      <p className="text-slate-500 text-sm font-medium">Không có video cho sản phẩm này.</p>
+                      <p className="text-slate-500 text-sm font-medium">
+                        {isEn ? 'No video available for this product.' : 'Không có video cho sản phẩm này.'}
+                      </p>
                     </div>
                   )}
                 </motion.div>
@@ -490,7 +503,9 @@ export function ProductDetailView({
                 >
                   {product.documents && product.documents.length > 0 ? (
                     <>
-                      <span className="text-xs font-black uppercase tracking-wider text-slate-400 block mb-2">Liên kết tải bộ cài dùng thử & tài liệu hướng dẫn sử dụng:</span>
+                      <span className="text-xs font-black uppercase tracking-wider text-slate-400 block mb-2">
+                        {isEn ? 'Trial installer and user guide documentation:' : 'Liên kết tải bộ cài dùng thử & tài liệu hướng dẫn sử dụng:'}
+                      </span>
                       {product.documents.map((doc, idx) => (
                         <a 
                           key={idx}
@@ -515,7 +530,9 @@ export function ProductDetailView({
                   ) : (
                     <div className="p-8 text-center bg-slate-50 border border-dashed border-slate-200 rounded-[8px]">
                       <Download size={32} className="mx-auto text-slate-400 mb-2" />
-                      <p className="text-slate-500 text-sm font-medium">Không có file hướng dẫn hoặc tài liệu đính kèm cho sản phẩm này.</p>
+                      <p className="text-slate-500 text-sm font-medium">
+                        {isEn ? 'No user manual or attached documentation for this product.' : 'Không có file hướng dẫn hoặc tài liệu đính kèm cho sản phẩm này.'}
+                      </p>
                     </div>
                   )}
                 </motion.div>
@@ -536,23 +553,29 @@ export function ProductDetailView({
                 <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
                   <Phone size={16} />
                 </div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-950">HỖ TRỢ TRỰC TUYẾN</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-950">
+                  {isEn ? 'ONLINE SUPPORT' : 'HỖ TRỢ TRỰC TUYẾN'}
+                </h3>
               </div>
 
               <div className="space-y-6 text-sm">
-                <ContactGroup label="Đại diện Kinh doanh" contacts={contacts?.sales.length ? contacts.sales : contacts?.contact ?? []} accent />
-                <ContactGroup label="Hỗ trợ kỹ thuật" contacts={contacts?.technical ?? []} />
-                <ContactGroup label="Kinh doanh Miền Bắc" contacts={contacts?.northSales ?? []} />
-                <ContactGroup label="Kinh doanh Miền Nam" contacts={contacts?.southSales ?? []} />
+                <ContactGroup label={isEn ? 'Sales Representative' : 'Đại diện Kinh doanh'} contacts={contacts?.sales.length ? contacts.sales : contacts?.contact ?? []} accent />
+                <ContactGroup label={isEn ? 'Technical Support' : 'Hỗ trợ kỹ thuật'} contacts={contacts?.technical ?? []} />
+                <ContactGroup label={isEn ? 'Northern Sales' : 'Kinh doanh Miền Bắc'} contacts={contacts?.northSales ?? []} />
+                <ContactGroup label={isEn ? 'Southern Sales' : 'Kinh doanh Miền Nam'} contacts={contacts?.southSales ?? []} />
                 {!contacts || Object.values(contacts).every((group) => group.length === 0) ? (
-                  <p className="rounded-lg bg-slate-50 p-3 text-xs font-medium text-slate-500">Thông tin đầu mối đang được cập nhật. Vui lòng gửi yêu cầu để CIC liên hệ lại.</p>
+                  <p className="rounded-lg bg-slate-50 p-3 text-xs font-medium text-slate-500">
+                    {isEn ? 'Contact information is being updated. Please submit an inquiry for CIC to reach out.' : 'Thông tin đầu mối đang được cập nhật. Vui lòng gửi yêu cầu để CIC liên hệ lại.'}
+                  </p>
                 ) : null}
               </div>
 
               {/* Extra Support Advice */}
               <div className="pt-4 border-t border-slate-100 text-center space-y-2">
                 <p className="text-xs text-slate-400 font-medium leading-relaxed">
-                  Quý khách vui lòng liên hệ trực tiếp số hotline hoặc gửi yêu cầu để đại diện kỹ thuật CIC hỗ trợ tức thời trong 1 giờ làm việc.
+                  {isEn
+                    ? 'Please contact our hotline directly or submit a request for prompt technical support within 1 business hour.'
+                    : 'Quý khách vui lòng liên hệ trực tiếp số hotline hoặc gửi yêu cầu để đại diện kỹ thuật CIC hỗ trợ tức thời trong 1 giờ làm việc.'}
                 </p>
               </div>
 
@@ -565,8 +588,12 @@ export function ProductDetailView({
         {/* Related Products Section (Sản phẩm liên quan) */}
         <div className="pt-16 border-t border-slate-200 mt-16 space-y-8">
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-extrabold uppercase tracking-tight text-[#333]">Sản phẩm liên quan</h3>
-            <span className="text-xs font-bold uppercase tracking-wider text-orange-600">Được đề xuất nhiều nhất</span>
+            <h3 className="text-xl font-extrabold uppercase tracking-tight text-[#333]">
+              {isEn ? 'Related Products' : 'Sản phẩm liên quan'}
+            </h3>
+            <span className="text-xs font-bold uppercase tracking-wider text-orange-600">
+              {isEn ? 'Most Recommended' : 'Được đề xuất nhiều nhất'}
+            </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
@@ -608,9 +635,11 @@ export function ProductDetailView({
 
                   {/* Price Section */}
                   <div className="flex items-baseline gap-2 pt-0.5">
-                    <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">Giá bán:</span>
+                    <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">
+                      {isEn ? 'Price:' : 'Giá bán:'}
+                    </span>
                     <span className="text-sm sm:text-base font-extrabold text-orange-600 tracking-tight">
-                      {rel.price === 'Liên hệ' ? 'Liên hệ' : rel.price}
+                      {rel.price === 'Liên hệ' ? (isEn ? 'Contact Us' : 'Liên hệ') : rel.price}
                     </span>
                   </div>
 
@@ -631,10 +660,10 @@ export function ProductDetailView({
                           onContact(rel);
                         }}
                         className="flex-1 py-2 px-1.5 sm:px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-[13px] font-semibold rounded-lg border border-slate-200/90 transition-all duration-200 flex items-center justify-center gap-1.5 text-center active:scale-95 cursor-pointer shadow-2xs"
-                        title="Liên hệ tư vấn"
+                        title={isEn ? 'Contact Consultation' : 'Liên hệ tư vấn'}
                       >
                         <PhoneCall size={13.5} className="text-slate-600 shrink-0" />
-                        <span className="truncate">Tư vấn</span>
+                        <span className="truncate">{isEn ? 'Consult' : 'Tư vấn'}</span>
                       </button>
 
                       {/* 2. Trắng viền cam: Tải về */}
@@ -645,10 +674,10 @@ export function ProductDetailView({
                           onDownload(rel);
                         }}
                         className="flex-1 py-2 px-1.5 sm:px-2 bg-white hover:bg-orange-50 text-orange-600 hover:text-orange-700 text-[13px] font-semibold rounded-lg border border-orange-500/80 hover:border-orange-600 transition-all duration-200 flex items-center justify-center gap-1.5 text-center active:scale-95 cursor-pointer shadow-2xs"
-                        title="Tải bộ cài & tài liệu"
+                        title={isEn ? 'Download Installer & Docs' : 'Tải bộ cài & tài liệu'}
                       >
                         <Download size={13.5} className="text-orange-600 shrink-0" />
-                        <span className="truncate">Tải về</span>
+                        <span className="truncate">{isEn ? 'Download' : 'Tải về'}</span>
                       </button>
 
                       {/* 3. Full cam: Mua ngay */}
@@ -659,10 +688,10 @@ export function ProductDetailView({
                           onBuy(rel);
                         }}
                         className="flex-1 py-2 px-1.5 sm:px-2 bg-orange-600 hover:bg-orange-700 text-white text-[13px] font-semibold rounded-lg shadow-xs shadow-orange-600/30 hover:shadow-orange-600/40 transition-all duration-200 flex items-center justify-center gap-1.5 text-center active:scale-95 cursor-pointer"
-                        title="Đăng ký mua bản quyền / sản phẩm"
+                        title={isEn ? 'Register License / Product Purchase' : 'Đăng ký mua bản quyền / sản phẩm'}
                       >
                         <ShoppingCart size={13.5} className="text-white shrink-0" />
-                        <span className="truncate">Mua ngay</span>
+                        <span className="truncate">{isEn ? 'Buy Now' : 'Mua ngay'}</span>
                       </button>
                     </div>
                   </div>
@@ -670,7 +699,7 @@ export function ProductDetailView({
 
                 {/* Product Details Action at Bottom */}
                 <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-xs sm:text-[13px] font-bold text-orange-600 group-hover:text-orange-700 transition-colors">
-                  <span className="font-bold tracking-tight">Chi tiết sản phẩm</span>
+                  <span className="font-bold tracking-tight">{isEn ? 'Product Details' : 'Chi tiết sản phẩm'}</span>
                   <ChevronRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </div>

@@ -15,6 +15,7 @@ import { AwardsSlider } from '../AwardsSlider';
 import { createElementBinding, createCollectionItemPath } from '@shared/visual-editing/elementBindingTypes';
 import type { ElementBindingRegistry } from '@shared/visual-editing/elementBindingRegistry';
 import type { AboutPageModel, PageRenderPolicy } from '@shared/page-content/models';
+import { useI18n } from '@/shared/i18n';
 import { bindElement, getYoutubeEmbedUrl, textFrom } from './aboutUtils';
 
 interface AboutOverviewTabProps {
@@ -56,6 +57,9 @@ export function AboutOverviewTab({
   renderPolicy,
   resolveMediaUrl,
 }: AboutOverviewTabProps) {
+  const { locale } = useI18n();
+  const isEn = locale === 'en';
+
   return (
     <motion.div
       key="overview"
@@ -68,7 +72,7 @@ export function AboutOverviewTab({
       <section data-page-builder-section-key="about.overview" className="pb-4 lg:pb-6 bg-transparent relative overflow-hidden z-10 border-b border-slate-100">
         <div className="w-full relative z-10">
           <SectionHeader
-            title={textFrom(overviewConfig, 'title', 'Tổng quan doanh nghiệp')}
+            title={textFrom(overviewConfig, 'title', isEn ? 'Corporate Overview' : 'Tổng quan doanh nghiệp')}
             className="!mb-4"
             titleProps={
               {
@@ -129,7 +133,7 @@ export function AboutOverviewTab({
                 data-page-builder-config-path={JSON.stringify(['badge'])}
                 className="text-[10px] font-black uppercase tracking-widest"
               >
-                {textFrom(timelineConfig, 'badge', 'Hành trình 35 năm')}
+                {textFrom(timelineConfig, 'badge', isEn ? '35-Year Journey' : 'Hành trình 35 năm')}
               </span>
             </div>
             <h2
@@ -141,13 +145,21 @@ export function AboutOverviewTab({
               className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2"
             >
               {(() => {
-                const t = textFrom(timelineConfig, 'title', aboutContent.timeline.title || 'Hành trình 35 năm');
+                const t = textFrom(timelineConfig, 'title', isEn ? '35-Year Journey' : (aboutContent.timeline.title || 'Hành trình 35 năm'));
                 if (t.toLowerCase().includes('35 năm')) {
                   const [p1] = t.split(/35\s*năm/i);
                   return (
                     <>
                       <span className="text-slate-900">{p1 || 'Hành trình '}</span>
                       <span className="text-orange-600">35 năm</span>
+                    </>
+                  );
+                }
+                if (t.toLowerCase().includes('35-year') || t.toLowerCase().includes('35 year')) {
+                  return (
+                    <>
+                      <span className="text-orange-600">35-Year</span>{' '}
+                      <span className="text-slate-900">Journey</span>
                     </>
                   );
                 }
@@ -165,7 +177,9 @@ export function AboutOverviewTab({
               {textFrom(
                 timelineConfig,
                 'description',
-                'Chặng đường vươn lên trở thành một trong những đơn vị tiên phong trong lĩnh vực công nghệ và tư vấn xây dựng tại Việt Nam.'
+                isEn
+                  ? 'The journey of rising to become one of the pioneers in technology and construction consulting in Vietnam.'
+                  : 'Chặng đường vươn lên trở thành một trong những đơn vị tiên phong trong lĩnh vực công nghệ và tư vấn xây dựng tại Việt Nam.'
               )}
             </p>
           </div>
@@ -238,8 +252,8 @@ export function AboutOverviewTab({
       <section data-page-builder-section-key="about.strategy" className="py-10 bg-slate-50 border-b border-slate-100 z-10 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <SectionHeader
-            title={textFrom(strategyConfig, 'title', aboutContent.strategy.title || 'Định hướng chiến lược')}
-            sub={textFrom(strategyConfig, 'subtitle', aboutContent.strategy.subtitle || 'Tầm nhìn kiến tạo giá trị công nghệ bền vững')}
+            title={textFrom(strategyConfig, 'title', isEn ? 'Strategic Direction' : (aboutContent.strategy.title || 'Định hướng chiến lược'))}
+            sub={textFrom(strategyConfig, 'subtitle', isEn ? 'Vision for creating sustainable technology value' : (aboutContent.strategy.subtitle || 'Tầm nhìn kiến tạo giá trị công nghệ bền vững'))}
             titleProps={
               {
                 ...bindElement<HTMLHeadingElement>(
@@ -267,7 +281,7 @@ export function AboutOverviewTab({
                 data-page-builder-media-path={JSON.stringify(['imageId'])}
                 data-page-builder-media-id={textFrom(strategyConfig, 'imageId', '')}
                 src={resolveMediaUrl(textFrom(strategyConfig, 'imageId', '/35nam_cic_1.JPG'))}
-                alt="Định hướng chiến lược"
+                alt={isEn ? 'Strategic Direction' : 'Định hướng chiến lược'}
                 loading="lazy"
                 decoding="async"
                 className={`w-full h-full object-cover rounded-[10px] ${
@@ -285,7 +299,7 @@ export function AboutOverviewTab({
                   <ShieldCheck size={28} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-2">Sứ mệnh</h3>
+                  <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-2">{isEn ? 'Mission' : 'Sứ mệnh'}</h3>
                   <p
                     {...bindElement(
                       bindingRegistry,
@@ -294,7 +308,7 @@ export function AboutOverviewTab({
                     data-page-builder-config-path={JSON.stringify(['mission'])}
                     className="text-slate-600 leading-relaxed text-sm md:text-base"
                   >
-                    {textFrom(strategyConfig, 'mission', aboutContent.strategy.mission || 'Đưa công nghệ tiên tiến vào thực tiễn ngành xây dựng.')}
+                    {textFrom(strategyConfig, 'mission', isEn ? 'Bringing advanced technology into the practice of the construction industry.' : (aboutContent.strategy.mission || 'Đưa công nghệ tiên tiến vào thực tiễn ngành xây dựng.'))}
                   </p>
                 </div>
               </div>
@@ -305,7 +319,7 @@ export function AboutOverviewTab({
                   <Globe size={28} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-2">Tầm nhìn</h3>
+                  <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-2">{isEn ? 'Vision' : 'Tầm nhìn'}</h3>
                   <p
                     {...bindElement(
                       bindingRegistry,
@@ -314,7 +328,7 @@ export function AboutOverviewTab({
                     data-page-builder-config-path={JSON.stringify(['vision'])}
                     className="text-slate-600 leading-relaxed text-sm md:text-base"
                   >
-                    {textFrom(strategyConfig, 'vision', aboutContent.strategy.vision || 'Trở thành doanh nghiệp công nghệ chuyên sâu hàng đầu.')}
+                    {textFrom(strategyConfig, 'vision', isEn ? 'To become a leading specialized technology enterprise in the region.' : (aboutContent.strategy.vision || 'Trở thành doanh nghiệp công nghệ chuyên sâu hàng đầu.'))}
                   </p>
                 </div>
               </div>
@@ -325,7 +339,7 @@ export function AboutOverviewTab({
                   <Award size={28} />
                 </div>
                 <div className="relative z-10 w-full">
-                  <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-4">Giá trị cốt lõi</h3>
+                  <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-4">{isEn ? 'Core Values' : 'Giá trị cốt lõi'}</h3>
                   <div
                     {...bindElement(
                       bindingRegistry,
@@ -373,8 +387,8 @@ export function AboutOverviewTab({
       <section data-page-builder-section-key="about.offerings" id="solutions" className="py-16 bg-transparent text-slate-900 relative overflow-hidden z-10 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <SectionHeader
-            title={textFrom(offeringsConfig, 'title', 'SẢN PHẨM VÀ DỊCH VỤ CUNG CẤP')}
-            sub={textFrom(offeringsConfig, 'subtitle', 'Khẳng định năng lực qua các giải pháp công nghệ cốt lõi')}
+            title={textFrom(offeringsConfig, 'title', isEn ? 'PRODUCTS AND SERVICES OFFERED' : 'SẢN PHẨM VÀ DỊCH VỤ CUNG CẤP')}
+            sub={textFrom(offeringsConfig, 'subtitle', isEn ? 'Affirming capability through core technological solutions' : 'Khẳng định năng lực qua các giải pháp công nghệ cốt lõi')}
             titleProps={
               {
                 ...bindElement<HTMLHeadingElement>(
@@ -426,8 +440,8 @@ export function AboutOverviewTab({
       <section data-page-builder-section-key="about.awards" className="py-16 bg-slate-50/60 relative overflow-hidden z-10 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <SectionHeader
-            title={textFrom(awardsConfig, 'title', 'Thành tựu & Giải thưởng')}
-            sub={textFrom(awardsConfig, 'subtitle', 'Minh chứng cho nỗ lực không ngừng nghỉ')}
+            title={textFrom(awardsConfig, 'title', isEn ? 'Achievements & Awards' : 'Thành tựu & Giải thưởng')}
+            sub={textFrom(awardsConfig, 'subtitle', isEn ? 'Testament to relentless efforts' : 'Minh chứng cho nỗ lực không ngừng nghỉ')}
             titleProps={
               {
                 ...bindElement<HTMLHeadingElement>(
@@ -459,7 +473,9 @@ export function AboutOverviewTab({
               {textFrom(
                 awardsConfig,
                 'description',
-                'Hơn 35 năm phát triển, CIC vinh dự nhận nhiều bằng khen, cúp và giải thưởng uy tín từ các cơ quan Nhà nước và hiệp hội chuyên ngành – tiêu biểu như Huân chương Lao động hạng Ba, Bằng khen của Thủ tướng Chính phủ, cùng các giải thưởng công nghệ danh giá như Sao Khuê, Sao Vàng Đất Việt và Vifotec. Đây là minh chứng cho chất lượng sản phẩm và uy tín thương hiệu mà CIC đã bền bỉ xây dựng trong suốt hành trình đồng hành cùng ngành Xây dựng Việt Nam.'
+                isEn
+                  ? 'Over 35 years of growth, CIC has been honored with numerous certificates of merit, cups, and prestigious awards from state authorities and professional associations - notably the Third-class Labor Order, Prime Minister Certificate of Merit, and prestigious tech awards such as Sao Khue, Vietnam Gold Star, and Vifotec. This is a testament to the product quality and brand reputation that CIC has consistently built throughout its journey with Vietnam construction industry.'
+                  : 'Hơn 35 năm phát triển, CIC vinh dự nhận nhiều bằng khen, cúp và giải thưởng uy tín từ các cơ quan Nhà nước và hiệp hội chuyên ngành – tiêu biểu như Huân chương Lao động hạng Ba, Bằng khen của Thủ tướng Chính phủ, cùng các giải thưởng công nghệ danh giá như Sao Khuê, Sao Vàng Đất Việt và Vifotec. Đây là minh chứng cho chất lượng sản phẩm và uy tín thương hiệu mà CIC đã bền bỉ xây dựng trong suốt hành trình đồng hành cùng ngành Xây dựng Việt Nam.'
               )}
             </p>
           </div>
@@ -473,8 +489,8 @@ export function AboutOverviewTab({
       <section data-page-builder-section-key="about.partners" className="py-10 bg-transparent border-b border-slate-100 overflow-hidden relative z-10">
         <div className="max-w-7xl mx-auto px-6 mb-12 relative z-10">
           <SectionHeader
-            title={textFrom(partnersConfig, 'title', 'Đối tác chiến lược & Khách hàng tiêu biểu')}
-            sub={textFrom(partnersConfig, 'subtitle', 'Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới')}
+            title={textFrom(partnersConfig, 'title', isEn ? 'Strategic Partners & Key Clients' : 'Đối tác chiến lược & Khách hàng tiêu biểu')}
+            sub={textFrom(partnersConfig, 'subtitle', isEn ? 'Cooperating with leading global tech corporations' : 'Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới')}
             titleProps={
               {
                 ...bindElement<HTMLHeadingElement>(
@@ -507,7 +523,9 @@ export function AboutOverviewTab({
               {textFrom(
                 partnersConfig,
                 'description',
-                'Với mạng lưới khách hàng rộng khắp trên cả nước, CIC hiện là đối tác tin cậy của hơn 1.000 khách hàng tại Việt Nam và là đối tác chính thức của nhiều hãng công nghệ hàng đầu thế giới.'
+                isEn
+                  ? 'With a nationwide network, CIC is currently a trusted partner of more than 1,000 customers in Vietnam and an official partner of many world-leading technology companies.'
+                  : 'Với mạng lưới khách hàng rộng khắp trên cả nước, CIC hiện là đối tác tin cậy của hơn 1.000 khách hàng tại Việt Nam và là đối tác chính thức của nhiều hãng công nghệ hàng đầu thế giới.'
               )}
             </p>
           </div>

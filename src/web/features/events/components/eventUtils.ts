@@ -19,7 +19,17 @@ export const getDaysRemaining = (isoDateStr: string) => {
   return days > 0 ? days : 0;
 };
 
-export const getStatusLabel = (status: 'upcoming' | 'ongoing' | 'past') => {
+export const getStatusLabel = (status: 'upcoming' | 'ongoing' | 'past', locale: 'vi' | 'en' = 'vi') => {
+  if (locale === 'en') {
+    switch (status) {
+      case 'upcoming':
+        return 'Upcoming';
+      case 'ongoing':
+        return 'Ongoing';
+      case 'past':
+        return 'Ended';
+    }
+  }
   switch (status) {
     case 'upcoming':
       return 'Sắp diễn ra';

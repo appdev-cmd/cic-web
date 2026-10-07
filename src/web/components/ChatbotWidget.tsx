@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Bot, X, Send, RefreshCw, ExternalLink, Settings, Check, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { useI18n } from '@/shared/i18n';
 
 interface ChatMessage {
   id: string;
@@ -36,6 +37,9 @@ export function ChatbotWidget({
   email = 'info@cic.com.vn',
   address = 'Tầng 4, Tòa nhà VG Building, 235 Nguyễn Trãi, Thanh Xuân, Hà Nội',
 }: ChatbotWidgetProps) {
+  const { locale } = useI18n();
+  const isEn = locale === 'en';
+
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [sessionId] = useState(() => 'session_' + Math.random().toString(36).substring(2, 9));
@@ -73,18 +77,32 @@ export function ChatbotWidget({
     {
       id: '1',
       sender: 'bot',
-      text: 'Xin chào! Tôi là Trợ lý AI của CIC Technology. Tôi có thể hỗ trợ gì cho bạn về các giải pháp phần mềm, tư vấn BIM và dịch vụ chuyển đổi số?',
+      text: isEn
+        ? 'Hello! I am the AI Assistant of CIC Technology. How can I assist you with software solutions, BIM consulting, and digital transformation services?'
+        : 'Xin chào! Tôi là Trợ lý AI của CIC Technology. Tôi có thể hỗ trợ gì cho bạn về các giải pháp phần mềm, tư vấn BIM và dịch vụ chuyển đổi số?',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      suggestions: [
-        'Tìm hiểu phần mềm Xây dựng & BIM',
-        'Đăng ký tư vấn giải pháp',
-        'Liên hệ Hotline & Zalo',
-        'Các dịch vụ CIC cung cấp'
-      ]
+      suggestions: isEn
+        ? [
+            'Explore Construction & BIM Software',
+            'Request Solution Consultation',
+            'Contact Hotline & Email',
+            'Services Offered by CIC'
+          ]
+        : [
+            'Tìm hiểu phần mềm Xây dựng & BIM',
+            'Đăng ký tư vấn giải pháp',
+            'Liên hệ Hotline & Zalo',
+            'Các dịch vụ CIC cung cấp'
+          ]
     }
   ];
 
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
+
+  // Sync initial message on locale change
+  useEffect(() => {
+    setMessages(initialMessages);
+  }, [locale]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -107,61 +125,85 @@ export function ChatbotWidget({
     let actionBtn: ChatMessage['actionBtn'] = undefined;
 
     if (lower.includes('xin chào') || lower.includes('hello') || lower.includes('hi')) {
-      botResponse = 'Rất vui được hỗ trợ bạn! CIC Technology là đối tác chiến lược hàng đầu trong lĩnh vực phần mềm Xây dựng, Giao thông, Công nghiệp và tư vấn ứng dụng BIM tại Việt Nam.';
-      suggestions = ['Xem danh mục Sản phẩm', 'Đăng ký tư vấn báo giá', 'Dịch vụ Tư vấn BIM'];
-    } else if (lower.includes('báo giá') || lower.includes('giá') || lower.includes('tư vấn') || lower.includes('đăng ký')) {
-      botResponse = `Để nhận báo giá chi tiết và được tư vấn trực tiếp theo nhu cầu dự án của bạn, bạn có thể gửi yêu cầu qua Form tư vấn nhanh hoặc liên hệ Hotline ${hotline}.`;
+      botResponse = isEn
+        ? 'Happy to assist you! CIC Technology is a leading strategic partner in Construction, Transportation, Industrial engineering software and BIM consulting in Vietnam.'
+        : 'Rất vui được hỗ trợ bạn! CIC Technology là đối tác chiến lược hàng đầu trong lĩnh vực phần mềm Xây dựng, Giao thông, Công nghiệp và tư vấn ứng dụng BIM tại Việt Nam.';
+      suggestions = isEn
+        ? ['View Product Catalog', 'Request Quotation', 'BIM Consulting Services']
+        : ['Xem danh mục Sản phẩm', 'Đăng ký tư vấn báo giá', 'Dịch vụ Tư vấn BIM'];
+    } else if (lower.includes('báo giá') || lower.includes('giá') || lower.includes('tư vấn') || lower.includes('đăng ký') || lower.includes('price') || lower.includes('quote')) {
+      botResponse = isEn
+        ? `To receive a detailed quotation and direct consultation tailored to your project requirements, you can submit our quick consultation form or call our Hotline at ${hotline}.`
+        : `Để nhận báo giá chi tiết và được tư vấn trực tiếp theo nhu cầu dự án của bạn, bạn có thể gửi yêu cầu qua Form tư vấn nhanh hoặc liên hệ Hotline ${hotline}.`;
       actionBtn = {
-        label: 'Mở Form Đăng ký Tư vấn',
+        label: isEn ? 'Open Consultation Form' : 'Mở Form Đăng ký Tư vấn',
         action: () => {
           onClose();
           onOpenConsultation();
         }
       };
-      suggestions = [`Gọi Hotline: ${hotline}`, 'Trang liên hệ chi tiết'];
-    } else if (lower.includes('bim') || lower.includes('xây dựng') || lower.includes('phần mềm') || lower.includes('sản phẩm')) {
-      botResponse = 'CIC cung cấp hệ sinh thái phần mềm bản quyền chuyên ngành Xây dựng, Kết cấu, Đất đai, Hạ tầng & giải pháp BIM tiên tiến. Bạn có thể xem danh mục sản phẩm đầy đủ trên website.';
+      suggestions = isEn
+        ? [`Call Hotline: ${hotline}`, 'Contact Page']
+        : [`Gọi Hotline: ${hotline}`, 'Trang liên hệ chi tiết'];
+    } else if (lower.includes('bim') || lower.includes('xây dựng') || lower.includes('phần mềm') || lower.includes('sản phẩm') || lower.includes('software')) {
+      botResponse = isEn
+        ? 'CIC provides a comprehensive ecosystem of licensed engineering software for Construction, Structural analysis, Geotechnical, Infrastructure & advanced BIM solutions. You can browse our full catalog on the website.'
+        : 'CIC cung cấp hệ sinh thái phần mềm bản quyền chuyên ngành Xây dựng, Kết cấu, Đất đai, Hạ tầng & giải pháp BIM tiên tiến. Bạn có thể xem danh mục sản phẩm đầy đủ trên website.';
       actionBtn = {
-        label: 'Xem Danh mục Sản phẩm',
+        label: isEn ? 'View Product Catalog' : 'Xem Danh mục Sản phẩm',
         action: () => {
           onClose();
           onNavigateView('products');
         }
       };
-      suggestions = ['Dịch vụ Tư vấn BIM', 'Yêu cầu Báo giá phần mềm'];
-    } else if (lower.includes('dịch vụ') || lower.includes('chuyển đổi số') || lower.includes('kiểm định')) {
-      botResponse = 'CIC mang đến các dịch vụ chuyên sâu: Tư vấn & Triển khai BIM, Giải pháp Chuyển đổi số doanh nghiệp, Kiểm định & Thử nghiệm công trình, Đào tạo nhân lực.';
+      suggestions = isEn
+        ? ['BIM Consulting Services', 'Request Software Quote']
+        : ['Dịch vụ Tư vấn BIM', 'Yêu cầu Báo giá phần mềm'];
+    } else if (lower.includes('dịch vụ') || lower.includes('chuyển đổi số') || lower.includes('kiểm định') || lower.includes('service')) {
+      botResponse = isEn
+        ? 'CIC offers specialized engineering services: BIM Consulting & Implementation, Enterprise Digital Transformation Solutions, Structural Inspection & Testing, and Professional Training.'
+        : 'CIC mang đến các dịch vụ chuyên sâu: Tư vấn & Triển khai BIM, Giải pháp Chuyển đổi số doanh nghiệp, Kiểm định & Thử nghiệm công trình, Đào tạo nhân lực.';
       actionBtn = {
-        label: 'Khám phá Dịch vụ CIC',
+        label: isEn ? 'Explore CIC Services' : 'Khám phá Dịch vụ CIC',
         action: () => {
           onClose();
           onNavigateView('services');
         }
       };
-      suggestions = ['Đăng ký tư vấn', 'Dự án tiêu biểu'];
-    } else if (lower.includes('dự án') || lower.includes('công trình') || lower.includes('đã làm')) {
-      botResponse = 'CIC đã đồng hành cùng hơn 500+ dự án trọng điểm quốc gia về giao thông, hạ tầng và dân dụng trên khắp 63 tỉnh thành Việt Nam.';
+      suggestions = isEn
+        ? ['Request Consultation', 'Featured Projects']
+        : ['Đăng ký tư vấn', 'Dự án tiêu biểu'];
+    } else if (lower.includes('dự án') || lower.includes('công trình') || lower.includes('đã làm') || lower.includes('project')) {
+      botResponse = isEn
+        ? 'CIC has partnered in over 500+ national key infrastructure, civil, and industrial projects throughout Vietnam.'
+        : 'CIC đã đồng hành cùng hơn 500+ dự án trọng điểm quốc gia về giao thông, hạ tầng và dân dụng trên khắp 63 tỉnh thành Việt Nam.';
       actionBtn = {
-        label: 'Xem các Dự án tiêu biểu',
+        label: isEn ? 'View Featured Projects' : 'Xem các Dự án tiêu biểu',
         action: () => {
           onClose();
           onNavigateView('projects');
         }
       };
-    } else if (lower.includes('hotline') || lower.includes('liên hệ') || lower.includes('sđt') || lower.includes('điện thoại') || lower.includes('zalo')) {
-      botResponse = `Thông tin liên hệ trực tiếp của CIC Technology:\n• Hotline: ${hotline}\n• Email: ${email}\n• Địa chỉ: ${address}.`;
+    } else if (lower.includes('hotline') || lower.includes('liên hệ') || lower.includes('sđt') || lower.includes('điện thoại') || lower.includes('zalo') || lower.includes('contact') || lower.includes('phone')) {
+      botResponse = isEn
+        ? `Direct contact information of CIC Technology:\n• Hotline: ${hotline}\n• Email: ${email}\n• Address: ${address}.`
+        : `Thông tin liên hệ trực tiếp của CIC Technology:\n• Hotline: ${hotline}\n• Email: ${email}\n• Địa chỉ: ${address}.`;
       actionBtn = {
-        label: 'Xem thông tin Liên hệ',
+        label: isEn ? 'View Contact Information' : 'Xem thông tin Liên hệ',
         action: () => {
           onClose();
           onNavigateView('contact');
         }
       };
     } else {
-      botResponse = `Cảm ơn câu hỏi của bạn về "${query}". Đội ngũ chuyên gia kĩ thuật của CIC sẵn sàng hỗ trợ chuyên sâu mọi yêu cầu của bạn. Bạn có thể gửi yêu cầu tư vấn hoặc liên hệ Hotline ${hotline}.`;
-      suggestions = ['Đăng ký tư vấn trực tiếp', `Liên hệ Hotline ${hotline}`, 'Xem sản phẩm phần mềm'];
+      botResponse = isEn
+        ? `Thank you for inquiring about "${query}". CIC technical specialists are ready to provide expert guidance. You can submit a consultation request or contact our Hotline at ${hotline}.`
+        : `Cảm ơn câu hỏi của bạn về "${query}". Đội ngũ chuyên gia kĩ thuật của CIC sẵn sàng hỗ trợ chuyên sâu mọi yêu cầu của bạn. Bạn có thể gửi yêu cầu tư vấn hoặc liên hệ Hotline ${hotline}.`;
+      suggestions = isEn
+        ? ['Direct Consultation Request', `Contact Hotline ${hotline}`, 'View Software Products']
+        : ['Đăng ký tư vấn trực tiếp', `Liên hệ Hotline ${hotline}`, 'Xem sản phẩm phần mềm'];
       actionBtn = {
-        label: 'Đăng ký tư vấn ngay',
+        label: isEn ? 'Request Consultation Now' : 'Đăng ký tư vấn ngay',
         action: () => {
           onClose();
           onOpenConsultation();
@@ -356,21 +398,21 @@ export function ChatbotWidget({
           <div className="flex items-center gap-1">
             <button
               onClick={() => setShowSettings(!showSettings)}
-              title="Cấu hình API Webhook"
+              title={isEn ? "Configure API Webhook" : "Cấu hình API Webhook"}
               className={`p-1.5 rounded-lg transition-colors cursor-pointer ${showSettings ? 'bg-white text-orange-600 font-bold shadow-xs' : 'text-orange-100 hover:text-white hover:bg-white/15'}`}
             >
               <Settings className="w-4 h-4" />
             </button>
             <button
               onClick={handleResetChat}
-              title="Làm mới cuộc trò chuyện"
+              title={isEn ? "Reset chat session" : "Làm mới cuộc trò chuyện"}
               className="p-1.5 hover:bg-white/15 rounded-lg text-orange-100 hover:text-white transition-colors cursor-pointer"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
             <button
               onClick={onClose}
-              title="Đóng chat"
+              title={isEn ? "Close chat" : "Đóng chat"}
               className="p-1.5 hover:bg-white/15 rounded-lg text-orange-100 hover:text-white transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
@@ -390,13 +432,13 @@ export function ChatbotWidget({
               <div className="flex items-center justify-between">
                 <span className="font-bold text-orange-700 flex items-center gap-1">
                   <Settings className="w-3.5 h-3.5" />
-                  Cấu hình Webhook API:
+                  {isEn ? 'API Webhook Settings:' : 'Cấu hình Webhook API:'}
                 </span>
                 <button
                   onClick={handleResetDefaultUrl}
                   className="text-[10px] text-slate-500 hover:text-orange-600 underline cursor-pointer"
                 >
-                  Khôi phục mặc định
+                  {isEn ? 'Restore default' : 'Khôi phục mặc định'}
                 </button>
               </div>
 
@@ -405,7 +447,7 @@ export function ChatbotWidget({
                   type="text"
                   value={webhookUrl}
                   onChange={(e) => setWebhookUrl(e.target.value)}
-                  placeholder="URL webhook (VD: https://ngrok-domain.ngrok-free.app/webhook/cic/chat)"
+                  placeholder={isEn ? "Webhook URL (e.g., https://api-domain.com/webhook/cic/chat)" : "URL webhook (VD: https://ngrok-domain.ngrok-free.app/webhook/cic/chat)"}
                   className="w-full bg-white border border-slate-300 text-slate-800 text-[11px] px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-orange-500 font-mono shadow-2xs"
                 />
               </div>
@@ -418,7 +460,7 @@ export function ChatbotWidget({
                     onChange={(e) => setAutoFallback(e.target.checked)}
                     className="accent-orange-600 rounded cursor-pointer"
                   />
-                  <span>Tự động phản hồi bằng AI CIC khi API offline</span>
+                  <span>{isEn ? 'Auto-reply with CIC AI when API is offline' : 'Tự động phản hồi bằng AI CIC khi API offline'}</span>
                 </label>
                 <button
                   onClick={() => handleSaveSettings(webhookUrl, autoFallback)}
@@ -427,10 +469,10 @@ export function ChatbotWidget({
                   {savedSuccess ? (
                     <>
                       <Check className="w-3 h-3 text-emerald-300" />
-                      <span>Đã lưu!</span>
+                      <span>{isEn ? 'Saved!' : 'Đã lưu!'}</span>
                     </>
                   ) : (
-                    <span>Lưu & Đóng</span>
+                    <span>{isEn ? 'Save & Close' : 'Lưu & Đóng'}</span>
                   )}
                 </button>
               </div>
@@ -525,7 +567,7 @@ export function ChatbotWidget({
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Nhập câu hỏi của bạn..."
+              placeholder={isEn ? "Type your question..." : "Nhập câu hỏi của bạn..."}
               className="flex-1 bg-slate-100 border border-slate-200 text-slate-900 text-xs px-3.5 py-2.5 rounded-xl focus:outline-none focus:border-orange-500 focus:bg-white transition-all placeholder-slate-400"
             />
             <button

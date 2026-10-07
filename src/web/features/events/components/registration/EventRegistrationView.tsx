@@ -5,7 +5,7 @@ import type { EventItem, EventRegistration } from '@shared/types';
 import { getStatusBadgeStyle, getStatusLabel } from '../eventUtils';
 import { EventTicketSuccess } from './EventTicketSuccess';
 import { registerEventAction } from '@/features/events/server/actions';
-
+import { useI18n } from '@/shared/i18n';
 
 interface EventRegistrationViewProps {
   event: EventItem;
@@ -18,6 +18,9 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
   fromDetail = false,
   onCancel,
 }) => {
+  const { locale } = useI18n();
+  const isEn = locale === 'en';
+
   const [formData, setFormData] = useState({
     fullName: '',
     company: '',
@@ -34,26 +37,26 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
-    if (!formData.fullName.trim()) errors.fullName = 'Vui lòng nhập họ và tên';
-    if (!formData.company.trim()) errors.company = 'Vui lòng nhập tên đơn vị/công ty';
-    if (!formData.position.trim()) errors.position = 'Vui lòng nhập chức vụ của bạn';
+    if (!formData.fullName.trim()) errors.fullName = isEn ? 'Please enter your full name' : 'Vui lòng nhập họ và tên';
+    if (!formData.company.trim()) errors.company = isEn ? 'Please enter your company/organization' : 'Vui lòng nhập tên đơn vị/công ty';
+    if (!formData.position.trim()) errors.position = isEn ? 'Please enter your job title/position' : 'Vui lòng nhập chức vụ của bạn';
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email.trim()) {
-      errors.email = 'Vui lòng nhập email';
+      errors.email = isEn ? 'Please enter your email' : 'Vui lòng nhập email';
     } else if (!emailRegex.test(formData.email)) {
-      errors.email = 'Email không đúng định dạng';
+      errors.email = isEn ? 'Invalid email format' : 'Email không đúng định dạng';
     }
 
     const phoneRegex = /^(0|84)[3|5|7|8|9][0-9]{8}$/;
     if (!formData.phone.trim()) {
-      errors.phone = 'Vui lòng nhập số điện thoại';
+      errors.phone = isEn ? 'Please enter your phone number' : 'Vui lòng nhập số điện thoại';
     } else if (!phoneRegex.test(formData.phone.replace(/\s+/g, ''))) {
-      errors.phone = 'Số điện thoại không hợp lệ (10 số)';
+      errors.phone = isEn ? 'Invalid phone number format' : 'Số điện thoại không hợp lệ (10 số)';
     }
 
-    if (formData.attendeesCount < 1) errors.attendeesCount = 'Số lượng tối thiểu là 1';
-    if (!formData.consent) errors.consent = 'Bạn cần đồng ý với chính sách của chúng tôi';
+    if (formData.attendeesCount < 1) errors.attendeesCount = isEn ? 'Minimum attendees count is 1' : 'Số lượng tối thiểu là 1';
+    if (!formData.consent) errors.consent = isEn ? 'You must agree to our policy' : 'Bạn cần đồng ý với chính sách của chúng tôi';
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -119,15 +122,15 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
           onClick={onCancel}
           className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-slate-700 hover:text-orange-600 transition-colors w-fit"
         >
-          <ArrowLeft size={16} /> Quay lại {fromDetail ? 'chi tiết sự kiện' : 'danh sách sự kiện'}
+          <ArrowLeft size={16} /> {isEn ? (fromDetail ? 'Back to event details' : 'Back to events list') : `Quay lại ${fromDetail ? 'chi tiết sự kiện' : 'danh sách sự kiện'}`}
         </button>
 
         <div className="text-left sm:text-right">
           <span className="text-[10px] font-black uppercase tracking-widest text-orange-600 block">
-            Đăng ký tham dự
+            {isEn ? 'Event Registration' : 'Đăng ký tham dự'}
           </span>
           <h1 className="text-2xl font-black uppercase tracking-tight text-slate-950">
-            Form Đăng Ký Giữ Chỗ
+            {isEn ? 'Reserve Your Seat' : 'Form Đăng Ký Giữ Chỗ'}
           </h1>
         </div>
       </div>
@@ -140,7 +143,7 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
           </div>
           <div className="space-y-1">
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">
-              Sự kiện đã chọn:
+              {isEn ? 'Selected Event:' : 'Sự kiện đã chọn:'}
             </span>
             <h2 className="font-black text-slate-950 text-base leading-snug">{event.title}</h2>
             <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 font-medium">
@@ -158,7 +161,7 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
             event.status
           )}`}
         >
-          {getStatusLabel(event.status)}
+          {getStatusLabel(event.status, locale)}
         </span>
       </div>
 
@@ -168,10 +171,12 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
           <form onSubmit={handleRegisterSubmit} className="space-y-6">
             <div className="border-b border-slate-100 pb-4">
               <h3 className="text-sm font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
-                <User size={16} className="text-orange-600" /> Thông tin cá nhân & Đơn vị công tác
+                <User size={16} className="text-orange-600" /> {isEn ? 'Personal & Company Information' : 'Thông tin cá nhân & Đơn vị công tác'}
               </h3>
               <p className="text-xs text-slate-500 mt-1">
-                Vui lòng điền thông tin chính xác để Ban tổ chức cấp mã vé tham dự và gửi tài liệu sự kiện.
+                {isEn
+                  ? 'Please provide accurate information for the organizers to issue your electronic ticket and materials.'
+                  : 'Vui lòng điền thông tin chính xác để Ban tổ chức cấp mã vé tham dự và gửi tài liệu sự kiện.'}
               </p>
             </div>
 
@@ -179,12 +184,12 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
               {/* Name input */}
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                  <User size={14} className="text-orange-600" /> Họ và tên <span className="text-orange-600">*</span>
+                  <User size={14} className="text-orange-600" /> {isEn ? 'Full Name' : 'Họ và tên'} <span className="text-orange-600">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Nhập họ và tên"
+                  placeholder={isEn ? 'Enter your full name' : 'Nhập họ và tên'}
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                   className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
@@ -201,12 +206,12 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
               {/* Phone input */}
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                  <Phone size={14} className="text-orange-600" /> Số điện thoại <span className="text-orange-600">*</span>
+                  <Phone size={14} className="text-orange-600" /> {isEn ? 'Phone Number' : 'Số điện thoại'} <span className="text-orange-600">*</span>
                 </label>
                 <input
                   type="tel"
                   required
-                  placeholder="Nhập số điện thoại"
+                  placeholder={isEn ? 'Enter your phone number' : 'Nhập số điện thoại'}
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
@@ -223,12 +228,12 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
               {/* Email input */}
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                  <Mail size={14} className="text-orange-600" /> Địa chỉ Email <span className="text-orange-600">*</span>
+                  <Mail size={14} className="text-orange-600" /> {isEn ? 'Email Address' : 'Địa chỉ Email'} <span className="text-orange-600">*</span>
                 </label>
                 <input
                   type="email"
                   required
-                  placeholder="Nhập email liên hệ"
+                  placeholder={isEn ? 'Enter your email' : 'Nhập email liên hệ'}
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
@@ -245,12 +250,12 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
               {/* Company input */}
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                  <Building size={14} className="text-orange-600" /> Tên cơ quan / Doanh nghiệp <span className="text-orange-600">*</span>
+                  <Building size={14} className="text-orange-600" /> {isEn ? 'Company / Organization' : 'Tên cơ quan / Doanh nghiệp'} <span className="text-orange-600">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Nhập tên doanh nghiệp của bạn"
+                  placeholder={isEn ? 'Enter company name' : 'Nhập tên doanh nghiệp của bạn'}
                   value={formData.company}
                   onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                   className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
@@ -267,12 +272,12 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
               {/* Position input */}
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                  <Briefcase size={14} className="text-orange-600" /> Vị trí công tác / Chức vụ <span className="text-orange-600">*</span>
+                  <Briefcase size={14} className="text-orange-600" /> {isEn ? 'Job Title / Position' : 'Vị trí công tác / Chức vụ'} <span className="text-orange-600">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="VD: Kỹ sư kết cấu, Giám đốc..."
+                  placeholder={isEn ? 'e.g. Structural Engineer, Director...' : 'VD: Kỹ sư kết cấu, Giám đốc...'}
                   value={formData.position}
                   onChange={(e) => setFormData({ ...formData, position: e.target.value })}
                   className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
@@ -289,7 +294,7 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
               {/* Number of attendees */}
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                  <Users size={14} className="text-orange-600" /> Số lượng người tham dự
+                  <Users size={14} className="text-orange-600" /> {isEn ? 'Number of Attendees' : 'Số lượng người tham dự'}
                 </label>
                 <select
                   value={formData.attendeesCount}
@@ -300,7 +305,7 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
                 >
                   {[1, 2, 3, 4, 5, 10].map((num) => (
                     <option key={num} value={num}>
-                      {num} người
+                      {num} {isEn ? (num === 1 ? 'attendee' : 'attendees') : 'người'}
                     </option>
                   ))}
                 </select>
@@ -310,10 +315,10 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
             {/* Note text field */}
             <div className="space-y-2">
               <label className="text-xs font-black uppercase tracking-wider text-slate-700 block">
-                Ghi chú / Câu hỏi gửi tới Ban tổ chức
+                {isEn ? 'Notes / Questions for Organizers' : 'Ghi chú / Câu hỏi gửi tới Ban tổ chức'}
               </label>
               <textarea
-                placeholder="Mô tả nhu cầu của bạn..."
+                placeholder={isEn ? 'Describe your requirements or questions...' : 'Mô tả nhu cầu của bạn...'}
                 rows={3}
                 value={formData.note}
                 onChange={(e) => setFormData({ ...formData, note: e.target.value })}
@@ -331,7 +336,9 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
                   className="mt-0.5 border-slate-300 text-orange-600 focus:ring-orange-500 w-4 h-4 rounded-[4px]"
                 />
                 <span className="text-xs font-medium text-slate-600 leading-normal">
-                  Tôi đồng ý cung cấp thông tin phục vụ công tác tổ chức sự kiện và nhận các thông tin giải pháp công nghệ mới nhất từ CIC Tech qua Email/SMS.{' '}
+                  {isEn
+                    ? 'I agree to provide information for event coordination and receive technology solution updates from CIC Tech via Email/SMS.'
+                    : 'Tôi đồng ý cung cấp thông tin phục vụ công tác tổ chức sự kiện và nhận các thông tin giải pháp công nghệ mới nhất từ CIC Tech qua Email/SMS.'}{' '}
                   <span className="text-orange-600">*</span>
                 </span>
               </label>
@@ -354,7 +361,7 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
                 onClick={onCancel}
                 className="w-full sm:w-auto px-6 py-3 border border-slate-200 hover:border-slate-900 text-slate-700 text-xs font-black uppercase tracking-widest transition-all text-center rounded-[8px]"
               >
-                Hủy bỏ
+                {isEn ? 'Cancel' : 'Hủy bỏ'}
               </button>
 
               <button
@@ -384,11 +391,11 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Đang xử lý đăng ký...
+                    {isEn ? 'Processing registration...' : 'Đang xử lý đăng ký...'}
                   </>
                 ) : (
                   <>
-                    Xác nhận đăng ký giữ chỗ <Send size={14} />
+                    {isEn ? 'Confirm Registration' : 'Xác nhận đăng ký giữ chỗ'} <Send size={14} />
                   </>
                 )}
               </button>
