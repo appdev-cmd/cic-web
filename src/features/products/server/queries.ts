@@ -250,7 +250,10 @@ export async function getPublishedProductBySlugForReference(slug: string, locale
     WHERE p.published=true AND p.name NOT ILIKE '[Du lieu da bi xoa%' AND (p.alias=${trimmed} OR p.alias=${decoded} OR (p.alias IS NULL AND (p.id::text=${trimmed} OR p.id::text=${decoded})))
     LIMIT 1
   `;
-  const data = rows[0] ? mapReferenceRow(rows[0], locale) : null;
+  let data = rows[0] ? mapReferenceRow(rows[0], locale) : null;
+  if (!data && isEn) {
+    data = await getPublishedProductBySlugForReference(slug, 'vi');
+  }
   singleProductCache.set(cacheKey, { data, expiresAt: Date.now() + PRODUCT_CACHE_TTL_MS });
   return data;
 }

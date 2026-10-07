@@ -126,10 +126,17 @@ export const getPublishedNewsBySlug = cache(async function (slug: string, locale
   const normalized = decodeURIComponent(slug).trim(),
     t = table(locale),
     sql = getPostgresClient();
-  const rows = await sql.unsafe(
+  let rows = await sql.unsafe(
     `SELECT ${detailProjection} FROM ${t.news} n JOIN ${t.category} c ON c.id=n.category_id WHERE n.published=true AND c.published=true AND lower(btrim(n.alias))=lower(btrim($1)) ORDER BY coalesce(n.start_time, n.created_time) DESC, n.id DESC LIMIT 1`,
     [normalized]
   );
+  if (!rows[0] && locale === 'en') {
+    const tVi = table('vi');
+    rows = await sql.unsafe(
+      `SELECT ${detailProjection} FROM ${tVi.news} n JOIN ${tVi.category} c ON c.id=n.category_id WHERE n.published=true AND c.published=true AND lower(btrim(n.alias))=lower(btrim($1)) ORDER BY coalesce(n.start_time, n.created_time) DESC, n.id DESC LIMIT 1`,
+      [normalized]
+    );
+  }
   return rows[0] ? map(rows[0] as Row) : null;
 });
 

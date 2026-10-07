@@ -107,7 +107,8 @@ export const Header = ({
       setCurrentView?.('search');
       setActiveLink?.('');
       setIsSearchOpen(false);
-      navigateTo(`/search?q=${encodeURIComponent(localSearchQuery.trim())}`);
+      const searchPath = locale === 'en' ? `/en/search?q=${encodeURIComponent(localSearchQuery.trim())}` : `/search?q=${encodeURIComponent(localSearchQuery.trim())}`;
+      navigateTo(searchPath);
     }
   };
 

@@ -64,7 +64,7 @@ export async function listPublishedProjects(locale: 'vi' | 'en' = 'vi'): Promise
   const isEn = locale === 'en';
   const table = isEn ? sql`cic_projects_en` : sql`cic_projects`;
 
-  const rows = await sql<ProjectRow[]>`
+  let rows = await sql<ProjectRow[]>`
     SELECT id, title, alias, tagline, summary, image, sector, solution,
            technologies, customer_name, location, start_year, end_year, is_ongoing,
            is_featured, ordering
@@ -73,18 +73,29 @@ export async function listPublishedProjects(locale: 'vi' | 'en' = 'vi'): Promise
     ORDER BY coalesce(updated_time, created_time) DESC NULLS LAST, ordering ASC, id DESC
   `;
 
+  if (isEn && rows.length === 0) {
+    rows = await sql<ProjectRow[]>`
+      SELECT id, title, alias, tagline, summary, image, sector, solution,
+             technologies, customer_name, location, start_year, end_year, is_ongoing,
+             is_featured, ordering
+      FROM cic_projects
+      WHERE published = true
+      ORDER BY coalesce(updated_time, created_time) DESC NULLS LAST, ordering ASC, id DESC
+    `;
+  }
+
   return rows.map((r) => mapProjectListItem(r, locale));
 }
 
 export async function getPublishedProjectBySlug(slug: string, locale: 'vi' | 'en' = 'vi'): Promise<ProjectDetailViewModel | null> {
   const sql = getPostgresClient();
   const isEn = locale === 'en';
-  const table = isEn ? sql`cic_projects_en` : sql`cic_projects`;
-  const prodTable = isEn ? sql`cic_products_en` : sql`cic_products`;
-  const mfgTable = isEn ? sql`cic_manufactories_en` : sql`cic_manufactories`;
-  const serviceTable = isEn ? sql`cic_services_en` : sql`cic_services`;
+  let table = isEn ? sql`cic_projects_en` : sql`cic_projects`;
+  let prodTable = isEn ? sql`cic_products_en` : sql`cic_products`;
+  let mfgTable = isEn ? sql`cic_manufactories_en` : sql`cic_manufactories`;
+  let serviceTable = isEn ? sql`cic_services_en` : sql`cic_services`;
 
-  const [row] = await sql<ProjectRow[]>`
+  let [row] = await sql<ProjectRow[]>`
     SELECT id, title, alias, tagline, summary, content, image, sector, solution,
            technologies, customer_name, location, start_year, end_year, is_ongoing,
            is_featured, ordering, seo_title, seo_keyword, seo_description
@@ -92,6 +103,21 @@ export async function getPublishedProjectBySlug(slug: string, locale: 'vi' | 'en
     WHERE published = true AND alias = ${slug}
     LIMIT 1
   `;
+
+  if (!row && isEn) {
+    table = sql`cic_projects`;
+    prodTable = sql`cic_products`;
+    mfgTable = sql`cic_manufactories`;
+    serviceTable = sql`cic_services`;
+    [row] = await sql<ProjectRow[]>`
+      SELECT id, title, alias, tagline, summary, content, image, sector, solution,
+             technologies, customer_name, location, start_year, end_year, is_ongoing,
+             is_featured, ordering, seo_title, seo_keyword, seo_description
+      FROM cic_projects
+      WHERE published = true AND alias = ${slug}
+      LIMIT 1
+    `;
+  }
 
   if (!row) return null;
 
