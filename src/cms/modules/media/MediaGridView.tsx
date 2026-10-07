@@ -12,6 +12,8 @@ import {
   Layers,
   Copy,
   Download,
+  RefreshCw,
+  Sparkles,
 } from 'lucide-react';
 import { MediaAsset } from './types';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
@@ -24,9 +26,11 @@ interface MediaGridViewProps {
   onToggleSelectAsset: (id: string) => void;
   onOpenDetail: (asset: MediaAsset) => void;
   onOpenPreview: (asset: MediaAsset) => void;
+  onOpenReplaceModal?: (asset: MediaAsset) => void;
   onDeleteAsset: (id: string) => void;
   canEdit: boolean;
   canDelete: boolean;
+  canReplace?: boolean;
   cardSize?: 'sm' | 'md' | 'lg';
 }
 
@@ -37,9 +41,11 @@ export const MediaGridView: React.FC<MediaGridViewProps> = ({
   onToggleSelectAsset,
   onOpenDetail,
   onOpenPreview,
+  onOpenReplaceModal,
   onDeleteAsset,
   canEdit,
   canDelete,
+  canReplace = true,
   cardSize = 'md',
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -157,33 +163,37 @@ export const MediaGridView: React.FC<MediaGridViewProps> = ({
               {/* Status & Usage Badges */}
               <div className="absolute top-2 right-2 z-10 flex flex-col gap-1 items-end">
                 {asset.used_by_count > 0 ? (
-                  <span
-                    className="bg-emerald-600/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs"
-                    title={`Đang dùng tại ${asset.used_by_count} nơi trong CMS`}
+                  <button
+                    type="button"
+                    onClick={() => onOpenDetail(asset)}
+                    className="cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs transition-colors"
+                    title={`Đang dùng tại ${asset.used_by_count} nơi trong CMS - Bấm để xem chi tiết`}
                   >
-                    <Layers className="w-3 h-3" /> {asset.used_by_count}
-                  </span>
+                    <Layers className="w-3 h-3" /> {asset.used_by_count} nơi dùng
+                  </button>
                 ) : (
                   <span
                     className="bg-slate-600/80 text-white text-[10px] font-medium px-2 py-0.5 rounded-md shadow-xs"
-                    title="Chưa được sử dụng"
+                    title="Chưa được sử dụng trong bài viết hoặc sản phẩm nào"
                   >
                     Chưa dùng
                   </span>
                 )}
 
                 {asset.metadata_status === 'incomplete' && (
-                  <span
-                    className="bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1 shadow-xs"
-                    title="Thiếu nội dung thay thế hoặc metadata"
+                  <button
+                    type="button"
+                    onClick={() => onOpenDetail(asset)}
+                    className="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1 shadow-xs transition-colors"
+                    title="Thiếu nội dung thay thế hoặc metadata - Bấm vào để AI tự động điền"
                   >
-                    <AlertTriangle className="w-3 h-3" /> Thiếu meta
-                  </span>
+                    <Sparkles className="w-3 h-3" /> Thiếu meta (AI)
+                  </button>
                 )}
               </div>
 
               {/* Hover Quick Action Toolbar Overlay */}
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent p-2.5 flex items-center justify-center gap-2 opacity-100 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100">
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/85 via-slate-950/45 to-transparent p-2.5 flex items-center justify-center gap-1.5 opacity-100 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100">
                 <button
                   type="button"
                   onClick={() => onOpenPreview(asset)}
@@ -197,10 +207,21 @@ export const MediaGridView: React.FC<MediaGridViewProps> = ({
                   onClick={() => onOpenDetail(asset)}
                   disabled={!canEdit}
                   className="flex min-h-11 min-w-11 items-center justify-center bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-                  title="Chỉnh sửa chi tiết & Variant"
+                  title="Chỉnh sửa Metadata & AI Co-pilot"
                 >
                   <Edit className="w-3.5 h-3.5" />
                 </button>
+                {onOpenReplaceModal && (
+                  <button
+                    type="button"
+                    onClick={() => onOpenReplaceModal(asset)}
+                    disabled={!canReplace}
+                    className="flex min-h-11 min-w-11 items-center justify-center bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                    title="Thay thế file mới (Giữ nguyên liên kết ở tất cả các bài viết)"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => onDeleteAsset(asset.id)}

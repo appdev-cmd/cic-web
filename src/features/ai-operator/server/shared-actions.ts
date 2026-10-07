@@ -880,5 +880,104 @@ QUY TẮC BẮT BUỘC:
   }
 }
 
+export interface GenerateMediaMetadataInput {
+  filename: string;
+  currentTitle?: string;
+  folderName?: string;
+  mediaType?: string;
+  locale?: 'vi' | 'en';
+}
+
+export interface GenerateMediaMetadataOutput {
+  title: string;
+  alt_text: string;
+  caption: string;
+  description: string;
+  tags: string[];
+}
+
+/**
+ * Shared AI Action: Automatically generate Title, WCAG Alt-Text, Caption, and Tags for Media Assets
+ */
+export async function generateMediaMetadataAction(
+  input: GenerateMediaMetadataInput
+): Promise<GenerateMediaMetadataOutput> {
+  await requireCmsAccess();
+
+  const filename = input.filename?.trim() || '';
+  const currentTitle = input.currentTitle?.trim() || '';
+  if (!filename && !currentTitle) {
+    throw new Error('Tên tệp hoặc tiêu đề là bắt buộc để AI phân tích.');
+  }
+
+  const llm = getLlmProvider();
+  const systemPrompt = `Bạn là Trợ lý AI Quản lý Đa phương tiện (Media Asset AI Co-pilot) của Công ty Cổ phần Công nghệ và Tư vấn Đầu tư Xây dựng (CIC).
+Nhiệm vụ của bạn là phân tích tên tệp, tiêu đề hiện tại, thư mục và loại media để tạo bộ metadata chuyên nghiệp, chuẩn SEO và thân thiện với người khiếm thị (tiêu chuẩn WCAG 2.2 AA).
+
+QUY TẮC CỐT LÕI:
+1. TIÊU ĐỀ (title):
+   - Chuyển tên file vô nghĩa (ví dụ: "z591823_hoi_thao_bim_autodesk.jpg" hoặc "Screenshot 2026-10-07.png") thành tiêu đề tiếng Việt tự nhiên, viết hoa chữ cái đầu câu hoặc danh từ riêng.
+   - Loại bỏ hoàn toàn phần mở rộng (.png, .jpg), dấu gạch dưới, mã số ngẫu nhiên.
+   - Ví dụ: "Hội thảo Chuyển đổi số & Giải pháp BIM Autodesk" hoặc "Giao diện tính toán kết cấu phần mềm CIC".
+2. ALT TEXT (alt_text - BẮT BUỘC CHUẨN WCAG 2.2):
+   - Mô tả súc tích, sinh động nội dung hoặc bối cảnh hình ảnh thể hiện (1-2 câu, 80-140 ký tự).
+   - Tuyệt đối KHÔNG viết "Hình ảnh của...", "Ảnh chụp...".
+   - Ví dụ: "Các kỹ sư thảo luận giải pháp mô hình thông tin công trình BIM tại hội thảo CIC".
+3. CHÚ THÍCH (caption):
+   - Câu chú thích ngắn gọn, trang trọng để hiển thị dưới ảnh trong bài viết.
+4. MÔ TẢ NỘI BỘ (description):
+   - Ghi chú 1-2 câu về mục đích sử dụng hình ảnh này trên website CIC.
+5. THẺ TAGS (tags):
+   - Mảng gồm 3 đến 5 thẻ từ khóa ngắn gọn, không dấu hoặc có dấu cách, phản ánh đúng chủ đề (ví dụ: ["bim", "autodesk", "hoi-thao", "cic"]).
+
+Chỉ trả về JSON thuần túy theo cấu trúc:
+{
+  "title": "...",
+  "alt_text": "...",
+  "caption": "...",
+  "description": "...",
+  "tags": ["...", "..."]
+}`;
+
+  const userPrompt = JSON.stringify({
+    filename,
+    currentTitle,
+    folderName: input.folderName || 'Chưa phân loại',
+    mediaType: input.mediaType || 'image',
+    locale: input.locale || 'vi',
+  });
+
+  try {
+    const raw = await llm.generateStructured<GenerateMediaMetadataOutput>({
+      systemPrompt,
+      userPrompt,
+      temperature: 0.3,
+    });
+
+    return {
+      title: String(raw.title || currentTitle || filename),
+      alt_text: String(raw.alt_text || raw.title || ''),
+      caption: String(raw.caption || ''),
+      description: String(raw.description || ''),
+      tags: Array.isArray(raw.tags) ? raw.tags.map(String).slice(0, 6) : [],
+    };
+  } catch {
+    // Graceful fallback: clean up filename
+    const cleanName = filename
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[_-]+/g, ' ')
+      .replace(/^[a-z0-9]{8,}\s*/i, '')
+      .trim();
+    const fallbackTitle = cleanName ? cleanName.charAt(0).toUpperCase() + cleanName.slice(1) : 'Tệp hình ảnh CIC';
+    return {
+      title: fallbackTitle,
+      alt_text: `${fallbackTitle} - CIC Technology`,
+      caption: fallbackTitle,
+      description: `Tài sản truyền thông lưu trữ tại thư mục ${input.folderName || 'chung'}.`,
+      tags: ['cic', 'media'],
+    };
+  }
+}
+
 
 

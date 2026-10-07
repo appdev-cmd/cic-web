@@ -10,6 +10,7 @@ import {
   ChevronUp,
   FileText,
   Image as ImageIcon,
+  Sparkles,
 } from 'lucide-react';
 import { UploadFileItem } from './types';
 
@@ -122,13 +123,19 @@ export const UploadQueueDrawer: React.FC<UploadQueueDrawerProps> = ({
           ))}
 
           {isAllDone && (
-            <button
-              type="button"
-              onClick={() => onCompleteUpload(queue)}
-              className="min-h-11 w-full py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold transition-colors shadow-xs"
-            >
-              Hoàn tất & Chèn vào Thư viện
-            </button>
+            <div className="space-y-2 pt-2 border-t border-slate-700">
+              <div className="flex items-center gap-2 text-[11px] text-amber-300 bg-amber-950/40 border border-amber-800/60 p-2.5 rounded-xl">
+                <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Mẹo: Bạn có thể bấm vào tệp trong thư viện để dùng <strong>AI Co-pilot</strong> tự động điền Tiêu đề và Alt Text chuẩn SEO chỉ với 1 cú click!</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => onCompleteUpload(queue)}
+                className="min-h-11 w-full py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold transition-colors shadow-xs flex items-center justify-center gap-2"
+              >
+                Hoàn tất & Chèn vào Thư viện
+              </button>
+            </div>
           )}
         </div>
       )}

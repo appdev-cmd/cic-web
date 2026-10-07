@@ -340,9 +340,14 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data, workspaceLocal
                   setIsPreviewOpen(true);
                 }}
                 onDeleteAsset={handleDeleteAsset}
+                onOpenReplaceModal={(ast) => {
+                  setReplaceAssetItem(ast);
+                  setIsReplaceModalOpen(true);
+                }}
                 cardSize={cardSize}
                 canEdit={capabilities.edit}
                 canDelete={capabilities.delete}
+                canReplace={capabilities.replace}
               />
             ) : (
               <MediaListView
@@ -358,9 +363,14 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data, workspaceLocal
                   setPreviewAsset(ast);
                   setIsPreviewOpen(true);
                 }}
+                onOpenReplaceModal={(ast) => {
+                  setReplaceAssetItem(ast);
+                  setIsReplaceModalOpen(true);
+                }}
                 onDeleteAsset={handleDeleteAsset}
                 canEdit={capabilities.edit}
                 canDelete={capabilities.delete}
+                canReplace={capabilities.replace}
               />
             )}
           </div>
@@ -382,6 +392,7 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data, workspaceLocal
         canEdit={capabilities.edit}
         canDelete={capabilities.delete}
         canReplace={capabilities.replace}
+        onShowToast={showToast}
       />
 
       <UploadQueueDrawer

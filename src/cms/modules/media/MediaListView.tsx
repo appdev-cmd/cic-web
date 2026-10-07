@@ -12,6 +12,7 @@ import {
   Layers,
   MoreHorizontal,
   Download,
+  RefreshCw,
 } from 'lucide-react';
 import { MediaAsset } from './types';
 import { CmsIconButton } from '../../components/ui/CmsButton';
@@ -25,9 +26,11 @@ interface MediaListViewProps {
   onToggleSelectAsset: (id: string) => void;
   onOpenDetail: (asset: MediaAsset) => void;
   onOpenPreview: (asset: MediaAsset) => void;
+  onOpenReplaceModal?: (asset: MediaAsset) => void;
   onDeleteAsset: (id: string) => void;
   canEdit: boolean;
   canDelete: boolean;
+  canReplace?: boolean;
 }
 
 export const MediaListView: React.FC<MediaListViewProps> = ({
@@ -37,9 +40,11 @@ export const MediaListView: React.FC<MediaListViewProps> = ({
   onToggleSelectAsset,
   onOpenDetail,
   onOpenPreview,
+  onOpenReplaceModal,
   onDeleteAsset,
   canEdit,
   canDelete,
+  canReplace = true,
 }) => {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(10);
@@ -244,9 +249,20 @@ export const MediaListView: React.FC<MediaListViewProps> = ({
                         icon={<Edit />}
                         size="sm"
                         className="min-h-11 min-w-11"
-                        aria-label="Chỉnh sửa thông tin tệp"
-                        title="Chỉnh sửa thông tin"
+                        aria-label="Chỉnh sửa thông tin tệp & AI Co-pilot"
+                        title="Chỉnh sửa & AI Co-pilot"
                       />
+                      {onOpenReplaceModal && (
+                        <CmsIconButton
+                          onClick={() => onOpenReplaceModal(asset)}
+                          disabled={!canReplace}
+                          icon={<RefreshCw className="text-blue-600" />}
+                          size="sm"
+                          className="min-h-11 min-w-11"
+                          aria-label="Thay thế tệp mới"
+                          title="Thay thế tệp (Giữ nguyên liên kết ở tất cả các bài viết)"
+                        />
+                      )}
                       <CmsIconButton
                         onClick={() => onDeleteAsset(asset.id)}
                         disabled={!canDelete}

@@ -21,6 +21,7 @@ interface AssetDetailDrawerProps {
   canEdit: boolean;
   canDelete: boolean;
   canReplace: boolean;
+  onShowToast?: (msg: string) => void;
 }
 
 export const AssetDetailDrawer: React.FC<AssetDetailDrawerProps> = ({
@@ -34,6 +35,7 @@ export const AssetDetailDrawer: React.FC<AssetDetailDrawerProps> = ({
   canEdit,
   canDelete,
   canReplace,
+  onShowToast,
 }) => {
   const [activeTab, setActiveTab] = useState<AssetDetailTab>('details');
   const [editedAsset, setEditedAsset] = useState<MediaAsset | null>(null);
@@ -78,7 +80,14 @@ export const AssetDetailDrawer: React.FC<AssetDetailDrawerProps> = ({
 
           <AssetDetailNavigation activeTab={activeTab} asset={editedAsset} onChange={setActiveTab} />
 
-          {activeTab === 'details' && <AssetMetadataEditor asset={editedAsset} folders={folders} onChange={setEditedAsset} />}
+          {activeTab === 'details' && (
+            <AssetMetadataEditor
+              asset={editedAsset}
+              folders={folders}
+              onChange={setEditedAsset}
+              onShowToast={onShowToast}
+            />
+          )}
 
           {/* TAB 2: CROP & ADAPTIVE VARIANTS */}
           {activeTab === 'variants' && (
