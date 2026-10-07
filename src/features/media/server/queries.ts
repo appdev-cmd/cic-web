@@ -39,11 +39,20 @@ function collectPaths(assetRows: Row[]) {
 
 function mapAsset(row: Row, urls: Map<string,string>): MediaAsset {
   const id=str(row.id); const title=str(row.title)||str(row.filename); const alt=str(row.alt_text); const folders=rows(row.folders);
+  const variantList = rows(row.variants);
+  const originalVar = variantList.find((v) => str(v.preset_name) === 'original');
+  const focalVar = variantList.find((v) => v.focal_x != null && v.focal_y != null);
+  const focal_point = originalVar?.focal_x != null && originalVar?.focal_y != null
+    ? { x: Number(originalVar.focal_x), y: Number(originalVar.focal_y) }
+    : focalVar?.focal_x != null && focalVar?.focal_y != null
+    ? { x: Number(focalVar.focal_x), y: Number(focalVar.focal_y) }
+    : undefined;
   return {
     id,filename:str(row.filename),title,description:opt(row.description),type:str(row.media_type) as MediaAsset['type'],mime_type:str(row.mime_type),url:urls.get(str(row.storage_path))??'',thumbnail_url:urls.get(str(row.thumbnail_path))||undefined,
     file_size_kb:Math.round(Number(row.file_size_bytes)/1024),width:num(row.width),height:num(row.height),duration_sec:num(row.duration_seconds),alt_text:alt,caption:opt(row.caption),credit_author:opt(row.credit_author),license_type:opt(row.license_type) as MediaAsset['license_type'],license_expiry:opt(row.license_expiry),
     folder_id:folders[0]?str(folders[0].id):'',folder_name:folders[0]?str(folders[0].name):'Chưa phân loại',album_ids:rows(row.albums).map((v)=>str(v.album_id)),tags:Array.isArray(row.tags)?row.tags.map(String):[],used_by_count:rows(row.used_by_refs).length,used_by_refs:rows(row.used_by_refs).map((v)=>({id:str(v.id),entity_type:str(v.entity_type) as MediaAsset['used_by_refs'][number]['entity_type'],entity_title:str(v.entity_title),path:str(v.path),updated_at:str(v.updated_at)})),workflow_status:str(row.workflow_status) as MediaAsset['workflow_status'],metadata_status:alt&&title?'complete':'incomplete',
-    variants:rows(row.variants).map((v)=>({id:str(v.id),preset_name:str(v.preset_name) as never,width:Number(v.width),height:Number(v.height),format:str(v.format) as never,file_size_kb:Math.round(Number(v.file_size_bytes)/1024),url:urls.get(str(v.storage_path))??'',focal_point:v.focal_x==null||v.focal_y==null?undefined:{x:Number(v.focal_x),y:Number(v.focal_y)},status:str(v.status) as never})),
+    focal_point,
+    variants:variantList.filter((v)=>str(v.preset_name)!=='original').map((v)=>({id:str(v.id),preset_name:str(v.preset_name) as never,width:Number(v.width),height:Number(v.height),format:str(v.format) as never,file_size_kb:Math.round(Number(v.file_size_bytes)/1024),url:urls.get(str(v.storage_path))??'',focal_point:v.focal_x==null||v.focal_y==null?undefined:{x:Number(v.focal_x),y:Number(v.focal_y)},status:str(v.status) as never})),
     versions:rows(row.versions).map((v)=>({version_number:Number(v.version_number),filename:str(v.filename),file_size_kb:Math.round(Number(v.file_size_bytes)/1024),replaced_by:'Hệ thống CMS',replaced_at:str(v.created_at),note:str(v.note),url:urls.get(str(v.storage_path))??''})),
     owner_name:str(row.owner_name)||'Hệ thống CMS',owner_avatar:str(row.owner_avatar),created_at:str(row.created_at),updated_at:str(row.updated_at),deleted_at:opt(row.deleted_at),
   };

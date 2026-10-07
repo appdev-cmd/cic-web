@@ -39,8 +39,19 @@ export interface UploadFileItem {
   status: 'queued' | 'preflight' | 'uploading' | 'processing' | 'completed' | 'error';
   error_message?: string;
   preview_url?: string;
+  asset_id?: string;
   title?: string;
   alt_vi?: string;
   tags?: string[];
   folder_id?: string;
+  ai_status?: 'idle' | 'processing' | 'completed' | 'error' | 'skipped';
+  ai_error?: string;
+  ai_result?: {
+    title: string;
+    alt_text: string;
+    tags: string[];
+    description?: string;
+  };
+  user_edited?: boolean;
 }
+

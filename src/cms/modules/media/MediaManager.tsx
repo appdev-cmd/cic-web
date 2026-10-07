@@ -31,6 +31,7 @@ import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import { createMediaFolderAction, deleteMediaAlbumAction, refreshMediaAction, replaceMediaAssetAction, saveMediaAlbumAction, trashMediaAssetsAction, updateMediaMetadataAction, uploadMediaAction } from '@/features/media/server/actions';
+import { generateMediaMetadataAction } from '@/features/ai-operator/server/shared-actions';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import { useDialogA11y } from '../activity_logs_trash/useDialogA11y';
 import { filterMediaAssets } from './mediaFilters';
@@ -91,7 +92,14 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data, workspaceLocal
     setIssues(next.issues);
     setSelectedAssetIds([]);
   };
-  const reload = async () => applyData(await refreshMediaAction(workspaceLocale));
+  const reload = async () => {
+    const next = await refreshMediaAction(workspaceLocale);
+    applyData(next);
+    if (detailAsset) {
+      const updated = next.assets.find((a) => a.id === detailAsset.id);
+      if (updated) setDetailAsset(updated);
+    }
+  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -121,6 +129,60 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data, workspaceLocal
     uploadInputRef.current?.click();
   };
 
+  const uploadQueueRef = useRef<UploadFileItem[]>(uploadQueue);
+  useEffect(() => {
+    uploadQueueRef.current = uploadQueue;
+  }, [uploadQueue]);
+
+  const runAiMetadataProcessing = async (queueItemId: string, assetId: string, fileName: string) => {
+    const currentItem = uploadQueueRef.current.find((q) => q.id === queueItemId);
+    if (currentItem?.user_edited) {
+      setUploadQueue((current) => current.map((row) => row.id === queueItemId ? { ...row, ai_status: 'skipped' } : row));
+      return;
+    }
+
+    setUploadQueue((current) => current.map((row) => row.id === queueItemId ? { ...row, ai_status: 'processing', ai_error: undefined } : row));
+
+    try {
+      const currentFolder = folders.find((f) => f.id === selectedFolderId);
+      const aiResult = await generateMediaMetadataAction({
+        filename: fileName,
+        currentTitle: fileName,
+        folderName: currentFolder?.name,
+        mediaType: 'image',
+        locale: workspaceLocale,
+      });
+
+      const latestItem = uploadQueueRef.current.find((q) => q.id === queueItemId);
+      if (latestItem?.user_edited) {
+        setUploadQueue((current) => current.map((row) => row.id === queueItemId ? { ...row, ai_status: 'skipped' } : row));
+        return;
+      }
+
+      await updateMediaMetadataAction(assetId, {
+        locale: workspaceLocale,
+        title: aiResult.title,
+        altText: aiResult.alt_text,
+        description: aiResult.description || null,
+        caption: aiResult.caption || null,
+        tags: aiResult.tags || [],
+        folderId: selectedFolderId && selectedFolderId !== 'f_all' ? Number(selectedFolderId) : null,
+      });
+
+      setUploadQueue((current) => current.map((row) => row.id === queueItemId ? { ...row, ai_status: 'completed', ai_result: aiResult } : row));
+      await reload();
+    } catch (error) {
+      setUploadQueue((current) => current.map((row) => row.id === queueItemId ? { ...row, ai_status: 'error', ai_error: sanitizeCmsErrorMessage(error, 'Lỗi AI') } : row));
+    }
+  };
+
+  const handleRetryAi = (queueItemId: string) => {
+    const item = uploadQueue.find((q) => q.id === queueItemId);
+    if (item && item.asset_id) {
+      void runAiMetadataProcessing(item.id, item.asset_id, item.file_name);
+    }
+  };
+
   const handleFiles = async (files: FileList | null) => {
     if (!files?.length) return;
     const selected = [...files];
@@ -129,12 +191,14 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data, workspaceLocal
       file_name: file.name,
       file_size_kb: Math.round(file.size / 1024),
       mime_type: file.type,
-      progress: 5,
+      progress: 10,
       status: 'uploading',
       title: file.name,
+      ai_status: file.type.startsWith('image/') ? 'idle' : undefined,
     }));
     setUploadQueue(items);
     setIsUploadQueueOpen(true);
+
     for (const [index, file] of selected.entries()) {
       const item = items[index];
       try {
@@ -142,18 +206,39 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data, workspaceLocal
         form.set('file', file);
         form.set('locale', workspaceLocale);
         form.set('title', file.name);
-        await uploadMediaAction(form);
-        setUploadQueue((current) => current.map((row) => row.id === item.id ? { ...row, progress: 100, status: 'completed' } : row));
+        if (selectedFolderId && selectedFolderId !== 'f_all') {
+          form.set('folderId', selectedFolderId);
+        }
+        const uploadResult = await uploadMediaAction(form);
+        const assetId = uploadResult?.id;
+
+        setUploadQueue((current) =>
+          current.map((row) => (row.id === item.id ? { ...row, progress: 100, status: 'completed', asset_id: assetId } : row))
+        );
+
+        // Immediately reload so file appears in Media Manager without waiting for AI
+        void reload();
+
+        // If file is an image, kick off background AI analysis asynchronously without blocking next uploads
+        if (file.type.startsWith('image/') && assetId) {
+          void runAiMetadataProcessing(item.id, assetId, file.name);
+        }
       } catch (error) {
-        setUploadQueue((current) => current.map((row) => row.id === item.id ? { ...row, progress: 100, status: 'error', error_message: sanitizeCmsErrorMessage(error, 'Tải lên thất bại') } : row));
+        setUploadQueue((current) =>
+          current.map((row) =>
+            row.id === item.id ? { ...row, progress: 100, status: 'error', error_message: sanitizeCmsErrorMessage(error, 'Tải lên thất bại') } : row
+          )
+        );
       }
     }
-    await reload();
-    showToast('Đã xử lý hàng chờ tải lên.');
+    showToast('Đã tải lên tệp vào thư viện.');
     if (uploadInputRef.current) uploadInputRef.current.value = '';
   };
 
   const handleSaveAssetDetail = (updatedAsset: MediaAsset) => {
+    // Mark queue item as user_edited so background AI won't overwrite
+    setUploadQueue((current) => current.map((row) => row.asset_id === updatedAsset.id ? { ...row, user_edited: true, ai_status: 'skipped' } : row));
+
     startTransition(async () => {
       try {
         await updateMediaMetadataAction(updatedAsset.id, { locale: workspaceLocale, title: updatedAsset.title, description: updatedAsset.description ?? null, altText: updatedAsset.alt_text, caption: updatedAsset.caption ?? null, creditAuthor: updatedAsset.credit_author ?? null, licenseType: updatedAsset.license_type ?? null, licenseExpiry: updatedAsset.license_expiry ?? null, tags: updatedAsset.tags, folderId: updatedAsset.folder_id || null });
@@ -393,6 +478,8 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data, workspaceLocal
         canDelete={capabilities.delete}
         canReplace={capabilities.replace}
         onShowToast={showToast}
+        locale={workspaceLocale}
+        onRefresh={reload}
       />
 
       <UploadQueueDrawer
@@ -401,6 +488,7 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data, workspaceLocal
         queue={uploadQueue}
         onRemoveFromQueue={(id) => setUploadQueue(uploadQueue.filter((q) => q.id !== id))}
         onCompleteUpload={() => setIsUploadQueueOpen(false)}
+        onRetryAi={handleRetryAi}
       />
 
       <ReplaceArchiveModal

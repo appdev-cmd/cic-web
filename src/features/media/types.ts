@@ -14,10 +14,10 @@ export interface ScopeUsageRef {
 
 export interface AssetVariant {
   id: string;
-  preset_name: 'original' | '16:9' | '4:3' | '1:1' | '2:1' | 'mobile_header';
+  preset_name: 'original' | '16:9' | '4:3' | '1:1' | '3:2' | '2:1' | 'mobile_header' | 'custom' | string;
   width: number;
   height: number;
-  format: 'webp' | 'avif' | 'jpeg' | 'png';
+  format: 'webp' | 'avif' | 'jpeg' | 'png' | string;
   file_size_kb: number;
   url: string;
   focal_point?: { x: number; y: number };
@@ -70,6 +70,7 @@ export interface MediaAsset {
   used_by_refs: ScopeUsageRef[];
   workflow_status: WorkflowStatus;
   metadata_status: MetadataStatus;
+  focal_point?: { x: number; y: number };
   variants: AssetVariant[];
   versions: AssetVersion[];
   owner_name: string;

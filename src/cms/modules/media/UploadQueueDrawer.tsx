@@ -4,15 +4,14 @@ import {
   X,
   CheckCircle2,
   AlertCircle,
-  Folder,
-  Tag,
   ChevronDown,
   ChevronUp,
-  FileText,
   Image as ImageIcon,
   Sparkles,
+  RefreshCw,
+  Tag,
 } from 'lucide-react';
-import { UploadFileItem } from './types';
+import type { UploadFileItem } from './types';
 
 interface UploadQueueDrawerProps {
   isOpen: boolean;
@@ -20,6 +19,7 @@ interface UploadQueueDrawerProps {
   queue: UploadFileItem[];
   onRemoveFromQueue: (id: string) => void;
   onCompleteUpload: (queueItems: UploadFileItem[]) => void;
+  onRetryAi?: (itemId: string) => void;
 }
 
 export const UploadQueueDrawer: React.FC<UploadQueueDrawerProps> = ({
@@ -28,6 +28,7 @@ export const UploadQueueDrawer: React.FC<UploadQueueDrawerProps> = ({
   queue,
   onRemoveFromQueue,
   onCompleteUpload,
+  onRetryAi,
 }) => {
   const [isMinimized, setIsMinimized] = useState(false);
 
@@ -48,7 +49,7 @@ export const UploadQueueDrawer: React.FC<UploadQueueDrawerProps> = ({
             <h4 className="text-xs font-bold">
               Hàng chờ tải lên ({completedCount}/{queue.length} tệp)
             </h4>
-            <p className="text-[10px] text-slate-400">Preflight check & Metadata processing</p>
+            <p className="text-[10px] text-slate-400">Tải lên độc lập & Tự động xử lý AI metadata</p>
           </div>
         </div>
 
@@ -78,8 +79,9 @@ export const UploadQueueDrawer: React.FC<UploadQueueDrawerProps> = ({
           {queue.map((item) => (
             <div
               key={item.id}
-              className="p-3 bg-slate-800/80 rounded-xl border border-slate-700/80 flex flex-col gap-2"
+              className="p-3 bg-slate-800/80 rounded-xl border border-slate-700/80 flex flex-col gap-2.5"
             >
+              {/* File Info */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 truncate">
                   <ImageIcon className="w-4 h-4 text-orange-400 shrink-0" />
@@ -90,7 +92,7 @@ export const UploadQueueDrawer: React.FC<UploadQueueDrawerProps> = ({
                 </span>
               </div>
 
-              {/* Progress Bar */}
+              {/* Upload Progress Bar */}
               <div className="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
                 <div
                   className="bg-orange-500 h-full transition-all duration-300"
@@ -98,42 +100,103 @@ export const UploadQueueDrawer: React.FC<UploadQueueDrawerProps> = ({
                 />
               </div>
 
-              <div className="flex items-center justify-between text-[10px] text-slate-400">
+              {/* Status and Action Row */}
+              <div className="flex items-center justify-between text-[11px] text-slate-400">
                 {item.status === 'completed' ? (
-                  <span className="text-emerald-400 font-bold flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" /> Đã tải lên & sẵn sàng
+                  <span className="text-emerald-400 font-medium flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Đã lưu tệp vào kho
                   </span>
                 ) : item.status === 'uploading' ? (
                   <span className="text-orange-400">Đang tải lên... {item.progress}%</span>
                 ) : item.status === 'error' ? (
                   <span className="text-rose-300" role="alert">{item.error_message || 'Tải lên thất bại'}</span>
                 ) : (
-                  <span className="text-amber-400">Đang xử lý preflight check...</span>
+                  <span className="text-amber-400">Đang chuẩn bị...</span>
                 )}
 
                 <button
                   type="button"
                   onClick={() => onRemoveFromQueue(item.id)}
-                  className="min-h-11 px-2 text-slate-400 hover:text-rose-300"
+                  className="min-h-8 px-2 text-xs text-slate-400 hover:text-rose-300 transition-colors"
                 >
                   Xóa
                 </button>
               </div>
+
+              {/* AI Metadata Sub-status (when upload completed) */}
+              {item.status === 'completed' && item.mime_type.startsWith('image/') && (
+                <div className="pt-2 border-t border-slate-700/60">
+                  {item.ai_status === 'processing' && (
+                    <div className="flex items-center gap-2 text-[11px] text-amber-300 bg-amber-950/30 border border-amber-900/50 px-2.5 py-1.5 rounded-lg">
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-400 shrink-0" />
+                      <span>✦ AI đang phân tích ảnh & điền Tiêu đề, Alt Text chuẩn SEO...</span>
+                    </div>
+                  )}
+
+                  {item.ai_status === 'completed' && (
+                    <div className="space-y-1.5 bg-emerald-950/20 border border-emerald-900/40 p-2.5 rounded-lg text-[11px]">
+                      <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>✦ AI đã điền metadata hoàn tất</span>
+                      </div>
+                      {item.ai_result?.title && (
+                        <p className="text-slate-300 text-[10px] truncate">
+                          <strong className="text-slate-400 font-normal">Tiêu đề:</strong> {item.ai_result.title}
+                        </p>
+                      )}
+                      {item.ai_result?.alt_text && (
+                        <p className="text-slate-400 text-[10px] line-clamp-1">
+                          <strong className="font-normal">Alt:</strong> {item.ai_result.alt_text}
+                        </p>
+                      )}
+                      {item.ai_result?.tags && item.ai_result.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 pt-0.5">
+                          {item.ai_result.tags.slice(0, 3).map((t, idx) => (
+                            <span key={idx} className="px-1.5 py-0.2 rounded bg-slate-800 text-[9px] text-slate-300">
+                              #{t}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {item.ai_status === 'error' && (
+                    <div className="flex items-center justify-between gap-2 bg-rose-950/30 border border-rose-900/50 p-2 rounded-lg text-[11px]">
+                      <div className="flex items-center gap-1.5 text-rose-300 truncate">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">Lỗi AI: {item.ai_error || 'Timeout/Quota'} (Tệp đã lưu an toàn)</span>
+                      </div>
+                      {onRetryAi && (
+                        <button
+                          type="button"
+                          onClick={() => onRetryAi(item.id)}
+                          className="px-2 py-0.5 rounded bg-rose-800/60 hover:bg-rose-700 text-white font-bold text-[10px] shrink-0 transition-colors"
+                        >
+                          Thử lại AI
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {item.ai_status === 'skipped' && (
+                    <div className="text-[10px] text-slate-400 italic">
+                      Đã giữ nguyên metadata bạn nhập (không ghi đè).
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ))}
 
           {isAllDone && (
-            <div className="space-y-2 pt-2 border-t border-slate-700">
-              <div className="flex items-center gap-2 text-[11px] text-amber-300 bg-amber-950/40 border border-amber-800/60 p-2.5 rounded-xl">
-                <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>Mẹo: Bạn có thể bấm vào tệp trong thư viện để dùng <strong>AI Co-pilot</strong> tự động điền Tiêu đề và Alt Text chuẩn SEO chỉ với 1 cú click!</span>
-              </div>
+            <div className="pt-2 border-t border-slate-700">
               <button
                 type="button"
                 onClick={() => onCompleteUpload(queue)}
                 className="min-h-11 w-full py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold transition-colors shadow-xs flex items-center justify-center gap-2"
               >
-                Hoàn tất & Chèn vào Thư viện
+                Hoàn tất & Đóng hàng chờ
               </button>
             </div>
           )}

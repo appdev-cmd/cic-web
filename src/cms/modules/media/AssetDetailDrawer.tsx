@@ -9,6 +9,7 @@ import { MediaAsset, MediaFolder } from './types';
 import { useDialogA11y } from '../activity_logs_trash/useDialogA11y';
 import { AssetDetailFooter, AssetDetailHeader, AssetDetailNavigation, AssetPreviewSummary, type AssetDetailTab } from './AssetDetailChrome';
 import { AssetMetadataEditor } from './AssetMetadataEditor';
+import { AssetCropEditor } from './AssetCropEditor';
 
 interface AssetDetailDrawerProps {
   isOpen: boolean;
@@ -22,6 +23,8 @@ interface AssetDetailDrawerProps {
   canDelete: boolean;
   canReplace: boolean;
   onShowToast?: (msg: string) => void;
+  locale?: 'vi' | 'en';
+  onRefresh?: () => void;
 }
 
 export const AssetDetailDrawer: React.FC<AssetDetailDrawerProps> = ({
@@ -36,22 +39,16 @@ export const AssetDetailDrawer: React.FC<AssetDetailDrawerProps> = ({
   canDelete,
   canReplace,
   onShowToast,
+  locale = 'vi',
+  onRefresh,
 }) => {
   const [activeTab, setActiveTab] = useState<AssetDetailTab>('details');
   const [editedAsset, setEditedAsset] = useState<MediaAsset | null>(null);
-
-  // Crop focal point simulation state
-  const [focalPoint, setFocalPoint] = useState<{ x: number; y: number }>({ x: 50, y: 50 });
-  const dialogRef=useDialogA11y(isOpen,onClose);
+  const dialogRef = useDialogA11y(isOpen, onClose);
 
   useEffect(() => {
     if (asset) {
-      // Synchronize the editable draft whenever the selected drawer asset changes.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEditedAsset({ ...asset });
-      if (asset.variants && asset.variants.length > 0 && asset.variants[0].focal_point) {
-        setFocalPoint(asset.variants[0].focal_point);
-      }
     }
   }, [asset]);
 
@@ -60,13 +57,6 @@ export const AssetDetailDrawer: React.FC<AssetDetailDrawerProps> = ({
   const handleSave = () => {
     onSaveAsset(editedAsset);
     onClose();
-  };
-
-  const handleFocalPointClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
-    const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
-    setFocalPoint({ x, y });
   };
 
   return (
@@ -91,62 +81,15 @@ export const AssetDetailDrawer: React.FC<AssetDetailDrawerProps> = ({
 
           {/* TAB 2: CROP & ADAPTIVE VARIANTS */}
           {activeTab === 'variants' && (
-            <div className="space-y-6">
-              <div className="bg-slate-50 dark:bg-slate-850 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
-                <h4 className="text-xs font-bold text-slate-900 dark:text-white mb-1 flex items-center gap-1.5">
-                  <Crop className="w-4 h-4 text-orange-500" /> Điểm hội tụ ảnh (Focal Point Selector)
-                </h4>
-                <p className="text-xs text-slate-500 mb-4">
-                  Bấm vào vị trí quan trọng nhất trên ảnh để hệ thống giữ khung hình khi crop tự động theo tỉ lệ màn hình mobile/desktop.
-                </p>
-
-                <div className="relative aspect-16/9 bg-slate-950 rounded-xl overflow-hidden cursor-crosshair max-w-xl mx-auto" onClick={handleFocalPointClick}>
-                  <img src={editedAsset.url} alt="" className="w-full h-full object-contain" />
-
-                  {/* Focal point indicator */}
-                  <div
-                    className="absolute w-7 h-7 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-orange-500 bg-orange-500/30 flex items-center justify-center shadow-lg transition-all"
-                    style={{ left: `${focalPoint.x}%`, top: `${focalPoint.y}%` }}
-                  >
-                    <div className="w-2 h-2 rounded-full bg-orange-600" />
-                  </div>
-                </div>
-
-                <div className="mt-3 text-center text-xs font-mono text-slate-400">
-                  Focal Point: X={focalPoint.x}%, Y={focalPoint.y}%
-                </div>
-              </div>
-
-              {/* Preset Variations Table */}
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 dark:text-white mb-3">
-                  Danh sách Biến thể Tự động (Presets & WebP)
-                </h4>
-                <div className="space-y-2">
-                  {editedAsset.variants.map((v) => (
-                    <div
-                      key={v.id}
-                      className="flex flex-col items-stretch justify-between gap-2 p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs sm:flex-row sm:items-center"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="font-bold text-slate-800 dark:text-slate-200">{v.preset_name}</span>
-                        <span className="font-mono text-slate-400 text-[11px]">{v.width} x {v.height}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold">
-                          {v.format}
-                        </span>
-                        <span className="text-slate-500 font-mono text-[11px]">{v.file_size_kb} KB</span>
-                        <span className="text-emerald-600 font-bold flex items-center gap-1 text-[11px]">
-                          <Check className="w-3.5 h-3.5" /> {v.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                  {editedAsset.variants.length===0&&<div className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-xs text-slate-500 dark:border-slate-700">Chưa có biến thể được xử lý cho tệp này.</div>}
-                </div>
-              </div>
-            </div>
+            <AssetCropEditor
+              asset={editedAsset}
+              locale={locale}
+              canEdit={canEdit}
+              onRefreshAsset={() => {
+                onRefresh?.();
+              }}
+              onShowToast={onShowToast}
+            />
           )}
 
           {/* TAB 3: USED BY / REFERENCES */}

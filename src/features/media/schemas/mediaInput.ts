@@ -22,6 +22,28 @@ export const mediaFolderInputSchema = z.object({ workspace: z.enum(MEDIA_LOCALES
 export const mediaAlbumInputSchema = z.object({ workspace: z.enum(MEDIA_LOCALES), title: z.string().trim().min(1).max(255), alias: z.string().trim().min(1).max(150).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/), description: z.string().trim().max(5000).nullable(), workflowStatus: z.enum(['draft','published','archived']), coverAssetId: id.nullable(), assetIds: z.array(id).max(500) });
 export const mediaReplaceRegistrationSchema = mediaUploadRegistrationSchema.pick({ storagePath:true,filename:true,mimeType:true,fileSizeBytes:true,width:true,height:true,durationSeconds:true }).extend({ note:z.string().trim().min(1).max(2000) });
 export const mediaIdSchema = id;
+export const mediaCropVariantSchema = z.object({
+  assetId: id,
+  locale: z.enum(MEDIA_LOCALES),
+  presetName: z.string().trim().min(1).max(50),
+  crop: z.object({
+    x: z.number().nonnegative(),
+    y: z.number().nonnegative(),
+    width: z.number().positive(),
+    height: z.number().positive(),
+  }),
+  rotate: z.number().optional().default(0),
+  focalX: z.number().min(0).max(100).optional(),
+  focalY: z.number().min(0).max(100).optional(),
+});
+export const mediaFocalPointSchema = z.object({
+  assetId: id,
+  locale: z.enum(MEDIA_LOCALES),
+  focalX: z.number().min(0).max(100),
+  focalY: z.number().min(0).max(100),
+});
 export type MediaUploadRegistration = z.infer<typeof mediaUploadRegistrationSchema>;
 export type MediaMetadataPatch = z.infer<typeof mediaMetadataPatchSchema>;
 export type MediaAlbumInput = z.infer<typeof mediaAlbumInputSchema>;
+export type MediaCropVariantInput = z.infer<typeof mediaCropVariantSchema>;
+export type MediaFocalPointInput = z.infer<typeof mediaFocalPointSchema>;

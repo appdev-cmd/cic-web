@@ -84,3 +84,150 @@ export async function moveMediaAssetToTrash(sql:Sql,id:number,actorId:number) {
 }
 
 export async function trashMediaAssets(ids:number[],actor:CmsPrincipal) {return withTransaction(async(sql)=>{for(const id of ids){const moved=await moveMediaAssetToTrash(sql,id,actor.legacyUserId); await writeAuditEvent(actor,{action:AUDIT_ACTIONS.MEDIA_TRASHED,entityType:AUDIT_ENTITY_TYPES.MEDIA_ASSET,entityId:String(id),entityTitle:moved.title,module:'media',workspace:'global',result:'success',after:{trashId:moved.trashId,state:'trashed'}},sql);}});}
+
+export async function saveMediaCropVariant(
+  input: {
+    assetId: number;
+    presetName: string;
+    width: number;
+    height: number;
+    format: string;
+    storagePath: string;
+    fileSizeBytes: number;
+    focalX?: number | null;
+    focalY?: number | null;
+  },
+  actor: CmsPrincipal
+) {
+  return withTransaction(async (sql) => {
+    const [existing] = await sql`
+      SELECT storage_path FROM cic_media_variants
+      WHERE asset_id = ${input.assetId} AND preset_name = ${input.presetName} AND format = ${input.format}
+    `;
+
+    const [variant] = await sql`
+      INSERT INTO cic_media_variants (
+        asset_id, preset_name, width, height, format, storage_path, file_size_bytes, focal_x, focal_y, processing_status
+      ) VALUES (
+        ${input.assetId}, ${input.presetName}, ${input.width}, ${input.height}, ${input.format},
+        ${input.storagePath}, ${input.fileSizeBytes}, ${input.focalX ?? null}, ${input.focalY ?? null}, 'ready'
+      )
+      ON CONFLICT (asset_id, preset_name, format) DO UPDATE SET
+        width = EXCLUDED.width,
+        height = EXCLUDED.height,
+        storage_path = EXCLUDED.storage_path,
+        file_size_bytes = EXCLUDED.file_size_bytes,
+        focal_x = coalesce(EXCLUDED.focal_x, cic_media_variants.focal_x),
+        focal_y = coalesce(EXCLUDED.focal_y, cic_media_variants.focal_y),
+        processing_status = 'ready'
+      RETURNING id
+    `;
+
+    await writeAuditEvent(
+      actor,
+      {
+        action: AUDIT_ACTIONS.MEDIA_UPDATED,
+        entityType: AUDIT_ENTITY_TYPES.MEDIA_ASSET,
+        entityId: String(input.assetId),
+        entityTitle: `Biến thể crop: ${input.presetName}`,
+        module: 'media',
+        workspace: 'global',
+        result: 'success',
+        after: {
+          variantId: String(variant.id),
+          presetName: input.presetName,
+          format: input.format,
+          width: input.width,
+          height: input.height,
+          storagePath: input.storagePath,
+        },
+      },
+      sql
+    );
+
+    return {
+      variantId: String(variant.id),
+      oldStoragePath: existing && existing.storage_path !== input.storagePath ? String(existing.storage_path) : null,
+    };
+  });
+}
+
+export async function saveAssetFocalPoint(
+  assetId: number,
+  focalX: number,
+  focalY: number,
+  actor: CmsPrincipal
+) {
+  return withTransaction(async (sql) => {
+    const [asset] = await sql`
+      SELECT id, filename, width, height, storage_path, file_size_bytes
+      FROM cic_media_assets WHERE id = ${assetId} AND deleted_at IS NULL
+    `;
+    if (!asset) throw new Error('Không tìm thấy tệp Media.');
+
+    // Upsert 'original' preset variant to track the root focal point
+    await sql`
+      INSERT INTO cic_media_variants (
+        asset_id, preset_name, width, height, format, storage_path, file_size_bytes, focal_x, focal_y, processing_status
+      ) VALUES (
+        ${assetId}, 'original', ${asset.width || 100}, ${asset.height || 100}, 'original',
+        ${asset.storage_path}, ${asset.file_size_bytes}, ${focalX}, ${focalY}, 'ready'
+      )
+      ON CONFLICT (asset_id, preset_name, format) DO UPDATE SET
+        focal_x = ${focalX},
+        focal_y = ${focalY}
+    `;
+
+    // Also update focal point on all existing crop variants of this asset
+    await sql`
+      UPDATE cic_media_variants
+      SET focal_x = ${focalX}, focal_y = ${focalY}
+      WHERE asset_id = ${assetId}
+    `;
+
+    await writeAuditEvent(
+      actor,
+      {
+        action: AUDIT_ACTIONS.MEDIA_UPDATED,
+        entityType: AUDIT_ENTITY_TYPES.MEDIA_ASSET,
+        entityId: String(assetId),
+        entityTitle: String(asset.filename),
+        module: 'media',
+        workspace: 'global',
+        result: 'success',
+        after: { focalX, focalY },
+      },
+      sql
+    );
+  });
+}
+
+export async function deleteMediaVariant(variantId: number, actor: CmsPrincipal) {
+  return withTransaction(async (sql) => {
+    const [row] = await sql`
+      SELECT id, asset_id, preset_name, storage_path FROM cic_media_variants
+      WHERE id = ${variantId}
+    `;
+    if (!row) throw new Error('Không tìm thấy biến thể.');
+
+    await sql`DELETE FROM cic_media_variants WHERE id = ${variantId}`;
+
+    await writeAuditEvent(
+      actor,
+      {
+        action: AUDIT_ACTIONS.MEDIA_UPDATED,
+        entityType: AUDIT_ENTITY_TYPES.MEDIA_ASSET,
+        entityId: String(row.asset_id),
+        entityTitle: `Xóa biến thể crop: ${row.preset_name}`,
+        module: 'media',
+        workspace: 'global',
+        result: 'success',
+        before: { presetName: row.preset_name, storagePath: row.storage_path },
+      },
+      sql
+    );
+
+    return { storagePath: String(row.storage_path) };
+  });
+}
+
