@@ -114,7 +114,6 @@ body {
   height: auto !important; 
   margin-inline: auto; 
   background-color: #f8fafc; 
-  border-radius: 6px; 
 }
 .ck-content img:not([width]), .cms-rich-content img:not([width]), .legacy-html-content img:not([width]) {
   min-height: 80px;
