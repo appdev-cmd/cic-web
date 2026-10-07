@@ -8,10 +8,17 @@ import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '@/server/audit/registry';
 import { writeAuditEvent } from '@/server/audit/writer';
 import { moveProjectToTrash } from '@/features/trash/server/adapters/project';
 
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
+
 export type ProjectRelations = { productIds: number[]; serviceIds: number[] };
 
 function toProjectRow(input: ProjectInput, legacyUserId: number, creating: boolean) {
-  const row: Record<string, unknown> = { ...input, updated_by: legacyUserId, updated_time: new Date() };
+  const row: Record<string, unknown> = {
+    ...input,
+    content: input.content ? sanitizeHtmlContent(input.content) : input.content,
+    updated_by: legacyUserId,
+    updated_time: new Date(),
+  };
   if (creating) row.created_by = legacyUserId;
   return row;
 }

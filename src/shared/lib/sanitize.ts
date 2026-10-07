@@ -59,21 +59,43 @@ export const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
     },
   },
   allowedIframeHostnames: ['www.youtube.com', 'youtube.com', 'player.vimeo.com'],
+  allowProtocolRelative: false,
   allowedSchemes: ['http', 'https', 'mailto', 'tel'],
   allowedSchemesByTag: {
     img: ['http', 'https', 'data'],
   },
   transformTags: {
     a: (tagName, attribs) => {
-      if (attribs.target === '_blank') {
+      const href = attribs.href || '';
+      const isExternal = /^https?:\/\//i.test(href) && !/^https?:\/\/(?:[a-z0-9-]+\.)*cic\.com\.vn/i.test(href);
+      if (attribs.target === '_blank' || isExternal) {
         attribs.rel = 'noopener noreferrer';
       }
       return { tagName: 'a', attribs };
     },
     img: (tagName, attribs) => {
+      if (attribs.src) {
+        if (/^data:/i.test(attribs.src)) {
+          // Strictly allow only safe raster image base64 payloads (strip data:text/html, data:image/svg+xml, etc.)
+          if (!/^data:image\/(?:png|jpeg|jpg|webp|gif|avif);base64,/i.test(attribs.src)) {
+            delete attribs.src;
+          }
+        }
+      }
       attribs.referrerpolicy = attribs.referrerpolicy || 'no-referrer';
       return { tagName: 'img', attribs };
     },
+  },
+  exclusiveFilter: (frame) => {
+    // Drop iframes that have no valid allowed source
+    if (frame.tag === 'iframe' && (!frame.attribs.src || !frame.attribs.src.trim())) {
+      return true;
+    }
+    // Drop img tags that have had their invalid/malicious src removed
+    if (frame.tag === 'img' && (!frame.attribs.src || !frame.attribs.src.trim())) {
+      return true;
+    }
+    return false;
   },
 };
 
@@ -81,3 +103,26 @@ export function sanitizeHtmlContent(html: string | null | undefined): string {
   if (!html) return '';
   return sanitizeHtml(html, SANITIZE_OPTIONS);
 }
+
+/**
+ * Validates that a URL is safe to use in an href attribute (blocks javascript:, vbscript:, data:, etc.)
+ */
+export function isSafeUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  const trimmed = url.trim();
+  return /^(?:https?:\/\/|\/|#|mailto:|tel:)/i.test(trimmed);
+}
+
+/**
+ * Sanitizes a URL for use in an <a href> link.
+ * Returns the URL if safe, or a fallback (default '#') if unsafe (e.g. javascript: attacks).
+ */
+export function sanitizeHref(url: string | null | undefined, fallback: string = '#'): string {
+  if (!url) return fallback;
+  const trimmed = url.trim();
+  if (isSafeUrl(trimmed)) {
+    return trimmed;
+  }
+  return fallback;
+}
+

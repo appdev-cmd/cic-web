@@ -9,10 +9,12 @@ import { withTransaction } from '@/server/db/postgres';
 import type { ProductInput } from '../schemas/productInput';
 import type { ProductLocale } from '../types';
 
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
+
 const tables = (locale: ProductLocale) => locale === 'en'
   ? { p: 'cic_products_en', c: 'cic_products_categories_en', cr: 'cic_products_categories_rel_en', b: 'cic_manufactories_en', a: 'cic_application_en', ar: 'cic_products_applications_rel_en', t: 'cic_products_types_en', rr: 'cic_products_related_rel_en' }
   : { p: 'cic_products', c: 'cic_products_categories', cr: 'cic_products_categories_rel', b: 'cic_manufactories', a: 'cic_application', ar: 'cic_products_applications_rel', t: 'cic_products_types', rr: 'cic_products_related_rel' };
-const cleanHtml = (value: string) => value.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '').replace(/\son\w+\s*=\s*(['"]).*?\1/gi, '').replace(/javascript:/gi, '');
+const cleanHtml = (value: string) => sanitizeHtmlContent(value);
 
 async function validateRelations(sql: Sql, locale: ProductLocale, id: number | null, value: ProductInput) {
   const t = tables(locale);

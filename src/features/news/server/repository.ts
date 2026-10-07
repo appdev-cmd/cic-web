@@ -8,8 +8,10 @@ import { moveNewsToTrash } from '@/features/trash/server/adapters/news';
 import type { NewsInput } from '../schemas/newsInput';
 import { assertNewsPlacementCapacity, type NewsLocale } from './placement';
 
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
+
 const tables=(locale:NewsLocale)=>locale==='en'?{news:'cic_news_en',category:'cic_news_categories_en',product:'cic_products_en',sequence:'cic_news_en_id_seq'}:{news:'cic_news',category:'cic_news_categories',product:'cic_products',sequence:'cic_news_id_seq'};
-const cleanHtml=(value:string)=>value.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/\son\w+\s*=\s*(['"]).*?\1/gi,'').replace(/javascript:/gi,'');
+const cleanHtml=(value:string)=>sanitizeHtmlContent(value);
 const csv=(values:number[])=>[...new Set(values)].join(',');
 
 async function validate(sql:Sql,locale:NewsLocale,id:number|null,value:NewsInput){

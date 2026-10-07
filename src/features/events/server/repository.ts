@@ -8,14 +8,12 @@ import { moveEventToTrash } from '@/features/trash/server/adapters/event';
 import type { EventInput } from '../schemas/eventInput';
 import type { EventLocale } from '../types';
 
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
+
 const tables = (locale: EventLocale) =>
   locale === 'en' ? 'cic_event_en' : 'cic_event';
 
-const cleanHtml = (value: string) =>
-  value
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
-    .replace(/\son\w+\s*=\s*(['"]).*?\1/gi, '')
-    .replace(/javascript:/gi, '');
+const cleanHtml = (value: string) => sanitizeHtmlContent(value);
 
 async function validate(
   sql: Sql,

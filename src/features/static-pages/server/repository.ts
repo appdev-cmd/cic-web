@@ -13,15 +13,39 @@ import type {
   StaticPageSectionItem,
 } from '../types';
 import { CUSTOM_LEGAL_PAGE_CONTRACT } from '../manifest';
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
 
 const text = (v: unknown) => (typeof v === 'string' ? v : '');
+
+function sanitizeConfigHtml(obj: Record<string, unknown>): Record<string, unknown> {
+  const sanitized = { ...obj };
+  if (typeof sanitized.richTextHtml === 'string') {
+    sanitized.richTextHtml = sanitizeHtmlContent(sanitized.richTextHtml);
+  }
+  if (Array.isArray(sanitized.slides)) {
+    sanitized.slides = sanitized.slides.map((slide) => {
+      if (slide && typeof slide === 'object') {
+        const s = { ...slide } as Record<string, unknown>;
+        if (typeof s.title === 'string' && /<[a-z]/i.test(s.title)) {
+          s.title = sanitizeHtmlContent(s.title);
+        }
+        if (typeof s.subtitle === 'string' && /<[a-z]/i.test(s.subtitle)) {
+          s.subtitle = sanitizeHtmlContent(s.subtitle);
+        }
+        return s;
+      }
+      return slide;
+    });
+  }
+  return sanitized;
+}
 
 export function normalizeSectionConfig(cfg: unknown): Record<string, unknown> {
   if (!cfg) return {};
   if (typeof cfg === 'string') {
     try {
       const parsed = JSON.parse(cfg);
-      return typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, unknown>) : {};
+      return typeof parsed === 'object' && parsed !== null ? sanitizeConfigHtml(parsed as Record<string, unknown>) : {};
     } catch {
       return {};
     }
@@ -35,12 +59,12 @@ export function normalizeSectionConfig(cfg: unknown): Record<string, unknown> {
           .map((k) => (cfg as Record<string, unknown>)[k])
           .join('');
         const parsed = JSON.parse(reconstructed);
-        return typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, unknown>) : {};
+        return typeof parsed === 'object' && parsed !== null ? sanitizeConfigHtml(parsed as Record<string, unknown>) : {};
       } catch {
         // fallback
       }
     }
-    return cfg as Record<string, unknown>;
+    return sanitizeConfigHtml(cfg as Record<string, unknown>);
   }
   return {};
 }
