@@ -1,12 +1,12 @@
 import { motion } from 'motion/react';
-import { Building2, Users, Award } from 'lucide-react';
+import { Building2, Users, Award, Layers } from 'lucide-react';
 import { createElementBinding } from '@shared/visual-editing/elementBindingTypes';
 import type { ElementBindingRegistry } from '@shared/visual-editing/elementBindingRegistry';
 import type { PageRenderPolicy } from '@shared/page-content/models';
 import { useI18n } from '@/shared/i18n';
 import { bindElement, textFrom } from './aboutUtils';
 
-export type AboutTabKey = 'overview' | 'structure' | 'experience';
+export type AboutTabKey = 'overview' | 'ecosystem' | 'structure' | 'experience';
 
 interface AboutHeroBannerProps {
   heroConfig: Record<string, unknown>;
@@ -30,6 +30,7 @@ export function AboutHeroBanner({
 
   const tabs: Array<{ id: AboutTabKey; label: string }> = [
     { id: 'overview', label: isEn ? 'Corporate Overview' : 'Tổng quan doanh nghiệp' },
+    { id: 'ecosystem', label: isEn ? 'Solutions Ecosystem' : 'Hệ sinh thái giải pháp' },
     { id: 'structure', label: isEn ? 'Organization Structure' : 'Cơ cấu tổ chức' },
     { id: 'experience', label: isEn ? 'Capacity & Experience' : 'Năng lực & Kinh nghiệm' },
   ];
@@ -156,6 +157,7 @@ export function AboutHeroBanner({
                   }`}
                 >
                   {tab.id === 'overview' && <Building2 size={14} />}
+                  {tab.id === 'ecosystem' && <Layers size={14} />}
                   {tab.id === 'structure' && <Users size={14} />}
                   {tab.id === 'experience' && <Award size={14} />}
                   {tab.label}

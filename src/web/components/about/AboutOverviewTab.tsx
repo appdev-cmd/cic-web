@@ -383,59 +383,6 @@ export function AboutOverviewTab({
         </div>
       </section>
 
-      {/* Lĩnh vực kinh doanh */}
-      <section data-page-builder-section-key="about.offerings" id="solutions" className="py-16 bg-transparent text-slate-900 relative overflow-hidden z-10 border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <SectionHeader
-            title={textFrom(offeringsConfig, 'title', isEn ? 'PRODUCTS AND SERVICES OFFERED' : 'SẢN PHẨM VÀ DỊCH VỤ CUNG CẤP')}
-            sub={textFrom(offeringsConfig, 'subtitle', isEn ? 'Affirming capability through core technological solutions' : 'Khẳng định năng lực qua các giải pháp công nghệ cốt lõi')}
-            titleProps={
-              {
-                ...bindElement<HTMLHeadingElement>(
-                  bindingRegistry,
-                  createElementBinding({ sectionKey: 'about.offerings', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true })
-                ),
-                'data-page-builder-config-path': JSON.stringify(['title']),
-              } as any
-            }
-            subProps={
-              {
-                ...bindElement<HTMLParagraphElement>(
-                  bindingRegistry,
-                  createElementBinding({ sectionKey: 'about.offerings', elementPath: 'subtitle', semantic: 'text', ownership: 'section-config', editable: true })
-                ),
-                'data-page-builder-config-path': JSON.stringify(['subtitle']),
-              } as any
-            }
-          />
-
-          <div data-page-collection="product service" className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {displayedOfferingsItems.map((item, i) => {
-              const icons = [<BIMIcon key="0" />, <ShieldCheck key="1" />, <Cpu key="2" />, <Building2 key="3" />, <Box key="4" />, <Lightbulb key="5" />, <Leaf key="6" />];
-              const icon = icons[i % icons.length];
-              return (
-                <div
-                  key={i}
-                  className="flex flex-col gap-4 p-5 md:p-6 bg-slate-50 border border-slate-200 rounded-[10px] hover:border-orange-300 hover:shadow-md transition-all"
-                >
-                  <div className="w-14 h-14 shrink-0 rounded-[8px] bg-white border border-slate-200 flex items-center justify-center text-orange-600 shadow-sm">
-                    {icon}
-                  </div>
-                  <div>
-                    <h3 data-page-builder-config-path={JSON.stringify(['items', i, 'title'])} className="text-lg font-bold text-slate-900 mb-2">
-                      {item.title}
-                    </h3>
-                    <p data-page-builder-config-path={JSON.stringify(['items', i, 'desc'])} className="text-slate-600 text-sm leading-relaxed">
-                      {item.desc}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
       {/* Awards Section */}
       <section data-page-builder-section-key="about.awards" className="py-16 bg-slate-50/60 relative overflow-hidden z-10 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6 relative z-10">

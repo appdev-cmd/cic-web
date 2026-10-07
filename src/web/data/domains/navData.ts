@@ -7,6 +7,7 @@ export const navLinks: NavLink[] = [
     active: true,
     dropdown: [
       { name: 'Giới thiệu', href: '/about' },
+      { name: 'Hệ sinh thái giải pháp', href: '/gioi-thieu/he-sinh-thai' },
       { name: 'Cơ cấu tổ chức', href: '/about?tab=structure' },
       { name: 'Năng lực và Kinh nghiệm', href: '/about?tab=experience' }
     ]
