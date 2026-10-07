@@ -169,16 +169,70 @@ export async function replaceMediaAssetAction(rawId: unknown, formData: FormData
   }
 }
 
+function extractImageBuffer(buffer: Buffer): Buffer {
+  if (
+    buffer.length >= 22 &&
+    buffer[0] === 0x00 &&
+    buffer[1] === 0x00 &&
+    buffer[2] === 0x01 &&
+    buffer[3] === 0x00
+  ) {
+    const numImages = buffer.readUInt16LE(4);
+    if (numImages > 0) {
+      let bestOffset = buffer.readUInt32LE(18);
+      let bestSize = buffer.readUInt32LE(14);
+      let maxArea = 0;
+
+      for (let i = 0; i < numImages; i++) {
+        const entryOffset = 6 + i * 16;
+        if (entryOffset + 16 <= buffer.length) {
+          const w = buffer[entryOffset] || 256;
+          const h = buffer[entryOffset + 1] || 256;
+          const area = w * h;
+          if (area >= maxArea) {
+            maxArea = area;
+            bestSize = buffer.readUInt32LE(entryOffset + 8);
+            bestOffset = buffer.readUInt32LE(entryOffset + 12);
+          }
+        }
+      }
+
+      if (bestOffset + bestSize <= buffer.length) {
+        const sub = buffer.slice(bestOffset, bestOffset + bestSize);
+        if (sub.length >= 8 && sub[0] === 0x89 && sub[1] === 0x50 && sub[2] === 0x4e && sub[3] === 0x47) {
+          return sub;
+        }
+        if (sub.length >= 40 && sub.readUInt32LE(0) === 40) {
+          const bmpHeader = Buffer.alloc(14);
+          bmpHeader.write('BM', 0);
+          bmpHeader.writeUInt32LE(14 + bestSize, 2);
+          bmpHeader.writeUInt32LE(54, 10);
+          const dib = Buffer.from(sub);
+          const dibHeight = dib.readInt32LE(8);
+          dib.writeInt32LE(Math.floor(dibHeight / 2), 8);
+          return Buffer.concat([bmpHeader, dib]);
+        }
+        return sub;
+      }
+    }
+  }
+  return buffer;
+}
+
 export async function createCropVariantAction(rawPayload: unknown) {
   const actor = await requirePermission('media', 'edit');
   const payload = mediaCropVariantSchema.parse(rawPayload);
 
   const sql = getPostgresClient();
   const [asset] = await sql`
-    SELECT id, filename, mime_type, storage_path, width, height
+    SELECT id, filename, mime_type, media_type, storage_path, width, height
     FROM cic_media_assets WHERE id = ${payload.assetId} AND deleted_at IS NULL
   `;
   if (!asset) throw new Error('Không tìm thấy tệp Media.');
+
+  if (asset.media_type !== 'image' && !String(asset.mime_type).startsWith('image/')) {
+    throw new Error('Chỉ có thể cắt (crop) các tệp hình ảnh.');
+  }
 
   const { data, error } = await createSupabaseAdminClient()
     .storage.from(MEDIA_BUCKET)
@@ -187,7 +241,8 @@ export async function createCropVariantAction(rawPayload: unknown) {
     throw new Error(`Không thể đọc ảnh gốc từ kho lưu trữ: ${error?.message || 'Lỗi tải tệp'}`);
   }
 
-  const buffer = Buffer.from(await data.arrayBuffer());
+  const rawBuffer = Buffer.from(await data.arrayBuffer());
+  const buffer = extractImageBuffer(rawBuffer);
   const sharp = (await import('sharp')).default;
   let img = sharp(buffer);
 
@@ -195,7 +250,14 @@ export async function createCropVariantAction(rawPayload: unknown) {
     img = img.rotate(payload.rotate);
   }
 
-  const meta = await img.metadata();
+  let meta;
+  try {
+    meta = await img.metadata();
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`Không thể giải mã định dạng ảnh (${asset.filename}): ${msg}`);
+  }
+
   const imgWidth = meta.width || Number(asset.width) || 1000;
   const imgHeight = meta.height || Number(asset.height) || 1000;
 

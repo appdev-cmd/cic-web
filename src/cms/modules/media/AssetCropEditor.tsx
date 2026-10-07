@@ -257,8 +257,25 @@ export const AssetCropEditor: React.FC<AssetCropEditorProps> = ({
   const estimatedWidth = Math.round((cropBox.width / 100) * naturalSize.width);
   const estimatedHeight = Math.round((cropBox.height / 100) * naturalSize.height);
 
+  if (asset.type !== 'image') {
+    return (
+      <div className="p-8 text-center rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 text-xs text-slate-500 space-y-2">
+        <p className="font-bold text-slate-700 dark:text-slate-300">Tính năng Cắt ảnh & Biến thể chỉ áp dụng cho tệp hình ảnh.</p>
+        <p className="text-slate-400">Tệp này có định dạng: {asset.mime_type}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
+      {/* 0. NOTICE FOR ICO FORMAT */}
+      {(asset.filename.toLowerCase().endsWith('.ico') || asset.mime_type.includes('icon')) && (
+        <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-700 dark:text-amber-300 flex items-center gap-2">
+          <Info className="w-4 h-4 shrink-0 text-amber-500" />
+          <span>Tệp biểu tượng Icon (.ico): Engine sẽ tự động trích xuất ảnh nét nhất bên trong để cắt và xuất sang WebP chuẩn.</span>
+        </div>
+      )}
+
       {/* 1. TOP TOOLBAR: PRESETS & TRANSFORM CONTROLS */}
       <div className="p-4 bg-slate-50 dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
