@@ -23,10 +23,6 @@ async function queryMediaRows(locale: MediaLocale) {
         SELECT jsonb_build_object('id',c.id::text,'entity_type','cta','entity_title',c.admin_name,'path','/cms/cta','updated_at',c.updated_at::text) reference FROM cic_ctas c WHERE c.media_asset_id=a.id AND c.deleted_at IS NULL
         UNION ALL
         SELECT jsonb_build_object('id',s.id::text,'entity_type','form_submission','entity_title','Tệp tải lên từ biểu mẫu','path',coalesce(s.source_path,'/cms/forms/submissions'),'updated_at',s.submitted_at::text) reference FROM cic_form_submission_values sv JOIN cic_form_submissions s ON s.id=sv.submission_id WHERE sv.media_asset_id=a.id
-        UNION ALL
-        SELECT jsonb_build_object('id',n.id::text,'entity_type','news','entity_title',n.title,'path','/cms/news/' || n.id::text,'updated_at',n.updated_time::text) reference FROM cic_news n WHERE (n.image LIKE '%' || a.filename || '%' OR n.image LIKE '%' || a.storage_path || '%' OR n.content LIKE '%' || a.storage_path || '%') LIMIT 5
-        UNION ALL
-        SELECT jsonb_build_object('id',p.id::text,'entity_type','product','entity_title',p.name,'path','/cms/products/' || p.id::text,'updated_at',p.edited_time::text) reference FROM cic_products p WHERE (p.image LIKE '%' || a.filename || '%' OR p.image LIKE '%' || a.storage_path || '%' OR p.description LIKE '%' || a.storage_path || '%') LIMIT 5
       ) usage_refs),'[]'::jsonb) used_by_refs
       FROM cic_media_assets a LEFT JOIN cic_media_asset_translations t ON t.asset_id=a.id AND t.locale=${locale} LEFT JOIN cic_users u ON u.id=a.created_by
       WHERE a.deleted_at IS NULL ORDER BY a.updated_at DESC,a.id DESC`,
