@@ -28,7 +28,7 @@ interface HeaderProps {
   setCurrentView?: (view: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search') => void;
   activeLink?: string;
   setActiveLink?: (link: string) => void;
-  setAboutSubTab?: (tab: 'overview' | 'ecosystem' | 'structure' | 'experience') => void;
+  setAboutSubTab?: (tab: 'overview' | 'structure' | 'experience') => void;
   onSelectService?: (id: string | null) => void;
   onSelectProject?: (id: string | null) => void;
   onSelectNewsCategory?: (category: string | null) => void;
@@ -290,12 +290,10 @@ export const Header = ({
                                 e.preventDefault();
                                 setCurrentView('about');
                                 setActiveLink(link.name);
-                                if (subItem.name.includes('cấu') || subItem.name.includes('Structure') || subItem.href.includes('structure')) {
+                                if (subItem.name.includes('cấu') || subItem.name.includes('Structure')) {
                                   setAboutSubTab('structure');
-                                } else if (subItem.name.includes('lực') || subItem.name.includes('Experience') || subItem.href.includes('experience')) {
+                                } else if (subItem.name.includes('lực') || subItem.name.includes('Experience')) {
                                   setAboutSubTab('experience');
-                                } else if (subItem.name.includes('sinh thái') || subItem.name.includes('Ecosystem') || subItem.href.includes('ecosystem')) {
-                                  setAboutSubTab('ecosystem');
                                 } else {
                                   setAboutSubTab('overview');
                                 }
@@ -585,12 +583,10 @@ export const Header = ({
                                   e.preventDefault();
                                   setCurrentView('about');
                                   setActiveLink('Giới thiệu');
-                                  if (subItem.name.includes('cấu') || subItem.name.includes('Structure') || subItem.href.includes('structure')) {
+                                  if (subItem.name === 'Cơ cấu tổ chức') {
                                     setAboutSubTab('structure');
-                                  } else if (subItem.name.includes('lực') || subItem.name.includes('Experience') || subItem.href.includes('experience')) {
+                                  } else if (subItem.name === 'Năng lực và Kinh nghiệm') {
                                     setAboutSubTab('experience');
-                                  } else if (subItem.name.includes('sinh thái') || subItem.name.includes('Ecosystem') || subItem.href.includes('ecosystem')) {
-                                    setAboutSubTab('ecosystem');
                                   } else {
                                     setAboutSubTab('overview');
                                   }

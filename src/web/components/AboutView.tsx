@@ -15,7 +15,6 @@ import type { StoredPartnerMapLayout } from './CountryPartnerNetwork';
 import {
   AboutHeroBanner,
   AboutOverviewTab,
-  AboutEcosystemTab,
   AboutStructureTab,
   AboutExperienceTab,
   type AboutTabKey,
@@ -43,7 +42,6 @@ export interface AboutViewProps {
 export const AboutView = ({
   activeTab,
   setActiveTab,
-  onNavigateToContact,
   capacityContent = getLegacyAboutCapacityContent(),
   aboutContent = getLegacyAboutPageContent(),
   renderPolicy = productionRenderPolicy,
@@ -330,10 +328,6 @@ export const AboutView = ({
                 renderPolicy={renderPolicy}
                 resolveMediaUrl={resolveMediaUrl}
               />
-            )}
-
-            {localTab === 'ecosystem' && (
-              <AboutEcosystemTab onNavigateToContact={onNavigateToContact} />
             )}
 
             {localTab === 'structure' && (

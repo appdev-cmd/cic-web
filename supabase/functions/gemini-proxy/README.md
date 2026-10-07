@@ -52,8 +52,13 @@ curl -i --location --request POST "https://tjkytlstopieiqqiiisy.supabase.co/func
   --data '{"operation":"raw.generate","userPrompt":"Xin chào CIC"}'
 ```
 
-### Cơ chế bảo mật:
+### Cơ chế bảo mật & Guardrails:
 - **Xác thực JWT:** Mọi request bắt buộc phải có `Authorization: Bearer <token>`.
-- **Phân quyền Role:** Chỉ chấp nhận `SUPABASE_SERVICE_ROLE_KEY` (gọi từ Backend Server) hoặc User JWT có cờ `cms_profile: true` trong `app_metadata` (người dùng CMS đã đăng nhập).
-- Các request không hợp lệ sẽ bị từ chối ngay với HTTP `401 Unauthorized` hoặc `403 Forbidden`.
+- **Phân quyền Role:** Chấp nhận `SUPABASE_SERVICE_ROLE_KEY` (gọi từ Backend Server DAL) hoặc User JWT có cờ `cms_profile: true` / role `admin` / `operator` trong `app_metadata` (cán bộ CMS đã đăng nhập).
+- **Chống Prompt Injection từ Browser:** Cấm User JWT gọi `raw.generate`. Trình duyệt chỉ được phép gọi các operation có cấu trúc trong whitelist (`product.prefill`, `field.enrich`). Lệnh `raw.generate` chỉ dành riêng cho internal server gọi qua Service Role Key.
+- **Rate Limiting:** Sliding-window rate limit 30 req/phút đối với User JWT và 120 req/phút đối với Service Role Key. Vượt ngưỡng trả về HTTP 429 kèm header `Retry-After`.
+- **Input Size Limit:** Giới hạn Content-Length < 500 KB, `userPrompt` tối đa 12.000 ký tự (~3.000 tokens), `systemPrompt` tối đa 4.000 ký tự. Vượt ngưỡng trả về HTTP 413.
+- **Output Token Cap:** Đặt trần cứng tối đa 4.096 output tokens.
+- **Timeout Protection:** Timeout 10s cho xác thực Supabase Auth, 25s cho Google Gemini API. Bị nghẽn trả về HTTP 504.
+- Các request không hợp lệ bị từ chối ngay với HTTP `401 Unauthorized`, `403 Forbidden`, `413 Payload Too Large`, `429 Too Many Requests`, hoặc `504 Gateway Timeout`.
 
