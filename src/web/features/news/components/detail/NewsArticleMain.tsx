@@ -74,22 +74,6 @@ export function NewsArticleMain({
         </p>
       )}
 
-      {/* Featured Hero Banner Image */}
-      <div className="h-72 sm:h-[460px] lg:h-[500px] w-full relative overflow-hidden group rounded-[10px]">
-        <img
-          src={article.img}
-          alt={article.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 rounded-[10px]"
-          referrerPolicy="no-referrer"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-          <p className="text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-            <Sparkles size={14} className="text-orange-400" />
-            {article.title}
-          </p>
-        </div>
-      </div>
-
       {/* Recruitment Specific Info Box */}
       {article.category === 'recruitment' && (
         <div className="bg-white border border-orange-200 border-l-4 border-l-orange-500 p-5 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs text-slate-800 my-4 shadow-2xs">

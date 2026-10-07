@@ -34,7 +34,6 @@ export const ArticlePreviewModal: React.FC<Props> = ({ isOpen, article, onClose 
               <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-orange-600"><CalendarDays className="size-4" />{displayDate(article.start_time || article.created_time)}</p>
               <h1 className="text-3xl font-black leading-tight sm:text-4xl">{article.title}</h1>
               {article.summary && <p className="mt-5 border-l-4 border-orange-500 pl-4 text-base leading-7 text-slate-600">{article.summary}</p>}
-              {article.image && <img src={article.image} alt={article.title} className="mt-7 aspect-video w-full rounded-2xl object-cover" />}
               <div className="ck-content mt-8 leading-7" dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(article.content) }} />
               {article.video && <div className="mt-8 aspect-video overflow-hidden rounded-2xl [&_iframe]:h-full [&_iframe]:w-full" dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(article.video) }} />}
               {article.file_upload && <a href={article.file_upload} className="mt-8 inline-flex min-h-11 items-center gap-2 rounded-xl bg-orange-600 px-4 py-3 text-sm font-bold text-white"><Download className="size-4" />Tải tài liệu đính kèm</a>}
