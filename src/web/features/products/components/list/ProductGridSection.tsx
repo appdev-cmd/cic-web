@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React from 'react';
 import { motion } from 'motion/react';
@@ -164,12 +164,12 @@ export function ProductGridSection({
 
       {/* Listing Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-4 gap-4">
-        <span className="text-sm font-bold uppercase tracking-wider text-[#444] flex items-center gap-2">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-[#444] flex items-center gap-2 m-0 p-0 font-inherit">
           {t.products.catalogTitle}
           <span className="px-2.5 py-0.5 bg-orange-600/10 text-orange-600 text-xs font-bold rounded-[8px]">
             {totalProductsCount} {t.products.resultsFound}
           </span>
-        </span>
+        </h2>
 
         {/* Sort A-Z Toggle */}
         <div className="flex items-center gap-2 self-start sm:self-auto">

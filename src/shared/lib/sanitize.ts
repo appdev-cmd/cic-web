@@ -65,8 +65,17 @@ export const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
     img: ['http', 'https', 'data'],
   },
   transformTags: {
+    h1: (tagName, attribs) => {
+      // SEO: Avoid multiple H1 tags on detail pages by converting body H1 to H2
+      return { tagName: 'h2', attribs };
+    },
     a: (tagName, attribs) => {
-      const href = attribs.href || '';
+      let href = attribs.href || '';
+      // SEO: Normalize legacy staging domain links to clean relative paths
+      if (/phongcachso\.com/i.test(href)) {
+        href = href.replace(/https?:\/\/(?:www\.)?phongcachso\.com/gi, '');
+        attribs.href = href || '/';
+      }
       const isExternal = /^https?:\/\//i.test(href) && !/^https?:\/\/(?:[a-z0-9-]+\.)*cic\.com\.vn/i.test(href);
       if (attribs.target === '_blank' || isExternal) {
         attribs.rel = 'noopener noreferrer';
@@ -83,10 +92,18 @@ export const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
         }
       }
       attribs.referrerpolicy = attribs.referrerpolicy || 'no-referrer';
+      // SEO: Ensure every image has alt text for WCAG compliance and Google Image Indexing
+      if (!attribs.alt || !attribs.alt.trim()) {
+        attribs.alt = attribs.title?.trim() || 'Hình ảnh minh họa CIC';
+      }
       return { tagName: 'img', attribs };
     },
   },
   exclusiveFilter: (frame) => {
+    // SEO: Drop empty headings (h1-h6 with empty text or only &nbsp;)
+    if (/^h[1-6]$/i.test(frame.tag) && (!frame.text || !frame.text.replace(/\u00a0|&nbsp;/gi, '').trim())) {
+      return true;
+    }
     // Drop iframes that have no valid allowed source
     if (frame.tag === 'iframe' && (!frame.attribs.src || !frame.attribs.src.trim())) {
       return true;
