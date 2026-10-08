@@ -37,7 +37,8 @@ export function NewsCard({
         <img 
           src={news.img} 
           alt={news.title}
-          loading="lazy"
+          loading={index < 3 ? 'eager' : 'lazy'}
+          fetchPriority={index === 0 ? 'high' : 'auto'}
           decoding="async"
           onLoad={() => setIsLoaded(true)}
           className={`w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 transition-opacity duration-300 ${

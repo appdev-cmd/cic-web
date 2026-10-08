@@ -43,7 +43,8 @@ export function ProductCard({
               <img
                 src={imageSrc}
                 alt={product.name}
-                loading="lazy"
+                loading={idx < 3 ? 'eager' : 'lazy'}
+                fetchPriority={idx === 0 ? 'high' : 'auto'}
                 decoding="async"
                 onError={() => setHasError(true)}
                 referrerPolicy="no-referrer"

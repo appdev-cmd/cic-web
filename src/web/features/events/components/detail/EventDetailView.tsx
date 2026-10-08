@@ -55,6 +55,9 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
                 <img
                   src={event.img}
                   alt={event.title}
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute top-6 left-6 flex gap-2">
