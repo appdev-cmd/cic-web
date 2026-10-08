@@ -354,6 +354,8 @@ export const Header = ({
               onClick={() => setIsSearchOpen(!isSearchOpen)}
               className={`p-2 rounded-[8px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${isHeaderWhite ? 'text-slate-600 hover:text-orange-600' : 'text-white hover:text-orange-400'}`}
               title={t.common.search}
+              aria-label={t.common.search}
+              aria-expanded={isSearchOpen}
             >
               <Search size={20} />
             </button>
@@ -367,6 +369,7 @@ export const Header = ({
               className="lg:hidden min-h-11 min-w-11 inline-flex items-center justify-center p-2 text-white rounded-[8px]"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label={mobileMenuOpen ? t.common.close : t.header.menuAria}
+              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? (
                 <X size={24} className="text-slate-900" />
@@ -381,6 +384,8 @@ export const Header = ({
         <AnimatePresence>
           {isSearchOpen && (
             <motion.div
+              role="search"
+              aria-label={t.common.search}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -425,6 +430,7 @@ export const Header = ({
                       : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
                   }`}
                   title={t.common.close}
+                  aria-label={t.common.close}
                 >
                   <X size={20} />
                 </button>
@@ -437,7 +443,7 @@ export const Header = ({
       {/* Mobile Menu Overlay Drawer */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-[100] flex justify-end">
+          <div className="fixed inset-0 z-[100] flex justify-end" role="dialog" aria-modal="true" aria-label="Menu điều hướng di động">
             {/* Backdrop Overlay */}
             <motion.div
               initial={{ opacity: 0 }}

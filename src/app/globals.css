@@ -75,6 +75,19 @@ select:disabled {
   cursor: not-allowed;
 }
 
+/* WCAG 2.2 AA Focus Visible: Rõ ràng khi dùng bàn phím (Tab), không ảnh hưởng khi dùng chuột */
+:focus-visible {
+  outline: 2px solid #ea580c;
+  outline-offset: 2px;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #ea580c;
+  outline-offset: 0px;
+}
+
 .public-shell-content[data-header-variant="solid"] {
   padding-top: var(--public-header-height);
 }

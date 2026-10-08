@@ -153,10 +153,14 @@ export const Footer = ({
                 <form className="relative flex flex-col sm:flex-row gap-2" onSubmit={handleNewsletterSubmit}>
                   <input 
                     type="email" 
+                    id="footer-newsletter-email"
+                    name="email"
+                    autoComplete="email"
                     required
                     value={newsletterEmail}
                     onChange={(e) => setNewsletterEmail(e.target.value)}
                     placeholder={t.footer.newsletterPlaceholder} 
+                    aria-label={t.footer.newsletterPlaceholder}
                     className="min-w-0 flex-1 bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 rounded-[8px] transition-all"
                   />
                   <button 
@@ -172,11 +176,11 @@ export const Footer = ({
               )}
             </div>
             <div className="flex flex-wrap gap-4 mb-8">
-              <a href={sanitizeHref(values.facebook || 'https://www.facebook.com/CICTechnologyandConsultancyVN/')} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#1877F2] hover:border-[#1877F2] text-white transition-all shadow-lg group">
+              <a href={sanitizeHref(values.facebook || 'https://www.facebook.com/CICTechnologyandConsultancyVN/')} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#1877F2] hover:border-[#1877F2] text-white transition-all shadow-lg group">
                 <Facebook size={20} className="group-hover:scale-110 transition-transform" />
               </a>
               {values.linkedin_url ? (
-                <a href={sanitizeHref(values.linkedin_url)} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#0A66C2] hover:border-[#0A66C2] text-white transition-all shadow-lg group">
+                <a href={sanitizeHref(values.linkedin_url)} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#0A66C2] hover:border-[#0A66C2] text-white transition-all shadow-lg group">
                   <Linkedin size={20} className="group-hover:scale-110 transition-transform" />
                 </a>
               ) : (
@@ -184,13 +188,13 @@ export const Footer = ({
                   <Linkedin size={20} className="group-hover:scale-110 transition-transform" />
                 </span>
               )}
-              <a href={sanitizeHref(values.youtube || 'https://www.youtube.com/channel/UCVrD2Lw1V96ggdwQNs87qEQ')} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#FF0000] hover:border-[#FF0000] text-white transition-all shadow-lg group">
+              <a href={sanitizeHref(values.youtube || 'https://www.youtube.com/channel/UCVrD2Lw1V96ggdwQNs87qEQ')} target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#FF0000] hover:border-[#FF0000] text-white transition-all shadow-lg group">
                 <Youtube size={20} className="group-hover:scale-110 transition-transform" />
               </a>
-              <a href={sanitizeHref(values.zalo_url || 'https://zalo.me/02439761381')} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-sky-500 hover:border-sky-500 text-white transition-all shadow-lg group">
+              <a href={sanitizeHref(values.zalo_url || 'https://zalo.me/02439761381')} target="_blank" rel="noopener noreferrer" aria-label="Zalo" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-sky-500 hover:border-sky-500 text-white transition-all shadow-lg group">
                 <ZaloIcon size={20} className="group-hover:scale-110 transition-transform" />
               </a>
-              <a href={sanitizeHref(values.domain || 'https://www.cic.com.vn')} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-slate-800 hover:border-slate-800 text-white transition-all shadow-lg group">
+              <a href={sanitizeHref(values.domain || 'https://www.cic.com.vn')} target="_blank" rel="noopener noreferrer" aria-label="Website CIC" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-slate-800 hover:border-slate-800 text-white transition-all shadow-lg group">
                 <Globe size={20} className="group-hover:scale-110 transition-transform" />
               </a>
             </div>

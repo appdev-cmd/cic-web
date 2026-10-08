@@ -46,6 +46,17 @@ export function ProductActionModal({
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
+  React.useEffect(() => {
+    if (!modalType || !activeProduct) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [modalType, activeProduct, onClose]);
+
   if (!modalType || !activeProduct) return null;
 
   const resetStateForTab = (type: ProductModalType) => {
@@ -196,24 +207,31 @@ export function ProductActionModal({
 
         {/* Modal Box */}
         <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="product-modal-title"
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="bg-white border border-slate-200 shadow-[0_30px_70px_rgba(0,0,0,0.25)] rounded-2xl w-full max-w-xl p-6 md:p-8 relative z-10 text-slate-900 overflow-y-auto max-h-[92vh] sm:max-h-[94vh] custom-scrollbar"
+          className="bg-white border border-slate-200 shadow-[0_30px_70px_rgba(0,0,0,0.25)] rounded-2xl w-full max-w-xl p-6 md:p-8 relative z-10 text-slate-900 overflow-y-auto max-h-[92vh] sm:max-h-[94vh] custom-scrollbar focus:outline-none"
         >
           {/* Close Button */}
           <button
+            type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 transition-colors z-30"
+            className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 transition-colors z-30 rounded-lg focus-visible:ring-2 focus-visible:ring-orange-500"
             title={isEn ? 'Close' : 'Đóng'}
+            aria-label={isEn ? 'Close' : 'Đóng'}
           >
             <X size={20} />
           </button>
 
           {/* Modal Tabs */}
-          <div className="flex border-b border-slate-200 mb-6 mt-2">
+          <div className="flex border-b border-slate-200 mb-6 mt-2" role="tablist" aria-label={isEn ? 'Action Options' : 'Tùy chọn thao tác'}>
             <button
               type="button"
+              role="tab"
+              aria-selected={modalType === 'contact'}
               onClick={() => resetStateForTab('contact')}
               className={`flex-1 pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
                 modalType === 'contact'
@@ -225,6 +243,8 @@ export function ProductActionModal({
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={modalType === 'buy'}
               onClick={() => resetStateForTab('buy')}
               className={`flex-1 pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
                 modalType === 'buy'
@@ -239,6 +259,8 @@ export function ProductActionModal({
             {getProductType(activeProduct) !== 'Thiết bị' && (
               <button
                 type="button"
+                role="tab"
+                aria-selected={modalType === 'download'}
                 onClick={() => resetStateForTab('download')}
                 className={`flex-1 pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
                   modalType === 'download'
@@ -257,7 +279,7 @@ export function ProductActionModal({
               <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block mb-0.5">
                 {isEn ? 'Selected Product' : 'Sản phẩm đang chọn'}
               </span>
-              <span className="text-sm font-black text-slate-800">{activeProduct.name}</span>
+              <span id="product-modal-title" className="text-sm font-black text-slate-800">{activeProduct.name}</span>
             </div>
           </div>
 

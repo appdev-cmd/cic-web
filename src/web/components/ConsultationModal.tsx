@@ -112,6 +112,17 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
     }
   };
 
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -127,6 +138,9 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
 
           {/* Modal Container */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="consultation-modal-title"
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -141,6 +155,7 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
               onClick={onClose}
               className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
               title={t.common.close}
+              aria-label={t.common.close}
             >
               <X size={20} />
             </button>
@@ -176,7 +191,7 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
                       <HelpCircle size={14} />
                       {t.header.consultationCta}
                     </div>
-                    <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+                    <h2 id="consultation-modal-title" className="text-2xl font-bold text-slate-900 tracking-tight">
                       {t.contact.modalConsultationTitle}
                     </h2>
                     <p className="text-xs text-slate-500 font-medium">
@@ -185,7 +200,7 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
                   </div>
 
                   {submitError && (
-                    <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-medium">
+                    <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-medium">
                       {submitError}
                     </div>
                   )}
@@ -194,7 +209,7 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {/* Name */}
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        <label htmlFor="consultation-name" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                           {t.contact.nameLabel} <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
@@ -202,21 +217,25 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
                             <User size={16} />
                           </div>
                           <input
+                            id="consultation-name"
                             type="text"
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             placeholder={t.contact.namePlaceholder}
+                            aria-required="true"
+                            aria-invalid={!!errors.name}
+                            aria-describedby={errors.name ? "consultation-name-error" : undefined}
                             className={`w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 ${
                               errors.name ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-orange-500 focus:ring-orange-500'
                             }`}
                           />
                         </div>
-                        {errors.name && <p className="text-[11px] text-red-500 mt-1 font-medium">{errors.name}</p>}
+                        {errors.name && <p id="consultation-name-error" role="alert" className="text-[11px] text-red-500 mt-1 font-medium">{errors.name}</p>}
                       </div>
 
                       {/* Phone */}
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        <label htmlFor="consultation-phone" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                           {t.contact.phoneLabel} <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
@@ -224,22 +243,26 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
                             <Phone size={16} />
                           </div>
                           <input
+                            id="consultation-phone"
                             type="tel"
                             value={formData.phone}
                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                             placeholder={t.contact.phonePlaceholder}
+                            aria-required="true"
+                            aria-invalid={!!errors.phone}
+                            aria-describedby={errors.phone ? "consultation-phone-error" : undefined}
                             className={`w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 ${
                               errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-orange-500 focus:ring-orange-500'
                             }`}
                           />
                         </div>
-                        {errors.phone && <p className="text-[11px] text-red-500 mt-1 font-medium">{errors.phone}</p>}
+                        {errors.phone && <p id="consultation-phone-error" role="alert" className="text-[11px] text-red-500 mt-1 font-medium">{errors.phone}</p>}
                       </div>
                     </div>
 
                     {/* Email */}
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      <label htmlFor="consultation-email" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                         {t.contact.emailLabel}
                       </label>
                       <div className="relative">
@@ -247,24 +270,28 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
                           <Mail size={16} />
                         </div>
                         <input
+                          id="consultation-email"
                           type="email"
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                           placeholder={t.contact.emailPlaceholder}
+                          aria-invalid={!!errors.email}
+                          aria-describedby={errors.email ? "consultation-email-error" : undefined}
                           className={`w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 ${
                             errors.email ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-orange-500 focus:ring-orange-500'
                           }`}
                         />
                       </div>
-                      {errors.email && <p className="text-[11px] text-red-500 mt-1 font-medium">{errors.email}</p>}
+                      {errors.email && <p id="consultation-email-error" role="alert" className="text-[11px] text-red-500 mt-1 font-medium">{errors.email}</p>}
                     </div>
 
                     {/* Needs */}
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      <label htmlFor="consultation-need" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                         {t.contact.serviceInterestLabel}
                       </label>
                       <select
+                        id="consultation-need"
                         value={formData.consultationNeed}
                         onChange={(e) => setFormData({ ...formData, consultationNeed: e.target.value })}
                         className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 bg-white"
@@ -277,7 +304,7 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
 
                     {/* Message */}
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      <label htmlFor="consultation-message" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                         {t.contact.messageLabel}
                       </label>
                       <div className="relative">
@@ -285,6 +312,7 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
                           <MessageSquare size={16} />
                         </div>
                         <textarea
+                          id="consultation-message"
                           rows={3}
                           value={formData.message}
                           onChange={(e) => setFormData({ ...formData, message: e.target.value })}

@@ -423,20 +423,24 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
                   
                   {/* Họ tên */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                    <label htmlFor="contact-fullName" className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
                       {isEn ? 'Full name' : 'Họ tên'} <span className="text-orange-600">*</span>
                     </label>
                     <input
+                      id="contact-fullName"
                       type="text"
                       placeholder={isEn ? "Enter full name" : "Nhập họ và tên"}
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                      aria-required="true"
+                      aria-invalid={!!formErrors.fullName}
+                      aria-describedby={formErrors.fullName ? "contact-fullName-error" : undefined}
                       className={`w-full px-3.5 py-2.5 bg-slate-50 border text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:bg-white rounded-[8px] transition-all ${
                         formErrors.fullName ? 'border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:ring-orange-600/20 focus:border-orange-600'
                       }`}
                     />
                     {formErrors.fullName && (
-                      <span className="text-xs text-red-500 font-semibold flex items-center gap-1">
+                      <span id="contact-fullName-error" role="alert" className="text-xs text-red-500 font-semibold flex items-center gap-1">
                         <AlertCircle size={13} /> {formErrors.fullName}
                       </span>
                     )}
@@ -445,40 +449,48 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
                   {/* Địa chỉ email & Số điện thoại */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                      <label htmlFor="contact-email" className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
                         {isEn ? 'Email address' : 'Địa chỉ email'} <span className="text-orange-600">*</span>
                       </label>
                       <input
+                        id="contact-email"
                         type="email"
                         placeholder={isEn ? "Enter contact email" : "Nhập email liên hệ"}
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        aria-required="true"
+                        aria-invalid={!!formErrors.email}
+                        aria-describedby={formErrors.email ? "contact-email-error" : undefined}
                         className={`w-full px-3.5 py-2.5 bg-slate-50 border text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:bg-white rounded-[8px] transition-all ${
                           formErrors.email ? 'border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:ring-orange-600/20 focus:border-orange-600'
                         }`}
                       />
                       {formErrors.email && (
-                        <span className="text-xs text-red-500 font-semibold flex items-center gap-1">
+                        <span id="contact-email-error" role="alert" className="text-xs text-red-500 font-semibold flex items-center gap-1">
                           <AlertCircle size={13} /> {formErrors.email}
                         </span>
                       )}
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                      <label htmlFor="contact-phone" className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
                         {isEn ? 'Phone number' : 'Số điện thoại'} <span className="text-orange-600">*</span>
                       </label>
                       <input
+                        id="contact-phone"
                         type="tel"
                         placeholder={isEn ? "Enter phone number" : "Nhập số điện thoại"}
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        aria-required="true"
+                        aria-invalid={!!formErrors.phone}
+                        aria-describedby={formErrors.phone ? "contact-phone-error" : undefined}
                         className={`w-full px-3.5 py-2.5 bg-slate-50 border text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:bg-white rounded-[8px] transition-all ${
                           formErrors.phone ? 'border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:ring-orange-600/20 focus:border-orange-600'
                         }`}
                       />
                       {formErrors.phone && (
-                        <span className="text-xs text-red-500 font-semibold flex items-center gap-1">
+                        <span id="contact-phone-error" role="alert" className="text-xs text-red-500 font-semibold flex items-center gap-1">
                           <AlertCircle size={13} /> {formErrors.phone}
                         </span>
                       )}
@@ -487,20 +499,24 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
 
                   {/* Tiêu đề */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                    <label htmlFor="contact-subject" className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
                       {isEn ? 'Subject' : 'Tiêu đề'} <span className="text-orange-600">*</span>
                     </label>
                     <input
+                      id="contact-subject"
                       type="text"
                       placeholder={isEn ? "Enter inquiry subject..." : "Nhập tiêu đề yêu cầu tư vấn..."}
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                      aria-required="true"
+                      aria-invalid={!!formErrors.subject}
+                      aria-describedby={formErrors.subject ? "contact-subject-error" : undefined}
                       className={`w-full px-3.5 py-2.5 bg-slate-50 border text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:bg-white rounded-[8px] transition-all ${
                         formErrors.subject ? 'border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:ring-orange-600/20 focus:border-orange-600'
                       }`}
                     />
                     {formErrors.subject && (
-                      <span className="text-xs text-red-500 font-semibold flex items-center gap-1">
+                      <span id="contact-subject-error" role="alert" className="text-xs text-red-500 font-semibold flex items-center gap-1">
                         <AlertCircle size={13} /> {formErrors.subject}
                       </span>
                     )}
@@ -508,10 +524,11 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
 
                   {/* Nội dung */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                    <label htmlFor="contact-note" className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
                       {isEn ? 'Message' : 'Nội dung'}
                     </label>
                     <textarea
+                      id="contact-note"
                       rows={3}
                       placeholder={isEn ? "Describe your requirements..." : "Mô tả nhu cầu của bạn..."}
                       value={formData.note}
