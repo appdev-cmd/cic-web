@@ -41,6 +41,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         description={product.description}
         image={product.img}
         brand={product.brand}
+        price={product.price}
         url={`/products/${slug}`}
       />
       <BreadcrumbJsonLd

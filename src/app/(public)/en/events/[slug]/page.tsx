@@ -6,6 +6,7 @@ import {
   listPublishedEvents,
 } from '@/features/events/server/queries';
 import { EventsRuntimeView } from '@/web/features/events/EventsRuntimeView';
+import { BreadcrumbJsonLd, EventJsonLd } from '@/features/seo/components';
 import { detailMetadata } from '@/lib/seo/detailMetadata';
 import { cleanSeoTitle } from '@/lib/seo/siteUrl';
 
@@ -62,10 +63,29 @@ export default async function EnEventDetailPage({
   }
 
   return (
-    <EventsRuntimeView
-      events={allEvents}
-      products={products}
-      initialEventId={event.id}
-    />
+    <>
+      <EventJsonLd
+        name={event.title}
+        description={event.summary || event.chuDe}
+        startDate={event.timeEvent}
+        endDate={event.endTime}
+        place={event.place}
+        image={event.image}
+        url={`/en/events/${slug}`}
+        registrationUrl={event.linkDangky}
+      />
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Home', url: '/en' },
+          { name: 'Events', url: '/en/events' },
+          { name: event.title },
+        ]}
+      />
+      <EventsRuntimeView
+        events={allEvents}
+        products={products}
+        initialEventId={event.id}
+      />
+    </>
   );
 }

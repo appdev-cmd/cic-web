@@ -36,6 +36,8 @@ export default async function EnNewsDetailPage({ params }: { params: Promise<{ s
         description={item.summary}
         image={item.image}
         datePublished={item.date}
+        dateModified={item.updatedTime}
+        authorName={item.authorName}
         url={`/en/news/${slug}`}
       />
       <BreadcrumbJsonLd

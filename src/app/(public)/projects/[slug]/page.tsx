@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getPublishedProjectBySlug } from '@/features/projects/server/queries';
 import { ProjectDetailRuntimeView } from '@/web/features/projects/ProjectDetailRuntimeView';
+import { BreadcrumbJsonLd } from '@/features/seo/components';
 import type { Metadata } from 'next';
 import { detailMetadata } from '@/lib/seo/detailMetadata';
 
@@ -30,5 +31,16 @@ export default async function ProjectDetailPage({
   const project = await getPublishedProjectBySlug(slug);
   if (!project) notFound();
 
-  return <ProjectDetailRuntimeView project={project} />;
+  return (
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Trang chủ', url: '/' },
+          { name: 'Dự án', url: '/projects' },
+          { name: project.title },
+        ]}
+      />
+      <ProjectDetailRuntimeView project={project} />
+    </>
+  );
 }

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getPublishedProjectBySlug } from '@/features/projects/server/queries';
 import { ProjectDetailRuntimeView } from '@/web/features/projects/ProjectDetailRuntimeView';
+import { BreadcrumbJsonLd } from '@/features/seo/components';
 import { detailMetadata } from '@/lib/seo/detailMetadata';
 
 export const dynamic = 'force-dynamic';
@@ -30,5 +31,16 @@ export default async function EnProjectDetailPage({
   const project = await getPublishedProjectBySlug(slug, 'en');
   if (!project) notFound();
 
-  return <ProjectDetailRuntimeView project={project} />;
+  return (
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Home', url: '/en' },
+          { name: 'Projects', url: '/en/projects' },
+          { name: project.title },
+        ]}
+      />
+      <ProjectDetailRuntimeView project={project} />
+    </>
+  );
 }

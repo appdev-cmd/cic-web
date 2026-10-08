@@ -40,6 +40,7 @@ export default async function EnProductDetailPage({ params }: { params: Promise<
         description={product.description}
         image={product.img}
         brand={product.brand}
+        price={product.price}
         url={`/en/products/${slug}`}
       />
       <BreadcrumbJsonLd

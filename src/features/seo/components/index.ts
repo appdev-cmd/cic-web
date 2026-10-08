@@ -3,3 +3,4 @@ export * from './BreadcrumbJsonLd';
 export * from './ProductJsonLd';
 export * from './ArticleJsonLd';
 export * from './ServiceJsonLd';
+export * from './EventJsonLd';

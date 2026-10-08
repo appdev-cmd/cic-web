@@ -36,6 +36,8 @@ const map = (row: Row) => ({
   video: row.video == null ? null : String(row.video),
   fileUpload: media(row.file_upload),
   date: String(row.start_time ?? row.created_time ?? ''),
+  updatedTime: row.updated_time ? String(row.updated_time) : null,
+  authorName: String(row.author_last ?? row.author ?? 'CIC Technology'),
   views: Number(row.hits ?? 0),
   categoryId: row.category_id == null ? null : String(row.category_id),
   category: String(row.category_alias ?? ''),
@@ -53,8 +55,8 @@ const map = (row: Row) => ({
   showInHomepage: row.show_in_homepage === true,
 });
 
-const listProjection = `n.id,n.title,n.alias,n.summary,n.image,n.video,n.file_upload,n.start_time,n.created_time,n.hits,n.category_id,n.tags,n.products_related,n.news_related,n.seo_title,n.seo_description,n.seo_keyword,n.is_hot,n.show_in_homepage,c.name category_name,c.alias category_alias`;
-const detailProjection = `n.id,n.title,n.alias,n.summary,n.content,n.image,n.video,n.file_upload,n.start_time,n.created_time,n.hits,n.category_id,n.tags,n.products_related,n.news_related,n.seo_title,n.seo_description,n.seo_keyword,n.is_hot,n.show_in_homepage,c.name category_name,c.alias category_alias`;
+const listProjection = `n.id,n.title,n.alias,n.summary,n.image,n.video,n.file_upload,n.start_time,n.created_time,n.updated_time,n.author,n.hits,n.category_id,n.tags,n.products_related,n.news_related,n.seo_title,n.seo_description,n.seo_keyword,n.is_hot,n.show_in_homepage,c.name category_name,c.alias category_alias`;
+const detailProjection = `n.id,n.title,n.alias,n.summary,n.content,n.image,n.video,n.file_upload,n.start_time,n.created_time,n.updated_time,n.author,n.author_last,n.hits,n.category_id,n.tags,n.products_related,n.news_related,n.seo_title,n.seo_description,n.seo_keyword,n.is_hot,n.show_in_homepage,c.name category_name,c.alias category_alias`;
 
 export async function listPublishedNews(
   options: {
