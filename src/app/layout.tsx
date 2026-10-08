@@ -15,6 +15,7 @@ const roboto = Roboto({
 
 import { OrganizationJsonLd } from '@/features/seo/components';
 import { CANONICAL_SITE_URL } from '@/lib/seo/siteUrl';
+import { NetworkStatusNotifier } from '@/web/components/NetworkStatusNotifier';
 
 export const metadata: Metadata = {
   metadataBase: new URL(CANONICAL_SITE_URL),
@@ -73,6 +74,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body className={roboto.className}>
         <OrganizationJsonLd />
         {children}
+        <NetworkStatusNotifier />
       </body>
     </html>
   );
