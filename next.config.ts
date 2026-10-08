@@ -30,6 +30,58 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // 1. Single-hop legacy Vietnamese prefix with .html -> modern English routes
+      {
+        source: '/san-pham/:path*.html',
+        destination: '/products/:path*',
+        permanent: true,
+      },
+      {
+        source: '/san-pham/:path*',
+        destination: '/products/:path*',
+        permanent: true,
+      },
+      {
+        source: '/tin-tuc/:path*.html',
+        destination: '/news/:path*',
+        permanent: true,
+      },
+      {
+        source: '/tin-tuc/:path*',
+        destination: '/news/:path*',
+        permanent: true,
+      },
+      {
+        source: '/dich-vu/:path*.html',
+        destination: '/services/:path*',
+        permanent: true,
+      },
+      {
+        source: '/dich-vu/:path*',
+        destination: '/services/:path*',
+        permanent: true,
+      },
+      {
+        source: '/du-an/:path*.html',
+        destination: '/projects/:path*',
+        permanent: true,
+      },
+      {
+        source: '/du-an/:path*',
+        destination: '/projects/:path*',
+        permanent: true,
+      },
+      {
+        source: '/su-kien/:path*.html',
+        destination: '/events/:path*',
+        permanent: true,
+      },
+      {
+        source: '/su-kien/:path*',
+        destination: '/events/:path*',
+        permanent: true,
+      },
+      // 2. Generic .html stripping for root and other routes
       {
         source: '/:path*.html',
         destination: '/:path*',

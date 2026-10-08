@@ -31,6 +31,21 @@ export async function generateMetadata({ params }: DynamicSlugPageProps): Promis
       description: 'Products, consulting services and engineering technology projects by CIC Technology.',
     };
   }
+
+  // Legacy CIC URL Migration: detect -n[id], -p[id], -s[id] at root
+  if (/-n\d+$/i.test(slug)) {
+    const { redirect, RedirectType } = await import('next/navigation');
+    redirect(`/news/${slug.replace(/-n\d+$/i, '')}`, RedirectType.replace);
+  }
+  if (/-p\d+$/i.test(slug)) {
+    const { redirect, RedirectType } = await import('next/navigation');
+    redirect(`/products/${slug.replace(/-p\d+$/i, '')}`, RedirectType.replace);
+  }
+  if (/-s\d+$/i.test(slug)) {
+    const { redirect, RedirectType } = await import('next/navigation');
+    redirect(`/services/${slug.replace(/-s\d+$/i, '')}`, RedirectType.replace);
+  }
+
   const page = (await getPublicStaticPage('vi', slug)) ?? (await getPublicStaticPage('en', slug));
   if (!page) {
     const { resolveRedirect } = await import('@/features/function-seo/server/queries');
@@ -64,6 +79,20 @@ export default async function DynamicSlugPage({ params }: DynamicSlugPageProps) 
   if (slug === 'en') {
     const enHomeContent = await getPublishedHomePage('en');
     return <HomeRoute initialContent={enHomeContent} />;
+  }
+
+  // Legacy CIC URL Migration: detect -n[id], -p[id], -s[id] at root
+  if (/-n\d+$/i.test(slug)) {
+    const { redirect, RedirectType } = await import('next/navigation');
+    redirect(`/news/${slug.replace(/-n\d+$/i, '')}`, RedirectType.replace);
+  }
+  if (/-p\d+$/i.test(slug)) {
+    const { redirect, RedirectType } = await import('next/navigation');
+    redirect(`/products/${slug.replace(/-p\d+$/i, '')}`, RedirectType.replace);
+  }
+  if (/-s\d+$/i.test(slug)) {
+    const { redirect, RedirectType } = await import('next/navigation');
+    redirect(`/services/${slug.replace(/-s\d+$/i, '')}`, RedirectType.replace);
   }
 
   const page = (await getPublicStaticPage('vi', slug)) ?? (await getPublicStaticPage('en', slug));

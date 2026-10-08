@@ -9,14 +9,29 @@ import { detailMetadata } from '@/lib/seo/detailMetadata';
 export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const slug = (await params).slug;
-  const item = await getPublishedNewsBySlug(slug);
-  return item ? { ...detailMetadata(item.seoTitle || item.title, item.seoDescription || item.summary, `/news/${slug}`), keywords: item.seoKeyword || undefined } : {};
+  const rawSlug = (await params).slug;
+  const slug = decodeURIComponent(rawSlug);
+  let item = await getPublishedNewsBySlug(slug);
+  if (!item && /-n\d+$/i.test(slug)) {
+    item = await getPublishedNewsBySlug(slug.replace(/-n\d+$/i, ''));
+  }
+  return item ? { ...detailMetadata(item.seoTitle || item.title, item.seoDescription || item.summary, `/news/${item.slug || slug}`), keywords: item.seoKeyword || undefined } : {};
 }
 
 export default async function NewsDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const slug = (await params).slug;
-  const item = await getPublishedNewsBySlug(slug);
+  const rawSlug = (await params).slug;
+  const slug = decodeURIComponent(rawSlug);
+  let item = await getPublishedNewsBySlug(slug);
+
+  if (!item && /-n\d+$/i.test(slug)) {
+    const cleanSlug = slug.replace(/-n\d+$/i, '');
+    item = await getPublishedNewsBySlug(cleanSlug);
+    if (item) {
+      const { redirect, RedirectType } = await import('next/navigation');
+      redirect(`/news/${item.slug || cleanSlug}`, RedirectType.replace);
+    }
+  }
+
   if (!item) notFound();
   const [news, products] = await Promise.all([
     listPublishedNews({ page: 1, pageSize: 30 }),

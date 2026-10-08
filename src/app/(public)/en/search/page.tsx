@@ -8,6 +8,10 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   return {
     title: query ? `Search: "${query}" | CIC Technology` : 'Search | CIC Technology',
     description: 'Search engineering software, consulting services, projects, news and events at CIC Technology.',
+    robots: {
+      index: false,
+      follow: true,
+    },
     alternates: {
       canonical: '/en/search',
     },

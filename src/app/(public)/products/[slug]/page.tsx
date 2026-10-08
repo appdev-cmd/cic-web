@@ -18,14 +18,19 @@ interface ProductPageProps {
 }
 
 export async function generateMetadata({ params }: ProductPageProps) {
-  const slug = (await params).slug;
-  const product = await getPublishedProductBySlugForReference(slug);
-  return product ? detailMetadata(cleanSeoTitle(product.seoTitle || product.name), product.seoDescription || product.description, `/products/${slug}`) : {};
+  const rawSlug = (await params).slug;
+  const slug = decodeURIComponent(rawSlug);
+  let product = await getPublishedProductBySlugForReference(slug);
+  if (!product && /-p\d+$/i.test(slug)) {
+    product = await getPublishedProductBySlugForReference(slug.replace(/-p\d+$/i, ''));
+  }
+  return product ? detailMetadata(cleanSeoTitle(product.seoTitle || product.name), product.seoDescription || product.description, `/products/${product.slug || slug}`) : {};
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const slug = (await params).slug;
-  const [product, products, categories, applications, productTypes, contactsByProductId] = await Promise.all([
+  const rawSlug = (await params).slug;
+  const slug = decodeURIComponent(rawSlug);
+  let [product, products, categories, applications, productTypes, contactsByProductId] = await Promise.all([
     getPublishedProductBySlugForReference(slug),
     listPublishedProductsForReference(),
     listPublishedProductCategories('vi'),
@@ -33,6 +38,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
     listPublishedProductTypes('vi'),
     listPublicProductContacts('vi'),
   ]);
+
+  if (!product && /-p\d+$/i.test(slug)) {
+    const cleanSlug = slug.replace(/-p\d+$/i, '');
+    product = await getPublishedProductBySlugForReference(cleanSlug);
+    if (product) {
+      const { redirect, RedirectType } = await import('next/navigation');
+      redirect(`/products/${product.slug || cleanSlug}`, RedirectType.replace);
+    }
+  }
+
   if (!product) notFound();
   return (
     <>

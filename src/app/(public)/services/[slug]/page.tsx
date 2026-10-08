@@ -21,18 +21,34 @@ import { cleanSeoTitle } from '@/lib/seo/siteUrl';
 import { detailMetadata } from '@/lib/seo/detailMetadata';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const slug = (await params).slug;
-  const service = await getPublishedServiceBySlug(slug, 'vi');
+  const rawSlug = (await params).slug;
+  const slug = decodeURIComponent(rawSlug);
+  let service = await getPublishedServiceBySlug(slug, 'vi');
+  if (!service && /-s\d+$/i.test(slug)) {
+    service = await getPublishedServiceBySlug(slug.replace(/-s\d+$/i, ''), 'vi');
+  }
   if (!service) return {};
   const rawTitle = service.seoTitle || service.title;
   return {
-    ...detailMetadata(cleanSeoTitle(rawTitle), service.seoDescription || service.summary || `Tìm hiểu chi tiết về dịch vụ ${service.title} được cung cấp chuyên nghiệp bởi CIC Technology.`, `/services/${slug}`),
+    ...detailMetadata(cleanSeoTitle(rawTitle), service.seoDescription || service.summary || `Tìm hiểu chi tiết về dịch vụ ${service.title} được cung cấp chuyên nghiệp bởi CIC Technology.`, `/services/${service.slug || slug}`),
     keywords: service.seoKeywords,
   };
 }
 
 export default async function ServicePage({ params }: { params: Promise<{ slug: string }> }) {
-  const service = await getPublishedServiceBySlug((await params).slug, 'vi');
+  const rawSlug = (await params).slug;
+  const slug = decodeURIComponent(rawSlug);
+  let service = await getPublishedServiceBySlug(slug, 'vi');
+
+  if (!service && /-s\d+$/i.test(slug)) {
+    const cleanSlug = slug.replace(/-s\d+$/i, '');
+    service = await getPublishedServiceBySlug(cleanSlug, 'vi');
+    if (service) {
+      const { redirect, RedirectType } = await import('next/navigation');
+      redirect(`/services/${service.slug || cleanSlug}`, RedirectType.replace);
+    }
+  }
+
   if (!service) notFound();
   const all = await listPublishedServices('vi');
   const products = await getPublishedServiceProducts('vi', service.relatedProductIds);
