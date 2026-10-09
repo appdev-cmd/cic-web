@@ -74,8 +74,6 @@
     "@ckeditor/ckeditor5-react": "^11.2.0",
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.112.4",
-    "@tailwindcss/vite": "^4.1.14",
-    "@vitejs/plugin-react": "^5.0.4",
     "ckeditor5": "^48.4.0",
     "dotenv": "^17.2.3",
     "googleapis": "^181.0.0",
@@ -89,23 +87,25 @@
     "recharts": "^3.10.1",
     "sanitize-html": "^2.17.7",
     "server-only": "^0.0.1",
-    "vite": "^6.2.3",
     "xlsx-js-style": "^1.2.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
+    "@tailwindcss/vite": "^4.1.14",
     "@types/node": "^22.14.0",
     "@types/nodemailer": "^8.0.2",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@types/sanitize-html": "^2.16.1",
+    "@vitejs/plugin-react": "^5.0.4",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.3",
     "playwright": "^1.62.1",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
-    "typescript": "~5.8.2"
+    "typescript": "~5.8.2",
+    "vite": "^6.2.3"
   }
 }

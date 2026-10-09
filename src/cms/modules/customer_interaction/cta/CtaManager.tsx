@@ -584,11 +584,11 @@ export const CtaManager: React.FC<CtaManagerProps> = ({
         actions={[
           {
             label: 'Đổi trạng thái',
-            onClick: () => console.log('Change status'),
+            onClick: () => showToast('Chức năng đổi trạng thái hàng loạt đang được cập nhật.'),
           },
           {
             label: 'Lưu trữ',
-            onClick: () => console.log('Archive'),
+            onClick: () => showToast('Chức năng lưu trữ hàng loạt đang được cập nhật.'),
           },
           ...(canDelete
             ? [
