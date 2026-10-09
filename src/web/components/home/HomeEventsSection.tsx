@@ -106,7 +106,7 @@ export const HomeEventsSection: React.FC<HomeEventsSectionProps> = ({
             viewport={{ once: true }}
             className="lg:col-span-7 bg-slate-900/40 rounded-[10px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/5 group relative"
           >
-            <div className="h-[280px] sm:h-[340px] md:h-[380px] overflow-hidden relative bg-slate-950 flex items-center justify-center">
+            <div className="w-full aspect-video overflow-hidden relative bg-slate-950 flex items-center justify-center">
               <img
                 src={mainEvent.img || DEFAULT_MAIN_EVENT.img}
                 alt={mainEvent.title}
@@ -180,7 +180,7 @@ export const HomeEventsSection: React.FC<HomeEventsSectionProps> = ({
                 }}
                 className="flex gap-4 p-4 md:p-4.5 rounded-[10px] border border-transparent hover:border-white/10 transition-all cursor-pointer group relative shadow-orange-600/10 hover:shadow-xl text-left bg-slate-900/20"
               >
-                <div className="w-24 h-24 md:w-28 md:h-28 rounded-[10px] overflow-hidden shadow-inner flex-shrink-0 relative">
+                <div className="w-32 sm:w-36 md:w-44 aspect-video rounded-[10px] overflow-hidden shadow-inner flex-shrink-0 relative">
                   <img
                     src={ev.img || DEFAULT_SIDE_EVENTS[i % DEFAULT_SIDE_EVENTS.length]?.img}
                     alt={ev.title}
@@ -191,7 +191,7 @@ export const HomeEventsSection: React.FC<HomeEventsSectionProps> = ({
                      <img src="/logo.png" alt="" className="w-full invert" />
                   </div>
                 </div>
-                <div className="flex flex-col justify-center">
+                <div className="flex flex-col justify-center min-w-0 flex-1">
                   <h4 className="font-black text-white mb-1.5 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 text-sm md:text-base">
                     {ev.title}
                   </h4>
