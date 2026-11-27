@@ -446,7 +446,6 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
   const router = useRouter();
   const globalWorkspaceLocale = useCmsWorkspaceLocale();
   const [builderLocale, setBuilderLocale] = useState<CmsLocale>(globalWorkspaceLocale);
-  const activeLocale = editingLocaleOrGlobal(builderLocale, globalWorkspaceLocale);
   const dict = getCmsDictionary(globalWorkspaceLocale);
 
   const [pagesMap, setPagesMap] = useState<Record<'vi' | 'en', CmsStaticPageListItem[]>>(() => ({
@@ -454,6 +453,7 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
     en: pagesByLocale.en ?? [],
   }));
   const [editingPage, setEditingPage] = useState<PageBuilderPage | null>(null);
+  const activeLocale: CmsLocale = editingPage ? builderLocale : globalWorkspaceLocale;
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [previewPage, setPreviewPage] = useState<PageBuilderPage | null>(null);
   const [query, setQuery] = useState('');
@@ -472,10 +472,6 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
     seo: PageInlineSeoValues;
     saving: boolean;
   } | null>(null);
-
-  function editingLocaleOrGlobal(local: CmsLocale, global: CmsLocale): CmsLocale {
-    return editingPage ? local : global;
-  }
 
   // Sync list state when server props refresh
   useEffect(() => {
