@@ -8,7 +8,23 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Phone, Mail, ShieldCheck } from 'lucide-react';
 import { submitCustomerInteraction } from '../../services/customerInteractionSubmission';
 import { SYSTEM_FORM_IDS } from '../../../shared/customerInteractionContract';
-import { hasSafeInlineHtml, sanitizeHtmlContent, sanitizeInlineTextHtml } from '@/shared/lib/sanitize';
+import { sanitizeHtmlContent, sanitizeInlineTextHtml } from '@/shared/lib/sanitize';
+
+function formatContactHeadingHtml(rawTitle?: string): string {
+  if (!rawTitle) {
+    return 'Sẵn sàng kiến tạo <br /> <span class="text-orange-600">Tương lai số</span>';
+  }
+  if (/<[a-z][\s\S]*>/i.test(rawTitle)) {
+    return sanitizeHtmlContent(rawTitle);
+  }
+  for (const kw of ['Tương lai số', 'the Digital Future', 'Digital Future']) {
+    if (rawTitle.includes(kw)) {
+      const [before] = rawTitle.split(kw);
+      return `${sanitizeInlineTextHtml(before ?? '')}<br /> <span class="text-orange-600">${kw}</span>`;
+    }
+  }
+  return sanitizeInlineTextHtml(rawTitle);
+}
 import { enrichSubmissionSource, trackFormConversion } from '@/shared/lib/analytics';
 
 interface HomeContactSectionProps {
@@ -108,39 +124,21 @@ export const HomeContactSection: React.FC<HomeContactSectionProps> = ({ contactC
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-3xl md:text-5xl font-black text-slate-950 mb-5 leading-[1.1] tracking-tighter">
-              {contactCta?.title ? (
-                /<[a-z][\s\S]*>/i.test(contactCta.title) ? (
-                  <span dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(contactCta.title) }} />
-                ) : contactCta.title.includes('Tương lai số') ? (
-                  <>
-                    {contactCta.title.split('Tương lai số')[0]}
-                    <br /> <span className="text-orange-600">Tương lai số</span>
-                  </>
-                ) : contactCta.title.includes('the Digital Future') ? (
-                  <>
-                    {contactCta.title.split('the Digital Future')[0]}
-                    <br /> <span className="text-orange-600">the Digital Future</span>
-                  </>
-                ) : contactCta.title.includes('Digital Future') ? (
-                  <>
-                    {contactCta.title.split('Digital Future')[0]}
-                    <br /> <span className="text-orange-600">Digital Future</span>
-                  </>
-                ) : (
-                  contactCta.title
-                )
-              ) : (
-                <>Sẵn sàng kiến tạo <br /> <span className="text-orange-600">Tương lai số</span></>
-              )}
-            </h2>
-            <p className="text-slate-600 text-base mb-10 max-w-xl font-medium leading-relaxed">
-              {hasSafeInlineHtml(contactCta?.description) ? (
-                <span dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(contactCta?.description) }} />
-              ) : (
-                contactCta?.description || 'Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng lắng nghe và cung cấp những giải pháp công nghệ tối ưu nhất cho doanh nghiệp của bạn.'
-              )}
-            </p>
+            <h2
+              data-page-builder-config-path={JSON.stringify(['title'])}
+              className="text-3xl md:text-5xl font-black text-slate-950 mb-5 leading-[1.1] tracking-tighter"
+              dangerouslySetInnerHTML={{ __html: formatContactHeadingHtml(contactCta?.title) }}
+            />
+            <p
+              data-page-builder-config-path={JSON.stringify(['description'])}
+              className="text-slate-600 text-base mb-10 max-w-xl font-medium leading-relaxed"
+              dangerouslySetInnerHTML={{
+                __html: sanitizeInlineTextHtml(
+                  contactCta?.description ||
+                    'Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng lắng nghe và cung cấp những giải pháp công nghệ tối ưu nhất cho doanh nghiệp của bạn.'
+                ),
+              }}
+            />
             
             <div className="space-y-6">
               <div className="flex items-start gap-4">

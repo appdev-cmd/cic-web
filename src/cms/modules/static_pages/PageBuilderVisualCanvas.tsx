@@ -7,23 +7,13 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom';
 import { registerEntityOptions } from '../../../shared/page-content/resolveReferenceEntity';
 import { ElementBindingRegistry } from '../../../shared/visual-editing/elementBindingRegistry';
-import { VisualEditingOverlay } from './VisualEditingOverlay';
-import { reorderHomeStatsItems } from './homeStatsElementEditing';
-import { resolveVisualElementEdit } from './visualElementEditingAdapters';
-import type { CommitElementEditRequest } from '../../../shared/visual-editing/inlineTextEditing';
-import {
-  sortableDescriptorFromBinding,
-  type SortableReorderRequest,
-} from '../../../shared/visual-editing/sortableBoundCollection';
-import { sectionDefinitions } from './pageBuilderRegistry';
-import { isCapabilityEnabled } from '../../../shared/visual-editing/editableSectionContract';
+import type { DataDrawerTab } from './builder/PageBuilderDataDrawer';
 import type {
   PageBuilderConfigValue,
   PageBuilderEntityOption,
   PageBuilderPage,
   PageBuilderSection,
 } from './pageBuilderTypes';
-import { reorderReferenceItems, resolveReferenceItem } from './referenceSectionInteractions';
 
 import { useCanvasIframe } from './visual-canvas/useCanvasIframe';
 import { WebsitePage, LegalPage } from './visual-canvas/WebsitePageRenderer';
@@ -39,11 +29,25 @@ export interface PageBuilderVisualCanvasProps {
   viewport: 'desktop' | 'tablet' | 'mobile';
   onSelect: (id: string) => void;
   onTextChange?: (sectionId: string, path: Array<string | number>, value: string) => void;
-  onConfigValueChange?: (sectionId: string, path: Array<string | number>, value: PageBuilderConfigValue) => void;
+  onConfigValueChange?: (
+    sectionId: string,
+    path: Array<string | number>,
+    value: PageBuilderConfigValue
+  ) => void;
   entityOptions?: PageBuilderEntityOption[];
   onEditMedia?: (sectionId: string, path: Array<string | number>, currentId: string) => void;
-  onEditVideo?: (sectionId: string, path: Array<string | number>, currentUrl: string, anchor: { left: number; top: number }) => void;
-  onEditCta?: (sectionId: string, path: Array<string | number>, currentLabel: string, anchor: { left: number; top: number }) => void;
+  onEditVideo?: (
+    sectionId: string,
+    path: Array<string | number>,
+    currentUrl: string,
+    anchor: { left: number; top: number }
+  ) => void;
+  onEditCta?: (
+    sectionId: string,
+    path: Array<string | number>,
+    currentLabel: string,
+    anchor: { left: number; top: number }
+  ) => void;
   activeHeroSlide?: number;
   onSectionAction?: (sectionId: string, action: 'toggle' | 'up' | 'down') => void;
   onReferenceSourceChange?: (
@@ -69,11 +73,19 @@ export interface PageBuilderVisualCanvasProps {
   ) => void;
   onHeroAction?: (
     sectionId: string,
-    action: 'select' | 'add' | 'duplicate' | 'delete' | 'previous' | 'next' | 'movePrevious' | 'moveNext',
+    action:
+      | 'select'
+      | 'add'
+      | 'duplicate'
+      | 'delete'
+      | 'previous'
+      | 'next'
+      | 'movePrevious'
+      | 'moveNext',
     index?: number
   ) => void;
   onFrameDocumentReady?: (doc: Document | null) => void;
-  onOpenSectionConfig?: (sectionId: string) => void;
+  onOpenDataDrawer?: (tab: DataDrawerTab, sectionId?: string) => void;
 }
 
 export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = ({
@@ -99,23 +111,60 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
   onCollectionAction,
   onHeroAction,
   onFrameDocumentReady,
-  onOpenSectionConfig,
+  onOpenDataDrawer,
 }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const hostWrapperRef = useRef<HTMLDivElement>(null);
   const [hostElement, setHostElement] = useState<HTMLElement | null>(null);
   const bindingRegistry = useMemo(() => new ElementBindingRegistry(), []);
 
+  // Keep all parent callbacks in a ref so toolbar/format/selection state updates NEVER tear down contentEditable focus!
+  const callbacksRef = useRef({
+    onSelect,
+    onTextChange,
+    onConfigValueChange,
+    onSectionAction,
+    onReferenceSourceChange,
+    onPickReference,
+    onReferenceItemsChange,
+    onCollectionAction,
+    onHeroAction,
+    onEditMedia,
+    onEditVideo,
+    onEditCta,
+    onOpenDataDrawer,
+  });
+  callbacksRef.current = {
+    onSelect,
+    onTextChange,
+    onConfigValueChange,
+    onSectionAction,
+    onReferenceSourceChange,
+    onPickReference,
+    onReferenceItemsChange,
+    onCollectionAction,
+    onHeroAction,
+    onEditMedia,
+    onEditVideo,
+    onEditCta,
+    onOpenDataDrawer,
+  };
+
+  const issueIdsKey = useMemo(() => Array.from(issueIds).sort().join('|'), [issueIds]);
+  const stableIssueIds = useMemo(
+    () => new Set(issueIdsKey ? issueIdsKey.split('|') : []),
+    [issueIdsKey]
+  );
+
   if (entityOptions && entityOptions.length > 0) {
     registerEntityOptions(entityOptions);
   }
 
-  const [interactionRoot, setInteractionRoot] = useState<HTMLDivElement | null>(null);
   const [domVersion, setDomVersion] = useState(0);
 
   const attachRoot = useCallback((node: HTMLDivElement | null) => {
     rootRef.current = node;
-    setInteractionRoot(node);
+    if (node) setDomVersion((v) => v + 1);
   }, []);
 
   const attachHostWrapper = useCallback((node: HTMLDivElement | null) => {
@@ -146,90 +195,6 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
     };
   }, [frameDocument, onFrameDocumentReady, page.pageType]);
 
-  const resolveElementEdit = useCallback(
-    (bindingId: string) => {
-      const node = bindingRegistry.getNode(bindingId);
-      const binding =
-        node && bindingRegistry.getBindings(node).find((candidate) => candidate.bindingId === bindingId);
-      return binding ? resolveVisualElementEdit(sections, binding)?.descriptor ?? null : null;
-    },
-    [bindingRegistry, sections]
-  );
-
-  const commitElementEdit = useCallback(
-    (request: CommitElementEditRequest) => {
-      const target = resolveVisualElementEdit(sections, request.binding);
-      if (!target || !target.accepts(request) || !onConfigValueChange) return false;
-      onConfigValueChange(target.sectionId, target.path, request.after);
-      return true;
-    },
-    [onConfigValueChange, sections]
-  );
-
-  const resolveSortableItem = useCallback(
-    (bindingId: string) => {
-      const node = bindingRegistry.getNode(bindingId);
-      const binding =
-        node && bindingRegistry.getBindings(node).find((candidate) => candidate.bindingId === bindingId);
-      if (!binding) return null;
-      const descriptor = sortableDescriptorFromBinding(binding);
-      const capability = descriptor
-        ? sectionDefinitions[descriptor.sectionKey]?.editableContract?.collections?.[descriptor.collectionPath]
-            ?.capabilities.reorder ??
-          sectionDefinitions[descriptor.sectionKey]?.editableContract?.references?.[descriptor.collectionPath]
-            ?.capabilities.reorder
-        : undefined;
-      return isCapabilityEnabled(capability) ? descriptor : null;
-    },
-    [bindingRegistry]
-  );
-
-  const commitItemReorder = useCallback(
-    (request: SortableReorderRequest) => {
-      const definition = sectionDefinitions[request.sectionKey]?.editableContract;
-      const capability =
-        definition?.collections?.[request.collectionPath]?.capabilities.reorder ??
-        definition?.references?.[request.collectionPath]?.capabilities.reorder;
-      if (!isCapabilityEnabled(capability)) return false;
-      if (definition?.references?.[request.collectionPath]) {
-        const result = reorderReferenceItems(sections, request);
-        if (!result || !onReferenceItemsChange) return false;
-        onReferenceItemsChange(result.sectionId, result.entityType, result.entityIds);
-        return true;
-      }
-      if (!onConfigValueChange) return false;
-      const result = reorderHomeStatsItems(sections, request);
-      if (!result) return false;
-      onConfigValueChange(result.sectionId, result.path, result.items);
-      return true;
-    },
-    [onConfigValueChange, onReferenceItemsChange, sections]
-  );
-
-  const resolveReferenceItemByBindingId = useCallback(
-    (bindingId: string) => {
-      const node = bindingRegistry.getNode(bindingId);
-      const binding =
-        node && bindingRegistry.getBindings(node).find((candidate) => candidate.bindingId === bindingId);
-      return binding ? resolveReferenceItem(binding) : null;
-    },
-    [bindingRegistry]
-  );
-
-  const replaceReferenceItem = useCallback(
-    (
-      descriptor: import('../../../shared/visual-editing/referenceItemInteraction').ReferenceItemDescriptor
-    ) => {
-      const section = sections.find((candidate) => candidate.sectionKey === descriptor.sectionKey);
-      const reference = section?.references?.find(
-        (candidate) => candidate.entityType === descriptor.entityType
-      );
-      const index = reference?.entityIds.indexOf(descriptor.entityId) ?? -1;
-      if (section && index >= 0) onPickReference?.(section.id, reference!.entityType, index);
-    },
-    [onPickReference, sections]
-  );
-
   useEffect(() => {
     const refresh = () => setDomVersion((version) => version + 1);
     window.addEventListener('page-builder-dom-updated', refresh);
@@ -237,56 +202,68 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
   }, []);
 
   useEffect(() => {
+    const isEdit = mode === 'edit';
     return setupCanvasDomEnhancements({
       root: rootRef.current,
       frame: frameRef.current,
       scale,
       page,
       sections,
-      selectedId,
-      issueIds,
+      issueIds: stableIssueIds,
       viewport,
       mode,
       activeHeroSlide,
       entityOptions,
-      onSelect,
-      onTextChange: mode === 'edit' ? onTextChange : undefined,
-      onConfigValueChange: mode === 'edit' ? onConfigValueChange : undefined,
-      onSectionAction: mode === 'edit' ? onSectionAction : undefined,
-      onReferenceSourceChange: mode === 'edit' ? onReferenceSourceChange : undefined,
-      onPickReference: mode === 'edit' ? onPickReference : undefined,
-      onReferenceItemsChange: mode === 'edit' ? onReferenceItemsChange : undefined,
-      onCollectionAction: mode === 'edit' ? onCollectionAction : undefined,
-      onHeroAction: mode === 'edit' ? onHeroAction : undefined,
-      onEditMedia: mode === 'edit' ? onEditMedia : undefined,
-      onEditVideo: mode === 'edit' ? onEditVideo : undefined,
-      onEditCta: mode === 'edit' ? onEditCta : undefined,
-      onOpenSectionConfig: mode === 'edit' ? onOpenSectionConfig : undefined,
+      onSelect: (id) => callbacksRef.current.onSelect(id),
+      onTextChange: isEdit
+        ? (sId, p, v) => callbacksRef.current.onTextChange?.(sId, p, v)
+        : undefined,
+      onConfigValueChange: isEdit
+        ? (sId, p, v) => callbacksRef.current.onConfigValueChange?.(sId, p, v)
+        : undefined,
+      onSectionAction: isEdit
+        ? (sId, act) => callbacksRef.current.onSectionAction?.(sId, act)
+        : undefined,
+      onReferenceSourceChange: isEdit
+        ? (sId, t, src) => callbacksRef.current.onReferenceSourceChange?.(sId, t, src)
+        : undefined,
+      onPickReference: isEdit
+        ? (sId, t, idx) => callbacksRef.current.onPickReference?.(sId, t, idx)
+        : undefined,
+      onReferenceItemsChange: isEdit
+        ? (sId, t, ids) => callbacksRef.current.onReferenceItemsChange?.(sId, t, ids)
+        : undefined,
+      onCollectionAction: isEdit
+        ? (sId, p, act, idx) => callbacksRef.current.onCollectionAction?.(sId, p, act, idx)
+        : undefined,
+      onHeroAction: isEdit
+        ? (sId, act, idx) => callbacksRef.current.onHeroAction?.(sId, act, idx)
+        : undefined,
+      onEditMedia: isEdit
+        ? (sId, p, id) => callbacksRef.current.onEditMedia?.(sId, p, id)
+        : undefined,
+      onEditVideo: isEdit
+        ? (sId, p, url, anc) => callbacksRef.current.onEditVideo?.(sId, p, url, anc)
+        : undefined,
+      onEditCta: isEdit
+        ? (sId, p, lbl, anc) => callbacksRef.current.onEditCta?.(sId, p, lbl, anc)
+        : undefined,
+      onOpenDataDrawer: isEdit
+        ? (tab, sId) => callbacksRef.current.onOpenDataDrawer?.(tab, sId)
+        : undefined,
     });
   }, [
     activeHeroSlide,
     domVersion,
     entityOptions,
     frameBody,
-    issueIds,
+    frameRef,
     mode,
-    onCollectionAction,
-    onConfigValueChange,
-    onEditCta,
-    onEditMedia,
-    onEditVideo,
-    onHeroAction,
-    onOpenSectionConfig,
-    onPickReference,
-    onReferenceItemsChange,
-    onReferenceSourceChange,
-    onSectionAction,
-    onSelect,
-    onTextChange,
-    page,
+    page.id,
+    page.pageType,
     scale,
     sections,
-    selectedId,
+    stableIssueIds,
     viewport,
   ]);
 
@@ -304,18 +281,18 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
             if (target.closest('[data-page-builder-native-editor]')) return;
             const sectionNode = target.closest<HTMLElement>('[data-page-builder-section-id]');
             const sectionId = sectionNode?.dataset.pageBuilderSectionId ?? '';
-            if (sectionId && sectionId !== selectedId) onSelect(sectionId);
+            if (sectionId && sectionId !== selectedId) callbacksRef.current.onSelect(sectionId);
           }}
           onClickCapture={(event) => {
             const target = event.target as HTMLElement;
             if (target.closest('[data-page-builder-native-editor]')) return;
             const sectionNode = target.closest<HTMLElement>('[data-page-builder-section-id]');
             if (!sectionNode) {
-              onSelect('');
+              callbacksRef.current.onSelect('');
               return;
             }
             const sectionId = sectionNode.dataset.pageBuilderSectionId ?? '';
-            if (sectionId && sectionId !== selectedId) onSelect(sectionId);
+            if (sectionId && sectionId !== selectedId) callbacksRef.current.onSelect(sectionId);
           }}
         >
           <LegalPage
@@ -355,101 +332,77 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
       />
       {frameBody &&
         createPortal(
-          <>
-            <div
-              ref={attachRoot}
-              onClickCapture={(event) => {
-                if (mode !== 'edit') return;
-                const target = event.target as HTMLElement;
-                if (target.closest('[data-page-builder-native-editor]')) return;
+          <div
+            ref={attachRoot}
+            onClickCapture={(event) => {
+              if (mode !== 'edit') return;
+              const target = event.target as HTMLElement;
+              if (target.closest('[data-page-builder-native-editor], [data-page-builder-action]')) {
+                return;
+              }
 
-                const ctaNode = target.closest<HTMLElement>(
-                  '[data-page-builder-cta-key], [data-page-builder-cta-edit]'
+              // Let native focus/caret work undisturbed inside inline-editable text!
+              const editableTarget = target.closest<HTMLElement>(
+                '[contenteditable="true"], [data-page-builder-inline-edit]'
+              );
+              if (editableTarget) {
+                const sectionNode = editableTarget.closest<HTMLElement>(
+                  '[data-page-builder-section-id]'
                 );
-                if (ctaNode && onEditCta) {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  const sectionNode = ctaNode.closest<HTMLElement>('[data-page-builder-section-id]');
-                  const sectionId = sectionNode?.dataset.pageBuilderSectionId ?? selectedId;
-                  onSelect(sectionId);
-                  const nodeRect = ctaNode.getBoundingClientRect();
-                  const frameRect = frameRef.current?.getBoundingClientRect();
-                  const path = ctaNode.dataset.pageBuilderCtaKey
-                    ? (JSON.parse(ctaNode.dataset.pageBuilderCtaKey) as Array<string | number>)
-                    : [ctaNode.dataset.pageBuilderCtaEdit ?? 'primaryCtaId'];
-                  const labelSpan = ctaNode.querySelector('span');
-                  const currentLabel = normalizeText(
-                    labelSpan?.textContent ?? ctaNode.textContent ?? ''
-                  );
-                  onEditCta(sectionId, path, currentLabel, {
-                    left: (frameRect?.left ?? 0) + nodeRect.left * scale,
-                    top: (frameRect?.top ?? 0) + nodeRect.bottom * scale + 8,
-                  });
-                  return;
+                if (sectionNode?.dataset.pageBuilderSectionId) {
+                  callbacksRef.current.onSelect(sectionNode.dataset.pageBuilderSectionId);
                 }
+                return;
+              }
 
-                const mediaNode = target.closest<HTMLElement>('[data-page-builder-media-path]');
-                if (mediaNode && onEditMedia) {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  const sectionNode = mediaNode.closest<HTMLElement>('[data-page-builder-section-id]');
-                  const sectionId = sectionNode?.dataset.pageBuilderSectionId ?? selectedId;
-                  onSelect(sectionId);
-                  onEditMedia(
-                    sectionId,
-                    JSON.parse(mediaNode.dataset.pageBuilderMediaPath ?? '[]') as Array<string | number>,
-                    mediaNode.dataset.pageBuilderMediaId ?? ''
-                  );
-                  return;
-                }
-
-                if (target.closest('[data-ve-semantic~="reference-item"]')) return;
-                const sectionNode = target.closest<HTMLElement>('[data-page-builder-section-id]');
-                if (!sectionNode) {
-                  onSelect('');
-                  return;
-                }
-                if (!onTextChange) return;
-                if (target.closest('[data-page-builder-action]')) return;
-                const sectionId = sectionNode.dataset.pageBuilderSectionId ?? '';
-                onSelect(sectionId);
-                if (target.closest('[data-page-builder-preview-control]')) {
-                  onSelect('');
-                  window.setTimeout(() => onSelect(sectionId), 50);
-                  return;
-                }
+              // CTA button/link click -> open compact Link/Contact toolbar in header
+              const ctaNode = target.closest<HTMLElement>(
+                '[data-page-builder-cta-key], [data-page-builder-cta-edit]'
+              );
+              if (ctaNode && callbacksRef.current.onEditCta) {
+                event.preventDefault();
                 event.stopPropagation();
-                if (
-                  !target.closest(
-                    '[data-page-builder-inline-edit], [contenteditable="true"], [data-ve-editable="true"]'
-                  )
-                ) {
-                  event.preventDefault();
-                }
-              }}
-            >
-              <WebsitePage
-                page={{ ...page, draft: { ...page.draft, sections } }}
-                workspaceLocale={workspaceLocale}
-                activeHeroSlide={activeHeroSlide}
-                editMode={mode === 'edit'}
-                bindingRegistry={bindingRegistry}
-                selectedId={selectedId}
-                onConfigValueChange={mode === 'edit' ? onConfigValueChange : undefined}
-              />
-            </div>
-            <VisualEditingOverlay
-              enabled={mode === 'edit'}
-              root={interactionRoot}
-              registry={bindingRegistry}
-              resolveElementEdit={resolveElementEdit}
-              commitElementEdit={commitElementEdit}
-              resolveSortableItem={resolveSortableItem}
-              commitItemReorder={commitItemReorder}
-              resolveReferenceItem={resolveReferenceItemByBindingId}
-              replaceReferenceItem={replaceReferenceItem}
+                const sectionNode = ctaNode.closest<HTMLElement>('[data-page-builder-section-id]');
+                const sectionId = sectionNode?.dataset.pageBuilderSectionId ?? selectedId;
+                callbacksRef.current.onSelect(sectionId);
+                const nodeRect = ctaNode.getBoundingClientRect();
+                const frameRect = frameRef.current?.getBoundingClientRect();
+                const path = ctaNode.dataset.pageBuilderCtaKey
+                  ? (JSON.parse(ctaNode.dataset.pageBuilderCtaKey) as Array<string | number>)
+                  : [ctaNode.dataset.pageBuilderCtaEdit ?? 'primaryCtaId'];
+                const labelSpan = ctaNode.querySelector('span');
+                const currentLabel = normalizeText(
+                  labelSpan?.textContent ?? ctaNode.textContent ?? ''
+                );
+                callbacksRef.current.onEditCta(sectionId, path, currentLabel, {
+                  left: (frameRect?.left ?? 0) + nodeRect.left * scale,
+                  top: (frameRect?.top ?? 0) + nodeRect.bottom * scale + 8,
+                });
+                return;
+              }
+
+              // Prevent accidental navigation on links inside edit canvas
+              const anchor = target.closest('a');
+              if (anchor) {
+                event.preventDefault();
+              }
+
+              const sectionNode = target.closest<HTMLElement>('[data-page-builder-section-id]');
+              if (sectionNode?.dataset.pageBuilderSectionId) {
+                callbacksRef.current.onSelect(sectionNode.dataset.pageBuilderSectionId);
+              }
+            }}
+          >
+            <WebsitePage
+              page={{ ...page, draft: { ...page.draft, sections } }}
+              workspaceLocale={workspaceLocale}
+              activeHeroSlide={activeHeroSlide}
+              editMode={mode === 'edit'}
+              bindingRegistry={bindingRegistry}
+              selectedId={selectedId}
+              onConfigValueChange={mode === 'edit' ? onConfigValueChange : undefined}
             />
-          </>,
+          </div>,
           frameBody
         )}
     </div>

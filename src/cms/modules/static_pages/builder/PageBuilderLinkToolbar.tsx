@@ -1,9 +1,23 @@
-import React, { useMemo, useState } from 'react';
-import { ExternalLink, FileText, Globe, Link2, Mail, MessageCircle, Phone, Video, X } from 'lucide-react';
-import type { PageBuilderConfigValue, PageBuilderEntityOption, PageBuilderSection } from '../pageBuilderTypes';
-import { CTA_OPTIONS } from '../editor/editorConstants';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  Check,
+  ExternalLink,
+  FileText,
+  Globe,
+  Link2,
+  Mail,
+  MessageCircle,
+  Phone,
+  Video,
+  X,
+} from 'lucide-react';
+import type {
+  PageBuilderConfigValue,
+  PageBuilderEntityOption,
+  PageBuilderSection,
+} from '../pageBuilderTypes';
 import { siblingPath, valueAtPath } from '../editor/editorUtils';
-import { entityTypeLabels } from '../pageBuilderRegistry';
+import { entityTypeLabels, sectionDefinitions } from '../pageBuilderRegistry';
 import { resolveAllowedVideoEmbedSrc } from '@/shared/lib/rich-text-embeds';
 
 export interface ActiveLinkTarget {
@@ -18,9 +32,15 @@ interface PageBuilderLinkToolbarProps {
   target: ActiveLinkTarget;
   section: PageBuilderSection;
   entityOptions: PageBuilderEntityOption[];
-  onUpdateConfig: (sectionId: string, path: Array<string | number>, value: PageBuilderConfigValue) => void;
+  onUpdateConfig: (
+    sectionId: string,
+    path: Array<string | number>,
+    value: PageBuilderConfigValue
+  ) => void;
   onClose: () => void;
 }
+
+type LinkKind = 'url' | 'tel' | 'zalo' | 'mailto' | 'anchor';
 
 const QUICK_CONTACT_PRESETS = [
   { label: 'Hotline CIC', url: 'tel:02439761381', icon: Phone, newTab: false },
@@ -37,16 +57,48 @@ const QUICK_CONTACT_PRESETS = [
 
 const STATIC_ROUTE_OPTIONS = [
   { label: 'Trang chủ (/)', value: '/' },
-  { label: 'Giới thiệu (/about)', value: '/about' },
+  { label: 'Giới thiệu (/gioi-thieu)', value: '/gioi-thieu' },
+  { label: 'Cơ cấu tổ chức (/gioi-thieu/co-cau-to-chuc)', value: '/gioi-thieu/co-cau-to-chuc' },
+  {
+    label: 'Năng lực & Kinh nghiệm (/gioi-thieu/nang-luc-kinh-nghiem)',
+    value: '/gioi-thieu/nang-luc-kinh-nghiem',
+  },
   { label: 'Sản phẩm & Giải pháp (/products)', value: '/products' },
   { label: 'Dịch vụ Tư vấn (/services)', value: '/services' },
   { label: 'Dự án tiêu biểu (/projects)', value: '/projects' },
   { label: 'Tin tức & Góc nhìn (/news)', value: '/news' },
   { label: 'Sự kiện & Hội thảo (/events)', value: '/events' },
   { label: 'Liên hệ (/lien-he)', value: '/lien-he' },
-  { label: 'Chính sách bảo mật (/chinh-sach-bao-mat)', value: '/chinh-sach-bao-mat' },
-  { label: 'Điều khoản sử dụng (/dieu-khoan-su-dung)', value: '/dieu-khoan-su-dung' },
 ];
+
+function detectLinkKind(href: string): LinkKind {
+  const v = href.trim().toLowerCase();
+  if (v.startsWith('tel:')) return 'tel';
+  if (v.includes('zalo.me/')) return 'zalo';
+  if (v.startsWith('mailto:')) return 'mailto';
+  if (v.startsWith('#')) return 'anchor';
+  return 'url';
+}
+
+function formatByKind(kind: LinkKind, raw: string): string {
+  const clean = raw
+    .trim()
+    .replace(/^(tel:|mailto:)/i, '')
+    .replace(/^https?:\/\/zalo\.me\//i, '');
+  if (!clean) return '';
+  switch (kind) {
+    case 'tel':
+      return `tel:${clean.replace(/\s+/g, '')}`;
+    case 'zalo':
+      return `https://zalo.me/${clean.replace(/\D+/g, '') || clean}`;
+    case 'mailto':
+      return `mailto:${clean}`;
+    case 'anchor':
+      return clean.startsWith('#') ? clean : `#${clean}`;
+    default:
+      return raw.trim();
+  }
+}
 
 function entityPublicUrl(option: PageBuilderEntityOption): string {
   const slug = String((option.meta as Record<string, unknown> | undefined)?.slug || option.id);
@@ -91,10 +143,25 @@ export const PageBuilderLinkToolbar: React.FC<PageBuilderLinkToolbarProps> = ({
     ? [...target.path.slice(0, -1), String(target.path[target.path.length - 1]).replace(/Url$/, 'NewTab')]
     : siblingPath(ctaIdPath, 'NewTab');
 
-  const currentCtaId = isDirectUrlField ? '' : String(valueAtPath(section.config, ctaIdPath) ?? '');
-  const currentLabel = String(valueAtPath(section.config, labelPath) ?? target.fallbackLabel ?? '');
-  const currentUrl = String(valueAtPath(section.config, urlPath) ?? '');
-  const currentNewTab = Boolean(valueAtPath(section.config, newTabPath));
+  const storedLabel = String(valueAtPath(section.config, labelPath) ?? target.fallbackLabel ?? '');
+  const storedUrl = String(valueAtPath(section.config, urlPath) ?? '');
+  const storedNewTab = Boolean(valueAtPath(section.config, newTabPath));
+
+  const [labelDraft, setLabelDraft] = useState(storedLabel);
+  const [urlDraft, setUrlDraft] = useState(storedUrl);
+  const [linkKind, setLinkKind] = useState<LinkKind>(() => detectLinkKind(storedUrl));
+  const [newTabDraft, setNewTabDraft] = useState(storedNewTab);
+
+  useEffect(() => {
+    setVideoDraft(currentVideoVal);
+  }, [currentVideoVal]);
+
+  useEffect(() => {
+    setLabelDraft(storedLabel);
+    setUrlDraft(storedUrl);
+    setLinkKind(detectLinkKind(storedUrl));
+    setNewTabDraft(storedNewTab);
+  }, [storedLabel, storedUrl, storedNewTab, section.id, target.path]);
 
   const groupedEntities = useMemo(() => {
     const groups: Record<string, PageBuilderEntityOption[]> = {};
@@ -110,17 +177,21 @@ export const PageBuilderLinkToolbar: React.FC<PageBuilderLinkToolbarProps> = ({
     return groups;
   }, [entityOptions]);
 
+  const sectionLabel = sectionDefinitions[section.sectionKey]?.label ?? section.sectionKey;
+
   if (isVideo) {
     const validEmbedSrc = resolveAllowedVideoEmbedSrc(videoDraft);
     return (
-      <div className="shrink-0 border-b border-orange-200 bg-orange-50/60 px-4 py-3 shadow-inner dark:border-orange-900/40 dark:bg-slate-900">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-1 flex-wrap items-center gap-2.5">
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-orange-600 px-2.5 py-1.5 text-xs font-bold text-white">
+      <div className="shrink-0 border-b border-orange-200 bg-orange-50/60 px-3.5 py-2 dark:border-orange-900/40 dark:bg-slate-900">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-orange-600 px-2.5 py-1 text-[11px] font-extrabold text-white">
               <Video className="h-3.5 w-3.5" />
-              Đường dẫn Video (YouTube / Vimeo)
+              Video YouTube / Vimeo ({sectionLabel})
             </span>
             <input
+              id="pb-video-url"
+              name="pbVideoUrl"
               type="url"
               value={videoDraft}
               onChange={(e) => setVideoDraft(e.target.value)}
@@ -131,35 +202,36 @@ export const PageBuilderLinkToolbar: React.FC<PageBuilderLinkToolbarProps> = ({
                 }
               }}
               placeholder="https://www.youtube.com/watch?v=... hoặc https://youtu.be/..."
-              className="min-w-[280px] flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+              className="h-8 min-w-[260px] flex-1 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-900 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
             />
             {videoDraft.trim() && (
               <span
-                className={`rounded-md px-2 py-1 text-[11px] font-bold ${
+                className={`rounded-md px-2 py-0.5 text-[11px] font-bold ${
                   validEmbedSrc
-                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300'
-                    : 'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300'
+                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                    : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
                 }`}
               >
-                {validEmbedSrc ? '✓ Link nhúng hợp lệ' : 'Kiểm tra lại định dạng YouTube/Vimeo'}
+                {validEmbedSrc ? '✓ Link nhúng hợp lệ' : 'Kiểm tra lại link YouTube/Vimeo'}
               </span>
             )}
           </div>
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={() => {
                 onUpdateConfig(section.id, target.path, videoDraft.trim());
                 onClose();
               }}
-              className="rounded-xl bg-orange-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-orange-500 cursor-pointer"
+              className="inline-flex h-8 items-center gap-1 rounded-lg bg-orange-600 px-3 text-xs font-bold text-white hover:bg-orange-500 cursor-pointer"
             >
+              <Check className="h-3.5 w-3.5" />
               Áp dụng Video
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-slate-200 bg-white p-2 text-slate-500 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 cursor-pointer"
+              className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-500 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 cursor-pointer"
               aria-label="Đóng thanh Video"
             >
               <X className="h-4 w-4" />
@@ -170,31 +242,45 @@ export const PageBuilderLinkToolbar: React.FC<PageBuilderLinkToolbarProps> = ({
     );
   }
 
+  const applyCtaChanges = (nextUrl = urlDraft, nextLabel = labelDraft, nextNewTab = newTabDraft) => {
+    const formattedUrl = formatByKind(linkKind, nextUrl);
+    if (nextLabel.trim()) {
+      onUpdateConfig(section.id, labelPath, nextLabel.trim());
+    }
+    onUpdateConfig(section.id, urlPath, formattedUrl);
+    onUpdateConfig(section.id, newTabPath, nextNewTab);
+  };
+
   return (
-    <div className="shrink-0 border-b border-orange-200 bg-orange-50/50 px-4 py-3 shadow-inner dark:border-orange-900/40 dark:bg-slate-900">
-      <div className="mx-auto max-w-7xl space-y-2.5">
-        {/* Row 1: Quick Contact Pills */}
+    <div className="shrink-0 border-b border-orange-200 bg-orange-50/60 px-3.5 py-2 dark:border-orange-900/40 dark:bg-slate-900">
+      <div className="space-y-2">
+        {/* Top Row: Selected Context + Quick Contact Presets + Close */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-orange-600 px-2.5 py-1 text-[11px] font-extrabold text-white">
-              <Link2 className="h-3.5 w-3.5" />
-              Gắn Link / Liên hệ nhanh
+            <span className="inline-flex items-center gap-1 rounded-md bg-orange-600 px-2 py-0.5 text-[11px] font-extrabold text-white">
+              <Link2 className="h-3 w-3" />
+              Đang chọn: {labelDraft || target.fallbackLabel || sectionLabel}
             </span>
+
             {QUICK_CONTACT_PRESETS.map((preset) => {
               const Icon = preset.icon;
-              const active = currentUrl === preset.url;
+              const active = urlDraft === preset.url;
               return (
                 <button
                   key={preset.label}
                   type="button"
                   onClick={() => {
+                    const detected = detectLinkKind(preset.url);
+                    setLinkKind(detected);
+                    setUrlDraft(preset.url);
+                    setNewTabDraft(preset.newTab);
                     onUpdateConfig(section.id, urlPath, preset.url);
                     onUpdateConfig(section.id, newTabPath, preset.newTab);
                   }}
-                  className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-bold transition cursor-pointer ${
+                  className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-bold transition cursor-pointer ${
                     active
                       ? 'border-orange-500 bg-orange-100 text-orange-800 dark:bg-orange-950/60 dark:text-orange-200'
-                      : 'border-slate-200 bg-white text-slate-700 hover:border-orange-300 hover:bg-orange-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200'
+                      : 'border-slate-200 bg-white text-slate-700 hover:border-orange-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200'
                   }`}
                 >
                   <Icon className="h-3 w-3 text-orange-600" />
@@ -203,115 +289,134 @@ export const PageBuilderLinkToolbar: React.FC<PageBuilderLinkToolbarProps> = ({
               );
             })}
           </div>
+
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 cursor-pointer"
+            className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 cursor-pointer"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-3 w-3" />
             Đóng
           </button>
         </div>
 
-        {/* Row 2: Label, URL, Smart DB Destination Picker, System CTA & New Tab */}
-        <div className="grid grid-cols-1 gap-2.5 md:grid-cols-12">
-          <label className="block md:col-span-3">
-            <span className="mb-1 block text-[11px] font-bold text-slate-600 dark:text-slate-300">
-              Chữ hiển thị trên nút (Label)
-            </span>
-            <input
-              type="text"
-              value={currentLabel}
-              onChange={(e) => onUpdateConfig(section.id, labelPath, e.target.value)}
-              placeholder="Ví dụ: Nhận tư vấn ngay"
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
-            />
-          </label>
+        {/* Bottom Single Compact Controls Row (like robot-web CmsLinkContactToolbar) */}
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            id="pb-cta-label"
+            name="pbCtaLabel"
+            type="text"
+            value={labelDraft}
+            onChange={(e) => setLabelDraft(e.target.value)}
+            placeholder="Chữ trên nút..."
+            className="h-8 w-44 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-900 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+          />
 
-          <label className="block md:col-span-4">
-            <span className="mb-1 block text-[11px] font-bold text-slate-600 dark:text-slate-300">
-              Đường dẫn đích (URL / tel: / mailto: / #anchor)
-            </span>
-            <input
-              type="text"
-              value={currentUrl}
-              onChange={(e) => onUpdateConfig(section.id, urlPath, e.target.value)}
-              placeholder="Nhập /products, tel:02439761381 hoặc chọn bên phải..."
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 font-mono text-xs text-slate-900 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
-            />
-          </label>
+          <select
+            id="pb-link-kind"
+            name="pbLinkKind"
+            aria-label="Loại liên kết"
+            value={linkKind}
+            onChange={(e) => {
+              const nextKind = e.target.value as LinkKind;
+              setLinkKind(nextKind);
+              setUrlDraft((curr) => formatByKind(nextKind, curr));
+            }}
+            className="h-8 rounded-lg border border-slate-200 bg-white px-2 text-xs font-bold text-slate-700 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 cursor-pointer"
+          >
+            <option value="url">Web / Nội bộ</option>
+            <option value="tel">Điện thoại (tel:)</option>
+            <option value="zalo">Zalo (zalo.me)</option>
+            <option value="mailto">Email (mailto:)</option>
+            <option value="anchor">Neo trang (#)</option>
+          </select>
 
-          <label className="block md:col-span-3">
-            <span className="mb-1 block text-[11px] font-bold text-slate-600 dark:text-slate-300">
-              Chọn nhanh trang / bài viết từ DB
-            </span>
-            <select
-              value=""
-              onChange={(e) => {
-                if (!e.target.value) return;
-                onUpdateConfig(section.id, urlPath, e.target.value);
-              }}
-              className="w-full rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 cursor-pointer"
-            >
-              <option value="">-- Chọn đích đến có sẵn --</option>
-              <optgroup label="Trang chính của Website">
-                {STATIC_ROUTE_OPTIONS.map((route) => (
-                  <option key={route.value} value={route.value}>
-                    {route.label}
-                  </option>
-                ))}
-              </optgroup>
-              {Object.entries(groupedEntities).map(([entityType, items]) => (
-                <optgroup
-                  key={entityType}
-                  label={`${entityTypeLabels[entityType as keyof typeof entityTypeLabels] || entityType} (${items.length})`}
-                >
-                  {items.map((opt) => {
-                    const url = entityPublicUrl(opt);
-                    return (
-                      <option key={`${entityType}-${opt.id}`} value={url}>
-                        {opt.label} ({url})
-                      </option>
-                    );
-                  })}
-                </optgroup>
+          <select
+            id="pb-db-destination"
+            name="pbDbDestination"
+            aria-label="Chọn đích đến từ Database"
+            value=""
+            onChange={(e) => {
+              if (!e.target.value) return;
+              setLinkKind('url');
+              setUrlDraft(e.target.value);
+              onUpdateConfig(section.id, urlPath, e.target.value);
+            }}
+            className="h-8 max-w-[220px] rounded-lg border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 cursor-pointer"
+          >
+            <option value="">-- Chọn trang / bài viết DB --</option>
+            <optgroup label="Trang chính">
+              {STATIC_ROUTE_OPTIONS.map((route) => (
+                <option key={route.value} value={route.value}>
+                  {route.label}
+                </option>
               ))}
-            </select>
-          </label>
-
-          <div className="flex flex-col justify-between md:col-span-2">
-            {!isDirectUrlField ? (
-              <label className="block">
-                <span className="mb-1 block text-[11px] font-bold text-slate-600 dark:text-slate-300">
-                  CTA hệ thống
-                </span>
-                <select
-                  value={currentCtaId}
-                  onChange={(e) => onUpdateConfig(section.id, ctaIdPath, e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-xs font-medium text-slate-800 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 cursor-pointer"
-                >
-                  <option value="">-- Tuỳ chỉnh --</option>
-                  {CTA_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
+            </optgroup>
+            {Object.entries(groupedEntities).map(([entityType, items]) => (
+              <optgroup
+                key={entityType}
+                label={`${entityTypeLabels[entityType as keyof typeof entityTypeLabels] || entityType} (${items.length})`}
+              >
+                {items.map((opt) => {
+                  const url = entityPublicUrl(opt);
+                  return (
+                    <option key={`${entityType}-${opt.id}`} value={url}>
                       {opt.label}
                     </option>
-                  ))}
-                </select>
-              </label>
-            ) : (
-              <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">Tuỳ chọn mở trang</span>
-            )}
-            <label className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={currentNewTab}
-                onChange={(e) => onUpdateConfig(section.id, newTabPath, e.target.checked)}
-                className="h-3.5 w-3.5 accent-orange-600"
-              />
-              <ExternalLink className="h-3 w-3 text-slate-400" />
-              Mở tab mới
-            </label>
-          </div>
+                  );
+                })}
+              </optgroup>
+            ))}
+          </select>
+
+          <input
+            id="pb-cta-url"
+            name="pbCtaUrl"
+            type="text"
+            value={urlDraft}
+            onChange={(e) => setUrlDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                applyCtaChanges();
+                onClose();
+              }
+            }}
+            placeholder={
+              linkKind === 'tel'
+                ? 'tel:02439761381'
+                : linkKind === 'zalo'
+                  ? 'https://zalo.me/0988000000'
+                  : linkKind === 'mailto'
+                    ? 'mailto:info@cic.com.vn'
+                    : '/products hoặc https://...'
+            }
+            className="h-8 min-w-[200px] flex-1 rounded-lg border border-slate-200 bg-white px-2.5 font-mono text-xs text-slate-900 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+          />
+
+          <label className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 cursor-pointer">
+            <input
+              id="pb-cta-newtab"
+              name="pbCtaNewTab"
+              type="checkbox"
+              checked={newTabDraft}
+              onChange={(e) => setNewTabDraft(e.target.checked)}
+              className="h-3.5 w-3.5 accent-orange-600"
+            />
+            <ExternalLink className="h-3 w-3 text-slate-400" />
+            <span>Tab mới</span>
+          </label>
+
+          <button
+            type="button"
+            onClick={() => {
+              applyCtaChanges();
+              onClose();
+            }}
+            className="inline-flex h-8 items-center gap-1 rounded-lg bg-orange-600 px-3 text-xs font-extrabold text-white hover:bg-orange-500 cursor-pointer"
+          >
+            <Check className="h-3.5 w-3.5" />
+            <span>Áp dụng link</span>
+          </button>
         </div>
       </div>
     </div>

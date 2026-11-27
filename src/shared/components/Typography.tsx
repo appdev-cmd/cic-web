@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { hasSafeInlineHtml, sanitizeInlineTextHtml } from '@/shared/lib/sanitize';
+import { sanitizeInlineTextHtml } from '@/shared/lib/sanitize';
 
 type Tone = 'default' | 'inverse' | 'muted' | 'brand';
 
@@ -107,22 +107,18 @@ export const SectionHeader = ({
 
   return (
     <div className={`text-center mb-6 ${className}`.trim()}>
-      <Tag {...titleProps} className={`${typeH2} mb-3 ${titleColor} ${titleProps?.className ?? ''}`.trim()}>
-        {hasSafeInlineHtml(title) ? (
-          <span dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(title) }} />
-        ) : (
-          title
-        )}
-      </Tag>
+      <Tag
+        {...titleProps}
+        className={`${typeH2} mb-3 ${titleColor} ${titleProps?.className ?? ''}`.trim()}
+        dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(title || '') }}
+      />
       <div className="w-16 h-1 bg-orange-600 mx-auto mb-4" aria-hidden="true" />
       {sub ? (
-        <p {...subProps} className={`${typeCaption} ${subColor} max-w-[52ch] mx-auto ${subProps?.className ?? ''}`.trim()}>
-          {hasSafeInlineHtml(sub) ? (
-            <span dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(sub) }} />
-          ) : (
-            sub
-          )}
-        </p>
+        <p
+          {...subProps}
+          className={`${typeCaption} ${subColor} max-w-[52ch] mx-auto ${subProps?.className ?? ''}`.trim()}
+          dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(sub) }}
+        />
       ) : null}
     </div>
   );

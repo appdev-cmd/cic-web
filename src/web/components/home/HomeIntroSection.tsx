@@ -5,7 +5,26 @@ import { motion } from 'motion/react';
 import { ArrowRight, ArrowUpRight, Play } from 'lucide-react';
 import { typeH2, typeProse } from '@shared/components/Typography';
 import type { HomeIntroModel } from '@shared/page-content/models';
-import { hasSafeInlineHtml, sanitizeHtmlContent, sanitizeInlineTextHtml } from '@/shared/lib/sanitize';
+import { sanitizeHtmlContent, sanitizeInlineTextHtml } from '@/shared/lib/sanitize';
+
+function formatIntroHeadingHtml(rawTitle?: string): string {
+  if (!rawTitle) {
+    return 'Hơn 35 năm <span class="text-orange-600">đồng hành</span><br class="hidden md:block" /> cùng kỹ thuật Việt Nam';
+  }
+  if (/<[a-z][\s\S]*>/i.test(rawTitle)) {
+    return sanitizeHtmlContent(rawTitle);
+  }
+  for (const kw of ['đồng hành', 'Partnering', 'partnering']) {
+    if (rawTitle.includes(kw)) {
+      const [before, ...rest] = rawTitle.split(kw);
+      const after = rest.join(kw);
+      const beforeHtml = before?.trim() ? `${sanitizeInlineTextHtml(before)} ` : '';
+      const afterHtml = after.trim() ? ` ${sanitizeInlineTextHtml(after)}` : '';
+      return `${beforeHtml}<span class="text-orange-600">${kw}</span>${afterHtml}`;
+    }
+  }
+  return sanitizeInlineTextHtml(rawTitle);
+}
 
 export interface HomeIntroSectionProps {
   introData?: HomeIntroModel;
@@ -34,56 +53,25 @@ export const HomeIntroSection: React.FC<HomeIntroSectionProps> = ({
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8 }}
           >
-            <h2 data-page-builder-config-path={JSON.stringify(['title'])} className={`${typeH2} text-[#0b1b36] mb-4 sm:mb-5 normal-case`}>
-              {introData?.title ? (
-                /<[a-z][\s\S]*>/i.test(introData.title) ? (
-                  <span dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(introData.title) }} />
-                ) : introData.title.includes('đồng hành') ? (
-                  <>
-                    {introData.title.split('đồng hành')[0]}
-                    <span className="text-orange-600">đồng hành</span>
-                    {introData.title.split('đồng hành')[1]}
-                  </>
-                ) : introData.title.includes('Partnering') ? (
-                  <>
-                    {introData.title.split('Partnering')[0]}
-                    <span className="text-orange-600">Partnering</span>
-                    {introData.title.split('Partnering')[1]}
-                  </>
-                ) : introData.title.includes('partnering') ? (
-                  <>
-                    {introData.title.split('partnering')[0]}
-                    <span className="text-orange-600">partnering</span>
-                    {introData.title.split('partnering')[1]}
-                  </>
-                ) : (
-                  introData.title
-                )
-              ) : (
-                <>Hơn 35 năm <span className="text-orange-600">đồng hành</span><br className="hidden md:block" /> cùng kỹ thuật Việt Nam</>
-              )}
-            </h2>
+            <h2
+              data-page-builder-config-path={JSON.stringify(['title'])}
+              className={`${typeH2} text-[#0b1b36] mb-4 sm:mb-5 normal-case`}
+              dangerouslySetInnerHTML={{ __html: formatIntroHeadingHtml(introData?.title) }}
+            />
             <div className={`${typeProse} space-y-4 text-slate-600 mb-10 text-justify`}>
-              {introData?.paragraphs && introData.paragraphs.length > 0 ? (
-                introData.paragraphs.map((p, idx) => (
-                  <p key={idx} data-page-builder-config-path={JSON.stringify(['paragraphs', idx])}>
-                    {hasSafeInlineHtml(p) ? (
-                      <span dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(p) }} />
-                    ) : (
-                      p
-                    )}
-                  </p>
-                ))
-              ) : (
-                <>
-                  <p data-page-builder-config-path={JSON.stringify(['paragraphs', 0])}>
-                    Thành lập từ năm 1990 trực thuộc Bộ Xây dựng, Công ty Cổ phần Công nghệ và Tư vấn CIC tự hào là đơn vị tiên phong trong lĩnh vực chuyển giao công nghệ phần mềm và tư vấn kỹ thuật tại Việt Nam.
-                  </p>
-                  <p data-page-builder-config-path={JSON.stringify(['paragraphs', 1])}>
-                    Suốt hơn 35 năm, chúng tôi luôn đi đầu ứng dụng ICT, mang đến dịch vụ tư vấn chuyên sâu cho hàng nghìn doanh nghiệp, đối tác trong nước và quốc tế.
-                  </p>
-                </>
-              )}
+              {(introData?.paragraphs && introData.paragraphs.length > 0
+                ? introData.paragraphs
+                : [
+                    'Thành lập từ năm 1990 trực thuộc Bộ Xây dựng, Công ty Cổ phần Công nghệ và Tư vấn CIC tự hào là đơn vị tiên phong trong lĩnh vực chuyển giao công nghệ phần mềm và tư vấn kỹ thuật tại Việt Nam.',
+                    'Suốt hơn 35 năm, chúng tôi luôn đi đầu ứng dụng ICT, mang đến dịch vụ tư vấn chuyên sâu cho hàng nghìn doanh nghiệp, đối tác trong nước và quốc tế.',
+                  ]
+              ).map((p, idx) => (
+                <p
+                  key={idx}
+                  data-page-builder-config-path={JSON.stringify(['paragraphs', idx])}
+                  dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(p || '') }}
+                />
+              ))}
             </div>
             <div className="flex flex-wrap gap-3">
               <button 

@@ -2,33 +2,18 @@
 
 import React, { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  CheckCircle2,
-  Edit,
-  ExternalLink,
-  FileText,
-  Globe,
-  Globe2,
-  HelpCircle,
-  Loader2,
-  Plus,
-  RefreshCw,
-  RotateCcw,
-  Search,
-  X,
-} from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import { useCmsWorkspaceLocale } from '@/cms/context/CmsWorkspaceLocaleContext';
 import { useCmsToast } from '@/cms/context/CmsToastContext';
-import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import type { CmsMediaPickerItem } from '../../data/MediaPickerDataSource';
 import { CmsButton } from '../../components/ui/CmsButton';
-import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { PageBuilderEditor } from './PageBuilderEditor';
 import { PageBuilderPreviewModal } from './PageBuilderPreviewModal';
 import { pageBuilderEntityOptions } from './pageBuilderData';
-import { PageBuilderGuideCard, PageInlineSeoPanel, type PageInlineSeoValues } from './builder/PageInlineSeoPanel';
+import { type PageInlineSeoValues } from './builder/PageInlineSeoPanel';
+import { PageDirectoryListView } from './builder/PageDirectoryListView';
 import { getMediaPickerItemsAction } from '@/features/media/server/actions';
 import type {
   CmsStaticPageListItem,
@@ -67,15 +52,6 @@ interface StaticPagesScreenProps {
     createLegal: boolean;
   };
 }
-
-const formatTime = (value: string | null) => {
-  if (!value) return 'Chưa cập nhật';
-  try {
-    return new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value));
-  } catch {
-    return value;
-  }
-};
 
 const slugify = (value: string) =>
   value
@@ -446,7 +422,6 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
   const router = useRouter();
   const globalWorkspaceLocale = useCmsWorkspaceLocale();
   const [builderLocale, setBuilderLocale] = useState<CmsLocale>(globalWorkspaceLocale);
-  const dict = getCmsDictionary(globalWorkspaceLocale);
 
   const [pagesMap, setPagesMap] = useState<Record<'vi' | 'en', CmsStaticPageListItem[]>>(() => ({
     vi: pagesByLocale.vi ?? [],
@@ -524,15 +499,6 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
       toast.success(message);
     }
   };
-
-  const readinessStats = useMemo(() => {
-    const total = pages.length;
-    const publishedCount = pages.filter((p) => p.published.version > 0).length;
-    const draftDiffCount = pages.filter((p) => p.draft.version > p.published.version).length;
-    const enCodes = new Set((pagesMap.en ?? []).map((p) => p.code));
-    const bilingualReadyCount = (pagesMap.vi ?? []).filter((p) => enCodes.has(p.code)).length;
-    return { total, publishedCount, draftDiffCount, bilingualReadyCount };
-  }, [pages, pagesMap]);
 
   const filteredPages = useMemo(() => {
     return pages.filter((page) => {
@@ -835,239 +801,64 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
     );
   }
 
+  const counterpartLocale: CmsLocale = globalWorkspaceLocale === 'vi' ? 'en' : 'vi';
+  const counterpartPages = pagesMap[counterpartLocale] ?? [];
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {isLoadingDetail && <LoadingOverlay message="Đang tải dữ liệu trang từ Database..." />}
 
-      <CmsPageHeader
-        icon={<FileText />}
-        title={dict.modules.staticPages.title}
-        description={dict.modules.staticPages.description}
-        meta={
-          <span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-400">
-            {pages.length} {dict.modules.staticPages.itemUnit} · {globalWorkspaceLocale.toUpperCase()}
-          </span>
+      <PageDirectoryListView
+        workspaceLocale={globalWorkspaceLocale}
+        pages={pages}
+        counterpartPages={counterpartPages}
+        filteredPages={paginatedPages}
+        query={query}
+        onQueryChange={(val) => {
+          setQuery(val);
+          setCurrentPage(1);
+        }}
+        statusFilter={statusFilter}
+        onStatusFilterChange={(val) => {
+          setStatusFilter(val);
+          setCurrentPage(1);
+        }}
+        showGuide={showGuide}
+        onToggleGuide={() => setShowGuide((v) => !v)}
+        isRefreshing={isPending}
+        onRefresh={() => {
+          startTransition(() => {
+            router.refresh();
+          });
+          showToast('Đã đồng bộ lại danh sách trang từ máy chủ.');
+        }}
+        canCreateLegal={capabilities.createLegal}
+        onOpenCreateModal={() => setCreateOpen(true)}
+        inlineSeoState={inlineSeoState}
+        onToggleInlineSeo={(p) => void handleOpenInlineSeo(p)}
+        onChangeInlineSeo={(patch) =>
+          setInlineSeoState((curr) => (curr ? { ...curr, seo: { ...curr.seo, ...patch } } : null))
         }
-        actions={
-          <div className="flex flex-wrap gap-2">
-            <CmsButton
-              variant="secondary"
-              leadingIcon={<HelpCircle />}
-              onClick={() => setShowGuide((v) => !v)}
-            >
-              {showGuide ? 'Ẩn hướng dẫn' : 'Hướng dẫn 4 bước'}
-            </CmsButton>
-            <CmsButton
-              variant="secondary"
-              leadingIcon={<RefreshCw className={isPending ? 'animate-spin' : ''} />}
-              onClick={() => {
-                startTransition(() => {
-                  router.refresh();
-                });
-                showToast('Đã đồng bộ lại danh sách trang từ máy chủ.');
-              }}
-            >
-              Làm mới
-            </CmsButton>
-            {capabilities.createLegal && (
-              <CmsButton leadingIcon={<Plus />} onClick={() => setCreateOpen(true)}>
-                Tạo trang nội dung
-              </CmsButton>
-            )}
-          </div>
-        }
+        onSaveInlineSeo={() => void handleSaveInlineSeo()}
+        onCloseInlineSeo={() => setInlineSeoState(null)}
+        onEditPage={(p, loc) => void handleEdit(p, loc ?? globalWorkspaceLocale)}
       />
 
-      {/* READINESS SUMMARY CARDS (Inspired by robot-web PageDirectoryListView) */}
-      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-2xs dark:border-slate-800 dark:bg-slate-900">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-            Tổng số trang ({globalWorkspaceLocale.toUpperCase()})
-          </p>
-          <p className="mt-1 text-xl font-black text-slate-900 dark:text-white">
-            {readinessStats.total} trang
-          </p>
-          <p className="mt-0.5 text-[11px] text-slate-500">Quản lý tập trung Draft & Published</p>
-        </div>
-
-        <div className="rounded-2xl border border-emerald-200/70 bg-emerald-50/40 p-3.5 shadow-2xs dark:border-emerald-900/40 dark:bg-slate-900">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-            Đã xuất bản công khai
-          </p>
-          <p className="mt-1 flex items-center gap-1.5 text-xl font-black text-emerald-700 dark:text-emerald-300">
-            <CheckCircle2 className="h-5 w-5" />
-            {readinessStats.publishedCount}/{readinessStats.total}
-          </p>
-          <p className="mt-0.5 text-[11px] text-emerald-700/80 dark:text-emerald-400/80">
-            Đang phục vụ khách truy cập
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-amber-200/70 bg-amber-50/40 p-3.5 shadow-2xs dark:border-amber-900/40 dark:bg-slate-900">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
-            Có bản nháp chờ duyệt
-          </p>
-          <p className="mt-1 text-xl font-black text-amber-700 dark:text-amber-300">
-            {readinessStats.draftDiffCount} trang
-          </p>
-          <p className="mt-0.5 text-[11px] text-amber-700/80 dark:text-amber-400/80">
-            Sửa an toàn không ảnh hưởng web thật
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-blue-200/70 bg-blue-50/40 p-3.5 shadow-2xs dark:border-blue-900/40 dark:bg-slate-900">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">
-            Song ngữ VI ↔ EN
-          </p>
-          <p className="mt-1 text-xl font-black text-blue-700 dark:text-blue-300">
-            {readinessStats.bilingualReadyCount}/{(pagesMap.vi ?? []).length} cặp trang
-          </p>
-          <p className="mt-0.5 text-[11px] text-blue-700/80 dark:text-blue-400/80">
-            Chuyển nhanh ngay trong Builder
-          </p>
-        </div>
-      </section>
-
-      {showGuide && <PageBuilderGuideCard onClose={() => setShowGuide(false)} />}
-
-      {/* FILTER BAR */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs dark:border-slate-800 dark:bg-slate-900">
-        <div className="grid grid-cols-1 items-center gap-3 md:grid-cols-12">
-          <div className="relative flex items-center md:col-span-6">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-              <Search className="h-4 w-4 text-slate-400" />
-            </div>
-            <input
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              placeholder={
-                globalWorkspaceLocale === 'en'
-                  ? 'Search by name, code or path...'
-                  : 'Tìm theo tên, code hoặc đường dẫn...'
-              }
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs font-medium outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800"
-            />
-          </div>
-
-          <select
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value as typeof statusFilter);
+      {filteredPages.length > pageSize && (
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+          <CmsPagination
+            currentPage={currentPage}
+            pageSize={pageSize}
+            totalCount={filteredPages.length}
+            itemLabel="Page"
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
               setCurrentPage(1);
             }}
-            className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium outline-none focus:border-orange-500 md:col-span-3 dark:border-slate-700 dark:bg-slate-800"
-          >
-            <option value="all">{dict.common.allStatus}</option>
-            <option value="has_draft">
-              {globalWorkspaceLocale === 'en' ? 'Draft Changes' : 'Có thay đổi bản nháp'}
-            </option>
-            <option value="published">{dict.common.published}</option>
-          </select>
-
-          <div className="flex justify-end md:col-span-3">
-            <button
-              type="button"
-              disabled={!query && statusFilter === 'all'}
-              onClick={() => {
-                setQuery('');
-                setStatusFilter('all');
-                setCurrentPage(1);
-              }}
-              className="flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800 cursor-pointer"
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-              {dict.common.reset}
-            </button>
-          </div>
+          />
         </div>
-      </section>
-
-      {/* PAGES TABLE */}
-      <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
-        <div className="hidden overflow-x-auto md:block">
-          <table className="cms-data-table min-w-[920px] w-full text-left">
-            <thead>
-              <tr className="border-b border-slate-100 text-xs font-bold text-slate-500 dark:border-slate-800">
-                <th className="p-3">Page</th>
-                <th className="p-3">{globalWorkspaceLocale === 'en' ? 'Code / Slug' : 'Code / đường dẫn'}</th>
-                <th className="p-3">{globalWorkspaceLocale === 'en' ? 'Sections' : 'Khu vực'}</th>
-                <th className="p-3">Bản nháp (Draft)</th>
-                <th className="p-3">Công khai (Published)</th>
-                <th className="p-3 text-right">{dict.common.actions}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedPages.map((page) => {
-                const isSeoOpen = inlineSeoState?.page.id === page.id;
-                return (
-                  <React.Fragment key={page.id}>
-                    <PageRow
-                      page={page}
-                      workspaceLocale={globalWorkspaceLocale}
-                      seoActive={isSeoOpen}
-                      onToggleSeo={() => void handleOpenInlineSeo(page)}
-                      onEdit={() => void handleEdit(page)}
-                    />
-                    {isSeoOpen && inlineSeoState && (
-                      <tr className="border-t border-orange-100 bg-orange-50/20 dark:border-slate-800 dark:bg-slate-900/60">
-                        <td colSpan={6} className="p-3">
-                          <PageInlineSeoPanel
-                            compact
-                            pageName={inlineSeoState.page.name}
-                            slug={inlineSeoState.page.slug}
-                            workspaceLocale={globalWorkspaceLocale}
-                            seo={inlineSeoState.seo}
-                            saving={inlineSeoState.saving}
-                            onChange={(patch) =>
-                              setInlineSeoState((curr) =>
-                                curr ? { ...curr, seo: { ...curr.seo, ...patch } } : null
-                              )
-                            }
-                            onSaveSeoOnly={handleSaveInlineSeo}
-                            onClose={() => setInlineSeoState(null)}
-                          />
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="divide-y divide-slate-100 md:hidden dark:divide-slate-800">
-          {paginatedPages.map((page) => (
-            <PageCard
-              key={page.id}
-              page={page}
-              onToggleSeo={() => void handleOpenInlineSeo(page)}
-              onEdit={() => void handleEdit(page)}
-            />
-          ))}
-        </div>
-
-        {filteredPages.length === 0 && (
-          <div className="py-12 text-center text-sm text-slate-500">
-            {dict.modules.staticPages.emptyText}
-          </div>
-        )}
-
-        <CmsPagination
-          currentPage={currentPage}
-          pageSize={pageSize}
-          totalCount={filteredPages.length}
-          itemLabel="Page"
-          onPageChange={setCurrentPage}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setCurrentPage(1);
-          }}
-        />
-      </section>
+      )}
 
       <PageBuilderPreviewModal page={previewPage} onClose={() => setPreviewPage(null)} />
 
@@ -1093,170 +884,6 @@ function LoadingOverlay({ message }: { message: string }) {
         {message}
       </div>
     </div>
-  );
-}
-
-function typeLabel(templateKey: string) {
-  return templateKey === 'legal_standard' ? 'Mẫu nội dung chuẩn (CKEditor 5)' : 'Giao diện trực quan (Visual Builder)';
-}
-
-function PageRow({
-  page,
-  workspaceLocale,
-  seoActive,
-  onToggleSeo,
-  onEdit,
-}: {
-  page: CmsStaticPageListItem;
-  workspaceLocale: CmsLocale;
-  seoActive: boolean;
-  onToggleSeo: () => void;
-  onEdit: () => void;
-}) {
-  const changed = page.draft.version > page.published.version;
-  const publicUrl = workspaceLocale === 'en' ? `/en${page.slug === '/' ? '' : page.slug}` : page.slug;
-  return (
-    <tr className="border-t border-slate-100 transition-colors hover:bg-slate-50/50 dark:border-slate-800 dark:hover:bg-slate-800/40">
-      <td className="p-3">
-        <div className="flex items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">
-            <Globe2 className="h-4 w-4" />
-          </span>
-          <div>
-            <button
-              type="button"
-              onClick={onEdit}
-              className="text-left text-sm font-bold text-slate-900 hover:text-orange-600 dark:text-white dark:hover:text-orange-400 cursor-pointer"
-            >
-              {page.name}
-            </button>
-            <p className="text-xs text-slate-500 dark:text-slate-400">{typeLabel(page.templateKey)}</p>
-          </div>
-        </div>
-      </td>
-      <td className="p-3">
-        <p className="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">{page.code}</p>
-        <p className="mt-1 font-mono text-xs text-slate-500 dark:text-slate-400">{publicUrl}</p>
-      </td>
-      <td className="p-3 text-sm font-semibold text-slate-800 dark:text-slate-200">
-        {page.sectionCount} khu vực
-      </td>
-      <td className="p-3">
-        <span
-          className={`rounded-md px-2 py-1 text-xs font-bold ${
-            changed
-              ? 'border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800/60 dark:bg-amber-950/50 dark:text-amber-300'
-              : 'border border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400'
-          }`}
-        >
-          v{page.draft.version}
-          {changed ? ' · Chưa publish' : ''}
-        </span>
-        <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">
-          {formatTime(page.draft.updatedAt)}
-        </p>
-      </td>
-      <td className="p-3">
-        {page.published.version > 0 ? (
-          <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700 dark:border-emerald-800/60 dark:bg-emerald-950/50 dark:text-emerald-300">
-            v{page.published.version} · Published
-          </span>
-        ) : (
-          <span className="rounded-md border border-slate-200 bg-slate-100 px-2 py-1 text-xs font-bold text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
-            Chưa xuất bản
-          </span>
-        )}
-      </td>
-      <td className="p-3">
-        <div className="flex items-center justify-end gap-1.5">
-          <button
-            type="button"
-            onClick={onToggleSeo}
-            className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-bold transition cursor-pointer ${
-              seoActive
-                ? 'border-orange-400 bg-orange-50 text-orange-700 dark:border-orange-700 dark:bg-orange-950/50 dark:text-orange-300'
-                : 'border-slate-200 bg-white text-slate-600 hover:border-orange-300 hover:text-orange-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
-            }`}
-            title="Sửa nhanh SEO Google & Xem trước SERP"
-          >
-            <Globe className="h-3.5 w-3.5" />
-            <span>SEO</span>
-          </button>
-
-          <a
-            href={publicUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-500 hover:border-orange-300 hover:text-orange-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
-            title="Mở trang công khai ở tab mới"
-          >
-            <ExternalLink className="h-3.5 w-3.5" />
-          </a>
-
-          <button
-            type="button"
-            onClick={onEdit}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-orange-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-orange-500 cursor-pointer"
-            title="Mở Page Builder trực quan"
-          >
-            <Edit className="h-3.5 w-3.5" />
-            <span>Mở Builder</span>
-          </button>
-        </div>
-      </td>
-    </tr>
-  );
-}
-
-function PageCard({
-  page,
-  onToggleSeo,
-  onEdit,
-}: {
-  page: CmsStaticPageListItem;
-  onToggleSeo: () => void;
-  onEdit: () => void;
-}) {
-  return (
-    <article className="space-y-3 p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">
-            <Globe2 className="h-4 w-4" />
-          </span>
-          <div className="min-w-0">
-            <h2 className="truncate text-sm font-bold text-slate-900 dark:text-white">{page.name}</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">{typeLabel(page.templateKey)}</p>
-          </div>
-        </div>
-        <div className="flex shrink-0 gap-1.5">
-          <button
-            type="button"
-            onClick={onToggleSeo}
-            className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300 cursor-pointer"
-          >
-            SEO
-          </button>
-          <button
-            type="button"
-            onClick={onEdit}
-            className="rounded-lg bg-orange-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-orange-500 cursor-pointer"
-            aria-label={`Chỉnh sửa ${page.name}`}
-          >
-            Builder
-          </button>
-        </div>
-      </div>
-      <div className="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800/60">
-        <p className="break-all font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">
-          {page.slug}
-        </p>
-        <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-          {page.sectionCount} khu vực · Draft v{page.draft.version}
-          {page.published.version > 0 ? ` · Published v${page.published.version}` : ' · Chưa xuất bản'}
-        </p>
-      </div>
-    </article>
   );
 }
 

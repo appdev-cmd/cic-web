@@ -136,13 +136,36 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({
   mediaImages,
   workspaceLocale,
 }) => {
-  const [workingPage, setWorkingPage] = useState(() => {
+  const [editorHistory, setEditorHistory] = useState<{
+    present: PageBuilderPage;
+    past: PageBuilderPage[];
+    future: PageBuilderPage[];
+  }>(() => {
     const cloned = deepClone(page);
     if (!cloned.draft.seo.title?.trim()) {
       cloned.draft.seo.title = cloned.name ? `${cloned.name} | CIC Technology` : 'CIC Technology';
     }
-    return cloned;
+    return { present: cloned, past: [], future: [] };
   });
+  const workingPage = editorHistory.present;
+  const past = editorHistory.past;
+  const future = editorHistory.future;
+
+  const commitWorkingPage = useCallback((updater: (current: PageBuilderPage) => PageBuilderPage) => {
+    setEditorHistory((state) => {
+      const next = updater(state.present);
+      if (next === state.present) return state;
+      return {
+        present: next,
+        past: [...state.past.slice(-49), deepClone(state.present)],
+        future: [],
+      };
+    });
+  }, []);
+
+  const clearHistory = useCallback(() => {
+    setEditorHistory((state) => ({ ...state, past: [], future: [] }));
+  }, []);
 
   const [selectedSectionId, setSelectedSectionId] = useState<string>(
     () => page.draft.sections[0]?.id ?? ''
@@ -172,8 +195,6 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({
     tab: 'section',
   });
   const [activeHeroSlide, setActiveHeroSlide] = useState(0);
-  const [past, setPast] = useState<PageBuilderPage[]>([]);
-  const [future, setFuture] = useState<PageBuilderPage[]>([]);
   const [frameDoc, setFrameDoc] = useState<Document | null>(null);
   const [formatState, setFormatState] = useState<CanvasFormatState>(DEFAULT_CANVAS_FORMAT_STATE);
   const [pendingLeaveAction, setPendingLeaveAction] = useState<(() => void) | null>(null);
@@ -319,23 +340,19 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({
 
   const updateSectionConfig = useCallback(
     (sectionId: string, path: Array<string | number>, value: PageBuilderConfigValue) => {
-      setWorkingPage((current) => {
-        setPast((items) => [...items.slice(-49), deepClone(current)]);
-        setFuture([]);
-        return {
-          ...current,
-          draft: {
-            ...current.draft,
-            sections: current.draft.sections.map((section) => {
-              if (section.id !== sectionId) return section;
-              const seededConfig = seedDefaultCollectionIfEmpty(section, path);
-              return { ...section, config: updateAtPath(seededConfig, path, value) };
-            }),
-          },
-        };
-      });
+      commitWorkingPage((current) => ({
+        ...current,
+        draft: {
+          ...current.draft,
+          sections: current.draft.sections.map((section) => {
+            if (section.id !== sectionId) return section;
+            const seededConfig = seedDefaultCollectionIfEmpty(section, path);
+            return { ...section, config: updateAtPath(seededConfig, path, value) };
+          }),
+        },
+      }));
     },
-    []
+    [commitWorkingPage]
   );
 
   const updateInlineText = useCallback(
@@ -357,27 +374,23 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({
   );
 
   const updateReference = (sectionId: string, entityType: PageBuilderEntityType, ids: string[]) => {
-    setWorkingPage((current) => {
-      setPast((items) => [...items.slice(-49), deepClone(current)]);
-      setFuture([]);
-      return {
-        ...current,
-        draft: {
-          ...current.draft,
-          sections: current.draft.sections.map((section) => {
-            if (section.id !== sectionId) return section;
-            const existing = section.references ?? [];
-            const hasType = existing.some((reference) => reference.entityType === entityType);
-            const nextRefs = hasType
-              ? existing.map((reference) =>
-                  reference.entityType === entityType ? { ...reference, entityIds: ids } : reference
-                )
-              : [...existing, { entityType, entityIds: ids }];
-            return { ...section, references: nextRefs };
-          }),
-        },
-      };
-    });
+    commitWorkingPage((current) => ({
+      ...current,
+      draft: {
+        ...current.draft,
+        sections: current.draft.sections.map((section) => {
+          if (section.id !== sectionId) return section;
+          const existing = section.references ?? [];
+          const hasType = existing.some((reference) => reference.entityType === entityType);
+          const nextRefs = hasType
+            ? existing.map((reference) =>
+                reference.entityType === entityType ? { ...reference, entityIds: ids } : reference
+              )
+            : [...existing, { entityType, entityIds: ids }];
+          return { ...section, references: nextRefs };
+        }),
+      },
+    }));
   };
 
   const updateReferenceSource = (
@@ -385,48 +398,44 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({
     entityType: PageBuilderEntityType,
     source: NonNullable<PageBuilderSection['references']>[number]['source']
   ) => {
-    setWorkingPage((current) => {
-      setPast((items) => [...items.slice(-49), deepClone(current)]);
-      setFuture([]);
-      return {
-        ...current,
-        draft: {
-          ...current.draft,
-          sections: current.draft.sections.map((section) => {
-            if (section.id !== sectionId) return section;
-            const existing = section.references ?? [];
-            const hasType = existing.some((r) => r.entityType === entityType);
-            const baseRefs = hasType ? existing : [...existing, { entityType, entityIds: [] }];
-            return {
-              ...section,
-              references: baseRefs.map((reference) => {
-                if (reference.entityType !== entityType) return reference;
-                let nextEntityIds = reference.entityIds;
-                if (source?.mode === 'featured') {
-                  const limit =
-                    source?.limit ??
-                    sectionDefinitions[section.sectionKey]?.referenceLimit?.[entityType] ??
-                    4;
-                  const featuredEntities = entityOptions
-                    .filter(
-                      (opt) =>
-                        opt.entityType === entityType &&
-                        (opt.status ?? 'published') === 'published' &&
-                        opt.meta?.isFeatured
-                    )
-                    .slice(0, limit)
-                    .map((opt) => opt.id);
-                  if (featuredEntities.length > 0) {
-                    nextEntityIds = featuredEntities;
-                  }
+    commitWorkingPage((current) => ({
+      ...current,
+      draft: {
+        ...current.draft,
+        sections: current.draft.sections.map((section) => {
+          if (section.id !== sectionId) return section;
+          const existing = section.references ?? [];
+          const hasType = existing.some((r) => r.entityType === entityType);
+          const baseRefs = hasType ? existing : [...existing, { entityType, entityIds: [] }];
+          return {
+            ...section,
+            references: baseRefs.map((reference) => {
+              if (reference.entityType !== entityType) return reference;
+              let nextEntityIds = reference.entityIds;
+              if (source?.mode === 'featured') {
+                const limit =
+                  source?.limit ??
+                  sectionDefinitions[section.sectionKey]?.referenceLimit?.[entityType] ??
+                  4;
+                const featuredEntities = entityOptions
+                  .filter(
+                    (opt) =>
+                      opt.entityType === entityType &&
+                      (opt.status ?? 'published') === 'published' &&
+                      opt.meta?.isFeatured
+                  )
+                  .slice(0, limit)
+                  .map((opt) => opt.id);
+                if (featuredEntities.length > 0) {
+                  nextEntityIds = featuredEntities;
                 }
-                return { ...reference, source, entityIds: nextEntityIds };
-              }),
-            };
-          }),
-        },
-      };
-    });
+              }
+              return { ...reference, source, entityIds: nextEntityIds };
+            }),
+          };
+        }),
+      },
+    }));
   };
 
   const updateCollection = (
@@ -516,56 +525,54 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({
       (section.sectionKey === 'about.awards' || section.sectionKey === 'about.partners') &&
       section.config.syncWithHome !== false
     ) {
-      setWorkingPage((curr) => {
-        setPast((itemsHistory) => [...itemsHistory.slice(-49), deepClone(curr)]);
-        setFuture([]);
-        return {
-          ...curr,
-          draft: {
-            ...curr.draft,
-            sections: curr.draft.sections.map((s) => {
-              if (s.id !== sectionId) return s;
-              const updatedConfig = updateAtPath(s.config, [path], items);
-              return {
-                ...s,
-                config: {
-                  ...updatedConfig,
-                  syncWithHome: false,
-                },
-              };
-            }),
-          },
-        };
-      });
+      commitWorkingPage((curr) => ({
+        ...curr,
+        draft: {
+          ...curr.draft,
+          sections: curr.draft.sections.map((s) => {
+            if (s.id !== sectionId) return s;
+            const updatedConfig = updateAtPath(s.config, [path], items);
+            return {
+              ...s,
+              config: {
+                ...updatedConfig,
+                syncWithHome: false,
+              },
+            };
+          }),
+        },
+      }));
       return;
     }
     updateSectionConfig(sectionId, [path], items);
   };
 
   const undo = useCallback(() => {
-    setPast((items) => {
-      const previous = items.at(-1);
-      if (!previous) return items;
-      setFuture((next) => [deepClone(workingPage), ...next].slice(0, 50));
-      setWorkingPage(deepClone(previous));
-      return items.slice(0, -1);
+    setEditorHistory((state) => {
+      const previous = state.past.at(-1);
+      if (!previous) return state;
+      return {
+        present: deepClone(previous),
+        past: state.past.slice(0, -1),
+        future: [deepClone(state.present), ...state.future].slice(0, 50),
+      };
     });
-  }, [workingPage]);
+  }, []);
 
   const redo = useCallback(() => {
-    setFuture((items) => {
-      const next = items[0];
-      if (!next) return items;
-      setPast((previous) => [...previous.slice(-49), deepClone(workingPage)]);
-      setWorkingPage(deepClone(next));
-      return items.slice(1);
+    setEditorHistory((state) => {
+      const next = state.future[0];
+      if (!next) return state;
+      return {
+        present: deepClone(next),
+        past: [...state.past.slice(-49), deepClone(state.present)],
+        future: state.future.slice(1),
+      };
     });
-  }, [workingPage]);
+  }, []);
 
   const updateSectionStructure = (sectionId: string, action: 'toggle' | 'up' | 'down') => {
-    setWorkingPage((current) => {
-      setPast((items) => [...items.slice(-49), deepClone(current)]);
-      setFuture([]);
+    commitWorkingPage((current) => {
       const sections = current.draft.sections.map((section) => ({ ...section }));
       const index = sections.findIndex((section) => section.id === sectionId);
       if (index < 0) return current;
@@ -597,9 +604,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({
         setRestoringVersion(null);
       }
     }
-    setPast((items) => [...items.slice(-49), deepClone(workingPage)]);
-    setFuture([]);
-    setWorkingPage((current) => ({
+    commitWorkingPage((current) => ({
       ...current,
       draft: {
         ...deepClone(resolvedVersion),
@@ -688,8 +693,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({
       setIsSavingDraft(true);
       try {
         await onSaveDraft(buildPageWithNormalizedSeo());
-        setPast([]);
-        setFuture([]);
+        clearHistory();
       } finally {
         setIsSavingDraft(false);
       }
@@ -702,8 +706,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({
       setIsPublishing(true);
       try {
         await onPublish(buildPageWithNormalizedSeo());
-        setPast([]);
-        setFuture([]);
+        clearHistory();
       } finally {
         setIsPublishing(false);
       }
@@ -759,7 +762,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({
         }
         selectedSectionId={selectedSection?.id ?? ''}
         onSelectSection={handleSelectAndScrollSection}
-        onToggleSelectedSectionVisibility={(secId) => updateSectionStructure(secId, 'toggle')}
+        onSectionStructureAction={updateSectionStructure}
         viewport={viewport}
         onViewportChange={setViewport}
         canvasMode={canvasMode}
@@ -777,7 +780,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({
             if (resolved) setLinkTarget(resolved);
           }
         }}
-        onOpenDataDrawer={(tab) => setDataDrawerState({ open: true, tab })}
+        onOpenDataDrawer={(tab) => setDataDrawerState({ open: true, tab: tab ?? 'slides' })}
         showHistory={showHistory}
         onToggleHistory={() => setShowHistory((v) => !v)}
         canUndo={past.length > 0}
@@ -804,17 +807,13 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({
           workspaceLocale={workspaceLocale}
           seo={workingPage.draft.seo}
           onChange={(patch) => {
-            setWorkingPage((curr) => {
-              setPast((items) => [...items.slice(-49), deepClone(curr)]);
-              setFuture([]);
-              return {
-                ...curr,
-                draft: {
-                  ...curr.draft,
-                  seo: { ...curr.draft.seo, ...patch },
-                },
-              };
-            });
+            commitWorkingPage((curr) => ({
+              ...curr,
+              draft: {
+                ...curr.draft,
+                seo: { ...curr.draft.seo, ...patch },
+              },
+            }));
           }}
           onClose={() => setShowSeoPanel(false)}
         />
@@ -881,9 +880,9 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({
               activeHeroSlide={activeHeroSlide}
               entityOptions={entityOptions}
               onFrameDocumentReady={setFrameDoc}
-              onOpenSectionConfig={(sectionId) => {
-                setSelectedSectionId(sectionId);
-                setDataDrawerState({ open: true, tab: 'section' });
+              onOpenDataDrawer={(tab, secId) => {
+                if (secId) setSelectedSectionId(secId);
+                setDataDrawerState({ open: true, tab });
               }}
               onSelect={(id) => {
                 if (id) setSelectedSectionId(id);

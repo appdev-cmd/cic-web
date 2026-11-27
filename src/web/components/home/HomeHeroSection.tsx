@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRight, Users, Bell } from 'lucide-react';
 import { typeBadge, typeBodyLead, typeButton, typeHero } from '@shared/components/Typography';
 import type { HomeHeroSlideModel } from '@shared/page-content/models';
-import { hasSafeInlineHtml, sanitizeHtmlContent, sanitizeInlineTextHtml } from '@/shared/lib/sanitize';
+import { sanitizeHtmlContent, sanitizeInlineTextHtml } from '@/shared/lib/sanitize';
 
 export function formatHeroHeading(rawTitle?: string): string {
   if (!rawTitle) return '';
@@ -96,6 +96,8 @@ export const HomeHeroSection: React.FC<HomeHeroSectionProps> = ({
               src={currentHeroSlide.img} 
               alt=""
               aria-hidden="true"
+              data-page-builder-media-path={JSON.stringify(['slides', activeSlideIndex, 'backgroundImageId'])}
+              data-page-builder-media-id={currentHeroSlide.img}
               fetchPriority={activeSlideIndex === 0 ? "high" : "auto"}
               loading={activeSlideIndex === 0 ? "eager" : "lazy"}
               decoding="async"
@@ -120,37 +122,48 @@ export const HomeHeroSection: React.FC<HomeHeroSectionProps> = ({
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-lg mb-5 backdrop-blur-md">
             <span className="flex h-2 w-2 rounded-full bg-orange-600 animate-pulse"></span>
-            <span className={`${typeBadge} text-white`}>
-              {heroBadge}
-            </span>
+            <span
+              data-page-builder-config-path={JSON.stringify(['badge'])}
+              className={`${typeBadge} text-white`}
+              dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(heroBadge || '') }}
+            />
           </div>
           
           <h1 
+            data-page-builder-config-path={JSON.stringify(['slides', activeSlideIndex, 'title'])}
             className={`${typeHero} text-white mb-4`}
             dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(formatHeroHeading(currentHeroSlide?.title)) }}
           />
           
-          <p className={`${typeBodyLead} text-slate-300 mb-8 max-w-xl`}>
-            {hasSafeInlineHtml(currentHeroSlide?.sub) ? (
-              <span dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(currentHeroSlide?.sub) }} />
-            ) : (
-              currentHeroSlide?.sub || ''
-            )}
-          </p>
+          <p
+            data-page-builder-config-path={JSON.stringify(['slides', activeSlideIndex, 'subtitle'])}
+            className={`${typeBodyLead} text-slate-300 mb-8 max-w-xl`}
+            dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(currentHeroSlide?.sub || '') }}
+          />
 
           <div className="flex flex-col sm:flex-row gap-4">
             <button 
-              onClick={() => {
+              data-page-builder-cta-key={JSON.stringify(['slides', activeSlideIndex, 'primaryCtaId'])}
+              onClick={(e) => {
+                if (editMode) {
+                  e.preventDefault();
+                  return;
+                }
                 setCurrentView('products');
                 setActiveLink('Sản phẩm');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               className={`px-5 py-2.5 bg-orange-600 text-white rounded-lg ${typeButton} transition-all active:scale-95 shadow-lg shadow-orange-600/20 border-2 border-orange-600 btn-modern-interaction flex items-center justify-center gap-3 cursor-pointer`}
             >
-              Khám phá giải pháp <ArrowRight size={20} />
+              <span>Khám phá giải pháp</span> <ArrowRight size={20} />
             </button>
             <button 
-              onClick={() => {
+              data-page-builder-cta-key={JSON.stringify(['slides', activeSlideIndex, 'secondaryCtaId'])}
+              onClick={(e) => {
+                if (editMode) {
+                  e.preventDefault();
+                  return;
+                }
                 setCurrentView('about');
                 setActiveLink('Giới thiệu');
                 setAboutSubTab('overview');
@@ -158,7 +171,7 @@ export const HomeHeroSection: React.FC<HomeHeroSectionProps> = ({
               }}
               className={`px-5 py-2.5 bg-white/5 text-white rounded-lg ${typeButton} transition-all hover:bg-white/10 border-2 border-white/10 flex items-center justify-center gap-3 btn-modern-interaction cursor-pointer`}
             >
-              <Users size={20} /> Về chúng tôi
+              <Users size={20} /> <span>Về chúng tôi</span>
             </button>
           </div>
         </motion.div>
