@@ -156,6 +156,8 @@ export interface HomePageModel {
   news?: HomeNewsModel;
   partners?: HomePartnersModel;
   contactCta?: HomeContactCtaModel;
+  hiddenSectionKeys?: readonly string[];
+  sectionOrder?: readonly string[];
 }
 
 export interface AboutTimelineMilestoneModel {
@@ -257,6 +259,7 @@ export interface PageBuilderEntityOption {
     ctaUrl?: string;
     isFeatured?: boolean;
     link?: string;
+    slug?: string;
   };
 }
 

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRight, Users, Bell } from 'lucide-react';
 import { typeBadge, typeBodyLead, typeButton, typeHero } from '@shared/components/Typography';
 import type { HomeHeroSlideModel } from '@shared/page-content/models';
-import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
+import { hasSafeInlineHtml, sanitizeHtmlContent, sanitizeInlineTextHtml } from '@/shared/lib/sanitize';
 
 export function formatHeroHeading(rawTitle?: string): string {
   if (!rawTitle) return '';
@@ -131,7 +131,11 @@ export const HomeHeroSection: React.FC<HomeHeroSectionProps> = ({
           />
           
           <p className={`${typeBodyLead} text-slate-300 mb-8 max-w-xl`}>
-            {currentHeroSlide?.sub || ''}
+            {hasSafeInlineHtml(currentHeroSlide?.sub) ? (
+              <span dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(currentHeroSlide?.sub) }} />
+            ) : (
+              currentHeroSlide?.sub || ''
+            )}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">

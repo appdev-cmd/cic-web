@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import { ArrowRight, ArrowUpRight, Play } from 'lucide-react';
 import { typeH2, typeProse } from '@shared/components/Typography';
 import type { HomeIntroModel } from '@shared/page-content/models';
-import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
+import { hasSafeInlineHtml, sanitizeHtmlContent, sanitizeInlineTextHtml } from '@/shared/lib/sanitize';
 
 export interface HomeIntroSectionProps {
   introData?: HomeIntroModel;
@@ -67,7 +67,11 @@ export const HomeIntroSection: React.FC<HomeIntroSectionProps> = ({
               {introData?.paragraphs && introData.paragraphs.length > 0 ? (
                 introData.paragraphs.map((p, idx) => (
                   <p key={idx} data-page-builder-config-path={JSON.stringify(['paragraphs', idx])}>
-                    {p}
+                    {hasSafeInlineHtml(p) ? (
+                      <span dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(p) }} />
+                    ) : (
+                      p
+                    )}
                   </p>
                 ))
               ) : (

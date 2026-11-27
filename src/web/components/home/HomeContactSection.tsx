@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Phone, Mail, ShieldCheck } from 'lucide-react';
 import { submitCustomerInteraction } from '../../services/customerInteractionSubmission';
 import { SYSTEM_FORM_IDS } from '../../../shared/customerInteractionContract';
-import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
+import { hasSafeInlineHtml, sanitizeHtmlContent, sanitizeInlineTextHtml } from '@/shared/lib/sanitize';
 import { enrichSubmissionSource, trackFormConversion } from '@/shared/lib/analytics';
 
 interface HomeContactSectionProps {
@@ -135,7 +135,11 @@ export const HomeContactSection: React.FC<HomeContactSectionProps> = ({ contactC
               )}
             </h2>
             <p className="text-slate-600 text-base mb-10 max-w-xl font-medium leading-relaxed">
-              {contactCta?.description || 'Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng lắng nghe và cung cấp những giải pháp công nghệ tối ưu nhất cho doanh nghiệp của bạn.'}
+              {hasSafeInlineHtml(contactCta?.description) ? (
+                <span dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(contactCta?.description) }} />
+              ) : (
+                contactCta?.description || 'Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng lắng nghe và cung cấp những giải pháp công nghệ tối ưu nhất cho doanh nghiệp của bạn.'
+              )}
             </p>
             
             <div className="space-y-6">

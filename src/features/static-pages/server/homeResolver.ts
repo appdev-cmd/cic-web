@@ -483,6 +483,12 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
     };
   }
 
+  const orderedSections = [...publishedRev.sections].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+  const sectionOrder = orderedSections.map((s) => s.sectionKey);
+  const hiddenSectionKeys = orderedSections
+    .filter((s) => (s.config as Record<string, unknown> | undefined)?._visible === false)
+    .map((s) => s.sectionKey);
+
   const result: HomePageModel = {
     hero,
     intro,
@@ -494,6 +500,8 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
     news,
     partners,
     contactCta,
+    hiddenSectionKeys,
+    sectionOrder,
   };
   homePageCache[workspace] = { data: result, exp: now + 30_000 };
   return result;

@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { hasSafeInlineHtml, sanitizeInlineTextHtml } from '@/shared/lib/sanitize';
 
 export interface HomeEcosystemItem {
   id: string;
@@ -62,14 +63,14 @@ export const HomeEcosystemSection: React.FC<HomeEcosystemSectionProps> = ({
               data-page-builder-config-path={JSON.stringify(['title'])}
               className="text-3xl font-black uppercase leading-[1.08] tracking-tighter text-slate-950 sm:text-4xl lg:text-5xl"
             >
-              {title}
+              {hasSafeInlineHtml(title) ? <span dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(title) }} /> : title}
             </h2>
             <div aria-hidden="true" className="mx-auto my-5 h-1 w-14 rounded-full bg-orange-600" />
             <p
               data-page-builder-config-path={JSON.stringify(['subtitle'])}
               className="text-base leading-7 text-slate-600"
             >
-              {subtitle}
+              {hasSafeInlineHtml(subtitle) ? <span dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(subtitle) }} /> : subtitle}
             </p>
           </div>
 
@@ -121,14 +122,14 @@ export const HomeEcosystemSection: React.FC<HomeEcosystemSectionProps> = ({
               data-page-builder-config-path={JSON.stringify(['title'])}
               className="max-w-md text-3xl font-black uppercase leading-[1.08] tracking-tighter text-slate-950 sm:text-4xl lg:text-5xl"
             >
-              {title}
+              {hasSafeInlineHtml(title) ? <span dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(title) }} /> : title}
             </h2>
             <div aria-hidden="true" className="my-5 h-1 w-14 rounded-full bg-orange-600" />
             <p
               data-page-builder-config-path={JSON.stringify(['subtitle'])}
               className="max-w-md text-base leading-7 text-slate-600"
             >
-              {subtitle}
+              {hasSafeInlineHtml(subtitle) ? <span dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(subtitle) }} /> : subtitle}
             </p>
 
             <div className="mt-7 flex items-center gap-4 sm:mt-9">

@@ -37,7 +37,9 @@ export async function POST(req: NextRequest) {
     }
 
     const formData = await req.formData();
-    const file = formData.get('upload');
+    const file = formData.get('upload') ?? formData.get('file');
+    const rawLocale = formData.get('locale');
+    const locale: 'vi' | 'en' = rawLocale === 'en' ? 'en' : 'vi';
 
     if (!(file instanceof File)) {
       return NextResponse.json(
@@ -92,7 +94,7 @@ export async function POST(req: NextRequest) {
           mimeType: validated.mimeType,
           fileSizeBytes: file.size,
           mediaType: 'image',
-          locale: 'vi',
+          locale,
           title: validated.safeFilename.replace(/\.[^.]+$/, ''),
           altText: '',
           folderId: null,

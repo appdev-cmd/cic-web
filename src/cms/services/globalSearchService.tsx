@@ -503,13 +503,10 @@ export function getAllSearchableRecords(locale: CmsLocale = 'vi'): SearchResultI
     productData.forEach((p) => {
       const brandName = p.brand_name || '';
       const categoryName = p.category_id || '';
-      const statusMap: Record<string, { text: string; color: SearchResultItem['statusColor'] }> = {
-        in_stock: { text: 'Đang hiển thị', color: 'emerald' },
-        out_of_stock: { text: 'Hết hàng / Tạm dừng', color: 'rose' },
-        pre_order: { text: 'Đặt trước', color: 'amber' },
-        draft: { text: 'Bản nháp', color: 'slate' },
-      };
-      const st = statusMap[p.availability_signal || 'in_stock'] || { text: 'Đang hiển thị', color: 'emerald' };
+      const isPublished = p.published ?? p.editorial_status === 'published';
+      const st: { text: string; color: SearchResultItem['statusColor'] } = isPublished
+        ? { text: 'Đang hiển thị', color: 'emerald' }
+        : { text: 'Bản nháp', color: 'slate' };
 
       records.push({
         id: `prod_${p.id}`,
@@ -530,11 +527,12 @@ export function getAllSearchableRecords(locale: CmsLocale = 'vi'): SearchResultI
         },
         keywords: [
           p.title,
+          p.name || '',
           p.sku || '',
           p.alias || '',
           brandName,
-          p.origin || '',
-          p.tagline || '',
+          p.manufactory || '',
+          p.summary || '',
           p.short_description || '',
           p.product_type || '',
           ...(p.application_areas || []),

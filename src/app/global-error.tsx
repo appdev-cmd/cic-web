@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 
 export default function GlobalError({
   reset,
@@ -46,12 +47,12 @@ export default function GlobalError({
             >
               Thử lại
             </button>
-            <a
+            <Link
               href="/"
               className="w-full sm:w-auto px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors text-center cursor-pointer"
             >
               Về trang chủ
-            </a>
+            </Link>
           </div>
         </div>
       </body>

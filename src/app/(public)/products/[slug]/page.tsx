@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: ProductPageProps) {
 export default async function ProductPage({ params }: ProductPageProps) {
   const rawSlug = (await params).slug;
   const slug = decodeURIComponent(rawSlug);
-  let [product, products, categories, applications, productTypes, contactsByProductId] = await Promise.all([
+  const [initialProduct, products, categories, applications, productTypes, contactsByProductId] = await Promise.all([
     getPublishedProductBySlugForReference(slug),
     listPublishedProductsForReference(),
     listPublishedProductCategories('vi'),
@@ -38,6 +38,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     listPublishedProductTypes('vi'),
     listPublicProductContacts('vi'),
   ]);
+  let product = initialProduct;
 
   if (!product && /-p\d+$/i.test(slug)) {
     const cleanSlug = slug.replace(/-p\d+$/i, '');

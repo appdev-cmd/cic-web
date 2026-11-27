@@ -170,9 +170,49 @@ export const HomeView: React.FC<HomeViewProps> = ({
     ];
   }, [content.ecosystem?.items, heroSlides, projects, newsItems]);
 
-  return (
-    <>
+  const defaultSectionOrder = [
+    'home.hero',
+    'home.intro',
+    'home.stats',
+    'home.awards',
+    'home.ecosystem',
+    'home.projects',
+    'home.events',
+    'home.news',
+    'home.partners',
+    'home.contact_cta',
+  ] as const;
+
+  const hiddenSet = useMemo(
+    () => new Set(editMode ? [] : (content.hiddenSectionKeys ?? [])),
+    [content.hiddenSectionKeys, editMode]
+  );
+
+  const orderedKeys = useMemo(() => {
+    if (editMode || !content.sectionOrder || content.sectionOrder.length === 0) {
+      return [...defaultSectionOrder];
+    }
+    const seen = new Set<string>();
+    const list: string[] = [];
+    for (const k of content.sectionOrder) {
+      if (!seen.has(k)) {
+        seen.add(k);
+        list.push(k);
+      }
+    }
+    for (const k of defaultSectionOrder) {
+      if (!seen.has(k)) {
+        seen.add(k);
+        list.push(k);
+      }
+    }
+    return list;
+  }, [content.sectionOrder, editMode]);
+
+  const sectionElements: Record<string, React.ReactNode> = {
+    'home.hero': (
       <HomeHeroSection
+        key="home.hero"
         heroSlides={heroSlides}
         marqueeTexts={marqueeTexts}
         heroBadge={heroBadge}
@@ -183,29 +223,37 @@ export const HomeView: React.FC<HomeViewProps> = ({
         setActiveLink={setActiveLink}
         setAboutSubTab={setAboutSubTab}
       />
-
+    ),
+    'home.intro': (
       <HomeIntroSection
+        key="home.intro"
         introData={introData}
         editMode={editMode}
         setCurrentView={setCurrentView}
         setActiveLink={setActiveLink}
         setAboutSubTab={setAboutSubTab}
       />
-
+    ),
+    'home.stats': (
       <HomeStatsSection
+        key="home.stats"
         homeStats={homeStats}
         renderPolicy={renderPolicy}
         bindingRegistry={bindingRegistry}
       />
-
+    ),
+    'home.awards': (
       <HomeAwardsSection
+        key="home.awards"
         awards={homeAwards}
         title={content.awards?.title}
         subtitle={content.awards?.subtitle}
         editMode={editMode}
       />
-
+    ),
+    'home.ecosystem': (
       <HomeEcosystemSection
+        key="home.ecosystem"
         title={content.ecosystem?.title}
         subtitle={content.ecosystem?.subtitle}
         editMode={editMode}
@@ -217,8 +265,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
       />
-
+    ),
+    'home.projects': (
       <HomeProjectsSection
+        key="home.projects"
         projects={projects}
         title={content.projects?.title}
         subtitle={content.projects?.subtitle}
@@ -229,8 +279,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
         setActiveProjectId={setActiveProjectId}
         editMode={editMode}
       />
-
+    ),
+    'home.events': (
       <HomeEventsSection
+        key="home.events"
         upcomingEvents={upcomingHomeEvents}
         pastEvents={pastHomeEvents}
         title={content.events?.title}
@@ -242,8 +294,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
         setActiveEventId={setActiveEventId}
         setIsRegisteringEvent={setIsRegisteringEvent}
       />
-
+    ),
+    'home.news': (
       <HomeNewsSection
+        key="home.news"
         newsItems={newsItems}
         title={content.news?.title}
         subtitle={content.news?.subtitle}
@@ -253,17 +307,29 @@ export const HomeView: React.FC<HomeViewProps> = ({
         setActiveLink={setActiveLink}
         setPreSelectedNewsCategory={setPreSelectedNewsCategory}
       />
-
+    ),
+    'home.partners': (
       <HomePartnersSection
+        key="home.partners"
         partners={partners}
         title={content.partners?.title}
         subtitle={content.partners?.subtitle}
         renderPolicy={renderPolicy}
       />
-
+    ),
+    'home.contact_cta': (
       <HomeContactSection
+        key="home.contact_cta"
         contactCta={contactCta}
       />
+    ),
+  };
+
+  return (
+    <>
+      {orderedKeys
+        .filter((key) => !hiddenSet.has(key))
+        .map((key) => sectionElements[key] ?? null)}
     </>
   );
 };

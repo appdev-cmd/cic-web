@@ -9,6 +9,7 @@ import { entityTypeLabels, sectionDefinitions } from '../pageBuilderRegistry';
 import { directEditingSectionKeys } from '../visualElementEditingAdapters';
 import { getLegacyHomePageContent } from '../../../../shared/page-content/legacyPageContent';
 import { parseLocaleNumber, parseNumberAndSuffix } from '../../../../shared/visual-editing/inlineTextEditing';
+import { serializeInlineElementValue } from '../builder/canvasTextFormatter';
 import { deepClone } from '../editor/editorUtils';
 import type { 
   PageBuilderConfigValue, 
@@ -53,6 +54,33 @@ export function stripHtml(value: string): string {
 
 export function normalizeText(value: string): string {
   return value.replace(/\s+/g, ' ').trim();
+}
+
+const RICH_INLINE_SECTIONS_TITLE_SUBTITLE = new Set([
+  'home.projects',
+  'home.events',
+  'home.news',
+  'home.awards',
+  'home.partners',
+  'home.ecosystem',
+  'about.hero',
+]);
+
+export function isRichInlineField(sectionKey: string, path: Array<string | number>): boolean {
+  const last = String(path[path.length - 1] ?? '');
+  if (sectionKey === 'home.hero' && path[0] === 'slides' && (last === 'title' || last === 'subtitle')) {
+    return true;
+  }
+  if (sectionKey === 'home.intro' && (last === 'title' || path[0] === 'paragraphs')) {
+    return true;
+  }
+  if (sectionKey === 'home.contact_cta' && (last === 'title' || last === 'description')) {
+    return true;
+  }
+  if (RICH_INLINE_SECTIONS_TITLE_SUBTITLE.has(sectionKey) && (last === 'title' || last === 'subtitle')) {
+    return true;
+  }
+  return false;
 }
 
 export function configValueAtPath(config: Record<string, PageBuilderConfigValue>, path: Array<string | number>) {
@@ -144,6 +172,7 @@ export interface CanvasDomEnhancerParams {
   onEditMedia?: (sectionId: string, path: Array<string | number>, currentId: string) => void;
   onEditVideo?: (sectionId: string, path: Array<string | number>, currentUrl: string, anchor: { left: number; top: number }) => void;
   onEditCta?: (sectionId: string, path: Array<string | number>, currentLabel: string, anchor: { left: number; top: number }) => void;
+  onOpenSectionConfig?: (sectionId: string) => void;
 }
 
 export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () => void {
@@ -171,6 +200,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
     onEditMedia,
     onEditVideo,
     onEditCta,
+    onOpenSectionConfig,
   } = params;
 
   if (!root || page.pageType === 'legal') return () => undefined;
@@ -457,6 +487,9 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       if (definition?.canMove) {
         addButton('↑', () => onSectionAction?.(section.id, 'up'), section.position <= 2);
         addButton('↓', () => onSectionAction?.(section.id, 'down'), section.position >= sections.length - 1);
+      }
+      if (onOpenSectionConfig) {
+        addButton('⚙️ Cấu hình mục', () => onOpenSectionConfig(section.id));
       }
 
       const draftLayer = node.ownerDocument.createElement('div');
@@ -1370,9 +1403,15 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       }
       const value = configValueAtPath(selectedSection.config, path);
       if (!path.length || (value !== undefined && typeof value !== 'string' && typeof value !== 'number')) return;
+      const richCapable = typeof value !== 'number' && isRichInlineField(selectedSection.sectionKey, path);
       claimed.add(node);
       node.contentEditable = 'true';
       node.dataset.pageBuilderInlineEdit = path.join('-');
+      if (richCapable) {
+        node.dataset.pageBuilderRichInline = 'true';
+        node.dataset.pageBuilderSectionRef = selectedSection.id;
+        node.dataset.pageBuilderFieldPath = JSON.stringify(path);
+      }
       node.setAttribute('role', 'textbox');
       node.style.cursor = 'text';
       node.style.outline = '1px dashed rgb(249 115 22 / 0.65)';
@@ -1380,14 +1419,15 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       node.style.borderRadius = '3px';
       const showOutline = () => { node.style.outline = '2px solid rgb(249 115 22 / .82)'; };
       const hideOutline = () => { if (node !== node.ownerDocument.activeElement) node.style.outline = '1px dashed rgb(249 115 22 / 0.65)'; };
-      let currentInitialText = node.textContent?.trim() ?? '';
+      let currentInitialSerialized = richCapable ? serializeInlineElementValue(node) : (node.textContent?.trim() ?? '');
       const onFocus = () => {
-        currentInitialText = node.textContent?.trim() ?? '';
+        currentInitialSerialized = richCapable ? serializeInlineElementValue(node) : (node.textContent?.trim() ?? '');
         showOutline();
       };
       const update = () => {
         const text = node.textContent?.trim() ?? '';
-        if (text === currentInitialText) return;
+        const serialized = richCapable ? serializeInlineElementValue(node) : text;
+        if (serialized === currentInitialSerialized) return;
 
         // If updating a number field or stat value (e.g. Counter)
         if (typeof value === 'number' || (path.length >= 2 && path[path.length - 1] === 'value')) {
@@ -1408,7 +1448,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
           }
         }
 
-        let nextVal: string | number = text;
+        let nextVal: string | number = serialized;
         if (typeof value === 'number') {
           const num = parseLocaleNumber(text);
           nextVal = num !== null ? num : value;
@@ -1428,6 +1468,9 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
         node.removeEventListener('mouseenter', showOutline);
         node.removeEventListener('mouseleave', hideOutline);
         node.removeEventListener('focus', onFocus);
+        delete node.dataset.pageBuilderRichInline;
+        delete node.dataset.pageBuilderSectionRef;
+        delete node.dataset.pageBuilderFieldPath;
         node.removeAttribute('contenteditable'); 
         node.removeAttribute('role'); 
         node.style.cursor = ''; 
@@ -1496,8 +1539,14 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
         }
       }
       if (!onTextChange) return;
+      const richCapable = isRichInlineField(selectedSection.sectionKey, path);
       node.contentEditable = 'true';
       node.dataset.pageBuilderInlineEdit = key;
+      if (richCapable) {
+        node.dataset.pageBuilderRichInline = 'true';
+        node.dataset.pageBuilderSectionRef = selectedSection.id;
+        node.dataset.pageBuilderFieldPath = JSON.stringify(path);
+      }
       node.setAttribute('role', 'textbox');
       node.setAttribute('aria-label', `Chỉnh sửa ${key}`);
       const editLabel = fieldKey === 'title' ? 'Tiêu đề' : fieldKey === 'subtitle' || fieldKey === 'description' ? 'Mô tả' : fieldKey === 'badge' || fieldKey === 'eyebrow' ? 'Nhãn' : 'Bấm để sửa trực tiếp';
@@ -1511,7 +1560,9 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       const hideOutline = () => { if (node !== node.ownerDocument.activeElement) node.style.outline = ['home.hero', 'about.hero'].includes(selectedSection.sectionKey) ? 'none' : '1px dashed rgb(249 115 22 / 0.65)'; };
 
       const onBlur = () => {
-        const nextValue = normalizeText(node.textContent ?? '');
+        const nextValue = richCapable
+          ? serializeInlineElementValue(node)
+          : normalizeText(node.textContent ?? '');
         if (nextValue !== value) onTextChange(selectedSection.id, path, nextValue);
       };
       const onKeyDown = (event: KeyboardEvent) => {
@@ -1539,6 +1590,9 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
         node.removeEventListener('mouseenter', showOutline);
         node.removeEventListener('mouseleave', hideOutline);
         node.removeEventListener('focus', showOutline);
+        delete node.dataset.pageBuilderRichInline;
+        delete node.dataset.pageBuilderSectionRef;
+        delete node.dataset.pageBuilderFieldPath;
         node.removeAttribute('contenteditable');
         node.removeAttribute('role');
         node.removeAttribute('aria-label');

@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0 --port 3000",
-    "build": "node scripts/seed-canonical-pages-content.mjs && node scripts/seed-public-forms-and-ctas.mjs && node scripts/seed-mark-requests-processed.mjs && next build",
-    "postbuild": "node scripts/seed-mark-requests-processed.mjs",
+    "build": "next build",
     "db:seed-forms-ctas": "node scripts/seed-public-forms-and-ctas.mjs",
     "db:seed-mark-requests-processed": "node scripts/seed-mark-requests-processed.mjs",
     "db:seed-canonical-pages": "node scripts/seed-canonical-pages-content.mjs",
@@ -15,7 +14,7 @@
     "typecheck": "npm run typecheck:foundation && npm run typecheck:legacy",
     "test:security": "node --import tsx --conditions=react-server scripts/verify-security-remediation.ts",
     "test:ai-gateway": "node scripts/test-ai-gateway.mjs",
-    "deploy:ai-gateway": "npx supabase functions deploy gemini-proxy --project-ref tjkytlstopieiqqiiisy --no-verify-jwt",
+    "deploy:ai-gateway": "npx supabase functions deploy gemini-proxy --project-ref xktczbgqebkeeuovicxn --no-verify-jwt",
     "test:e2e": "node --max-old-space-size=4096 scripts/e2e-full-system-test.mjs",
     "typecheck:foundation": "node --max-old-space-size=4096 node_modules/typescript/bin/tsc --noEmit -p tsconfig.json",
     "typecheck:legacy": "tsc --noEmit -p tsconfig.legacy.json",
@@ -71,10 +70,10 @@
     "db:apply-form-destinations": "node --env-file=.env.local scripts/apply-form-multi-destination.mjs"
   },
   "dependencies": {
-    "@ckeditor/ckeditor5-react": "^11.2.0",
+    "@ckeditor/ckeditor5-react": "^12.0.0",
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.112.4",
-    "ckeditor5": "^48.4.0",
+    "ckeditor5": "^49.1.0",
     "dotenv": "^17.2.3",
     "googleapis": "^181.0.0",
     "lucide-react": "^0.546.0",

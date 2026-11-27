@@ -7,6 +7,7 @@ import {
   publishPageRecord,
   createLegalPageRecord,
   getCmsPageDetail,
+  getCmsPageRevision,
 } from './repository';
 import { invalidateHomePageCache } from './homeResolver';
 import { getPostgresClient } from '@/server/db/postgres';
@@ -108,23 +109,50 @@ export async function getCmsPageDetailAction(pageId: number | string) {
 }
 
 /**
+ * Server Action: Fetches a specific historical revision detail for restoring into draft.
+ * Requires `static_pages.view` permission.
+ */
+export async function getCmsPageRevisionAction(
+  pageId: number | string,
+  revisionId: number | string
+) {
+  try {
+    await requireStaticPagesPermission('view');
+    const revision = await getCmsPageRevision(pageId, revisionId);
+    if (!revision) return { success: false, error: 'Không tìm thấy phiên bản lịch sử.' };
+    return { success: true, data: revision };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Lỗi tải phiên bản lịch sử.';
+    return { success: false, error: message };
+  }
+}
+
+/**
  * Server Action: Fetches real entities from database for Page Builder reference picking.
+ * Requires `static_pages.view` permission and queries locale-specific tables.
  */
 export async function getPageBuilderEntityOptionsAction(
-  _workspace: 'vi' | 'en' = 'vi'
+  workspace: 'vi' | 'en' = 'vi'
 ): Promise<ActionResult<PageBuilderEntityOption[]>> {
   try {
+    await requireStaticPagesPermission('view');
     const sql = getPostgresClient();
+    const isEn = workspace === 'en';
+    const projTable = isEn ? sql`cic_projects_en` : sql`cic_projects`;
+    const eventTable = isEn ? sql`cic_event_en` : sql`cic_event`;
+    const newsTable = isEn ? sql`cic_news_en` : sql`cic_news`;
+    const serviceTable = isEn ? sql`cic_services_en` : sql`cic_services`;
+    const partnerTable = isEn ? sql`cic_manufactories_en` : sql`cic_manufactories`;
     const options: PageBuilderEntityOption[] = [];
 
     // 1. Projects
     try {
       const projectRows = await sql`
-        SELECT id, title, tagline, solution, sector, image, location, is_featured, customer_name, technologies
-        FROM cic_projects
+        SELECT id, alias, title, tagline, solution, sector, image, location, is_featured, customer_name, technologies
+        FROM ${projTable}
         WHERE published = true
         ORDER BY is_featured DESC, ordering, id
-        LIMIT 30
+        LIMIT 50
       `;
       projectRows.forEach((p) => {
         options.push({
@@ -134,6 +162,7 @@ export async function getPageBuilderEntityOptionsAction(
           entityType: 'project',
           status: 'published',
           meta: {
+            slug: p.alias ? String(p.alias) : String(p.id),
             image: p.image || undefined,
             location: p.location || undefined,
             category: p.solution || p.sector || 'Dự án',
@@ -151,11 +180,11 @@ export async function getPageBuilderEntityOptionsAction(
     // 2. Events
     try {
       const eventRows = await sql`
-        SELECT id, title, time_event, specific_time, place, image, summary, is_hot, show_in_homepage, link_dangky
-        FROM cic_event
+        SELECT id, alias, title, time_event, specific_time, place, image, summary, is_hot, show_in_homepage, link_dangky
+        FROM ${eventTable}
         WHERE published = true
         ORDER BY is_hot DESC, show_in_homepage DESC, coalesce(time_event, created_time) DESC
-        LIMIT 30
+        LIMIT 50
       `;
       eventRows.forEach((e) => {
         options.push({
@@ -165,6 +194,7 @@ export async function getPageBuilderEntityOptionsAction(
           entityType: 'event',
           status: 'published',
           meta: {
+            slug: e.alias ? String(e.alias) : String(e.id),
             image: e.image || undefined,
             location: e.place || undefined,
             date: e.time_event ? String(e.time_event) : undefined,
@@ -182,11 +212,11 @@ export async function getPageBuilderEntityOptionsAction(
     // 3. News
     try {
       const newsRows = await sql`
-        SELECT id, title, category_name, start_time, created_time, image, summary, is_hot, show_in_homepage
-        FROM cic_news
+        SELECT id, alias, title, category_name, start_time, created_time, image, summary, is_hot, show_in_homepage
+        FROM ${newsTable}
         WHERE published = true
         ORDER BY is_hot DESC, show_in_homepage DESC, coalesce(start_time, created_time) DESC
-        LIMIT 30
+        LIMIT 50
       `;
       newsRows.forEach((n) => {
         options.push({
@@ -196,6 +226,7 @@ export async function getPageBuilderEntityOptionsAction(
           entityType: 'news',
           status: 'published',
           meta: {
+            slug: n.alias ? String(n.alias) : String(n.id),
             image: n.image || undefined,
             category: n.category_name || undefined,
             summary: n.summary || undefined,
@@ -212,10 +243,10 @@ export async function getPageBuilderEntityOptionsAction(
     try {
       const serviceRows = await sql`
         SELECT id, title, alias, summary, show_in_homepage
-        FROM cic_services
+        FROM ${serviceTable}
         WHERE published = 1
         ORDER BY show_in_homepage DESC, id ASC
-        LIMIT 30
+        LIMIT 50
       `;
       serviceRows.forEach((s) => {
         options.push({
@@ -225,6 +256,7 @@ export async function getPageBuilderEntityOptionsAction(
           entityType: 'service',
           status: 'published',
           meta: {
+            slug: s.alias ? String(s.alias) : String(s.id),
             summary: s.summary || undefined,
             isFeatured: s.show_in_homepage === 1,
           },
@@ -238,10 +270,10 @@ export async function getPageBuilderEntityOptionsAction(
     try {
       const partnerRows = await sql`
         SELECT id, name, alias, image, show_in_homepage
-        FROM cic_manufactories
+        FROM ${partnerTable}
         WHERE published = true
         ORDER BY show_in_homepage DESC, id ASC
-        LIMIT 30
+        LIMIT 50
       `;
       partnerRows.forEach((m) => {
         options.push({
@@ -251,6 +283,7 @@ export async function getPageBuilderEntityOptionsAction(
           entityType: 'partner',
           status: 'published',
           meta: {
+            slug: m.alias ? String(m.alias) : String(m.id),
             image: m.image || undefined,
             isFeatured: Boolean(m.show_in_homepage),
           },
@@ -258,6 +291,34 @@ export async function getPageBuilderEntityOptionsAction(
       });
     } catch (err) {
       console.error('Error fetching partners for page builder:', err);
+    }
+
+    // 6. Products (for smart link picker in Page Builder)
+    try {
+      const prodTable = isEn ? sql`cic_products_en` : sql`cic_products`;
+      const productRows = await sql`
+        SELECT id, name, alias, code, image, is_hot
+        FROM ${prodTable}
+        WHERE published = true
+        ORDER BY is_hot DESC, ordering ASC, id DESC
+        LIMIT 60
+      `;
+      productRows.forEach((pr) => {
+        options.push({
+          id: String(pr.id),
+          label: pr.name || `Sản phẩm #${pr.id}`,
+          description: `Sản phẩm${pr.code ? ` · ${pr.code}` : ''}${pr.is_hot ? ' · Nổi bật' : ''}`,
+          entityType: 'product',
+          status: 'published',
+          meta: {
+            slug: pr.alias ? String(pr.alias) : String(pr.id),
+            image: pr.image || undefined,
+            isFeatured: Boolean(pr.is_hot),
+          },
+        });
+      });
+    } catch (err) {
+      console.error('Error fetching products for page builder:', err);
     }
 
     return { success: true, data: options };

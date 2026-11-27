@@ -36,6 +36,7 @@ export interface PageBuilderSection {
 }
 
 export interface PageBuilderVersion {
+  revisionId?: string;
   version: number;
   status: PageBuilderStatus;
   updatedAt: string;
@@ -43,6 +44,8 @@ export interface PageBuilderVersion {
   seo: {
     title: string;
     description: string;
+    canonicalUrl?: string;
+    noindex?: boolean;
     imageId?: string;
   };
   sections: PageBuilderSection[];

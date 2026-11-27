@@ -495,10 +495,11 @@ body::-webkit-scrollbar-corner,
 .cms-ckeditor .ck.ck-content.ck-editor__editable {
   border: 0 !important;
   box-shadow: none !important;
-  height: var(--cms-editor-min-height, 280px);
-  max-height: var(--cms-editor-min-height, 280px);
+  height: auto;
+  max-height: var(--cms-editor-max-height, 560px);
   min-height: var(--cms-editor-min-height, 280px);
   overflow-y: auto !important;
+  overscroll-behavior: contain;
   padding: 1.25rem 1.5rem;
   scrollbar-width: thin;
   scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
@@ -537,20 +538,84 @@ body::-webkit-scrollbar-corner,
 }
 
 .cms-ckeditor .ck-source-editing-area {
-  height: var(--cms-editor-min-height, 280px);
-  max-height: var(--cms-editor-min-height, 280px);
+  position: relative !important;
+  height: var(--cms-editor-max-height, 480px);
+  max-height: var(--cms-editor-max-height, 560px);
   min-height: var(--cms-editor-min-height, 280px);
+  overflow: hidden !important;
+}
+
+.cms-ckeditor .ck-source-editing-area::after {
+  display: none !important;
 }
 
 .cms-ckeditor .ck-source-editing-area textarea {
-  background: #fff;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  background: #fafbfc;
   color: #1e293b;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  height: 100%;
-  max-height: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: 0.8125rem !important;
+  line-height: 1.6 !important;
+  padding: 1rem 1.25rem !important;
+  box-sizing: border-box !important;
+  height: 100% !important;
+  max-height: 100% !important;
   min-height: var(--cms-editor-min-height, 280px);
-  overflow: auto;
-  resize: none;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  resize: none !important;
+}
+
+.ck-content iframe,
+.legal-article-content iframe,
+.cms-ckeditor .ck-media__wrapper iframe {
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  border: 0;
+  border-radius: 10px;
+  display: block;
+}
+
+.legal-article-content .cms-rich-reference,
+.ck-content .cms-rich-reference {
+  margin: 1.25rem auto;
+  padding: 0.875rem 1.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid #fed7aa;
+  background: #fff7ed;
+  color: #c2410c;
+  font-weight: 700;
+  text-align: center;
+}
+
+.legal-article-content .cms-rich-align-left,
+.ck-content .cms-rich-align-left {
+  margin-left: 0;
+  margin-right: auto;
+  width: fit-content;
+}
+
+.legal-article-content .cms-rich-align-right,
+.ck-content .cms-rich-align-right {
+  margin-left: auto;
+  margin-right: 0;
+  width: fit-content;
+}
+
+.legal-article-content .cms-rich-align-center,
+.ck-content .cms-rich-align-center {
+  margin-left: auto;
+  margin-right: auto;
+  width: fit-content;
+}
+
+.legal-article-content .cms-rich-align-full,
+.ck-content .cms-rich-align-full {
+  width: 100%;
 }
 
 .dark .cms-ckeditor {
@@ -707,4 +772,10 @@ body::-webkit-scrollbar-corner,
 .cms-ckeditor .ck-content .legal-contact-box a:hover {
   color: #fb923c;
   text-decoration: underline;
+}
+
+/* Inline CMS Hover Color Support (Page Builder & Public) */
+[data-cms-hover="1"]:hover {
+  color: var(--cms-hover-color) !important;
+  transition: color 0.18s ease;
 }

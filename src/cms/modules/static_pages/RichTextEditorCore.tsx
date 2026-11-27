@@ -1,22 +1,27 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import {
   Alignment,
   Autoformat,
   AutoImage,
+  AutoMediaEmbed,
   BlockQuote,
   Bold,
+  ButtonView,
   ClassicEditor,
+  Code,
   Essentials,
+  FindAndReplace,
   FontBackgroundColor,
   FontColor,
   FontFamily,
   FontSize,
   GeneralHtmlSupport,
   Heading,
+  HorizontalLine,
   Image,
   ImageCaption,
   ImageInsert,
@@ -48,14 +53,26 @@ import {
   Undo,
   Widget,
   toWidget,
-  ButtonView,
-  IconMedia,
+  type Editor,
+  type EditorConfig,
 } from 'ckeditor5';
-import type { Editor, FileLoader, PluginConstructor } from 'ckeditor5';
 import 'ckeditor5/ckeditor5.css';
-import { Check, ExternalLink, FileInput, Megaphone, Play, Video, X } from 'lucide-react';
-import { getDemoCtaModuleData, getDemoFormModuleData } from '../../data/demoCustomerInteractionDataSource';
+import { FileInput, Maximize2, Megaphone, Minimize2, X } from 'lucide-react';
+import { useCmsWorkspaceLocale } from '@/cms/context/CmsWorkspaceLocaleContext';
 import type { CustomerInteractionEmbed } from '../../../shared/customerInteractionContract';
+import {
+  resolveAllowedVideoEmbedSrc,
+  upgradeBareVideoIframesToMediaFigures,
+} from '@/shared/lib/rich-text-embeds';
+import { CIC_CKEDITOR_HTML_SUPPORT } from './richTextGhs';
+import {
+  createUploadAdapterPlugin,
+  MEDIA_VIDEO_LIBRARY_ICON,
+  YOUTUBE_EMBED_ICON,
+  type SourceEditingPluginLike,
+} from './richTextUploadAdapter';
+import { RichTextYoutubeModal } from './RichTextYoutubeModal';
+import { PageMediaPickerModal } from './PageMediaPickerModal';
 
 export type RichTextEmbedType = CustomerInteractionEmbed | 'video';
 
@@ -64,70 +81,14 @@ export interface RichTextEditorProps {
   onChange: (value: string) => void;
   onBlur?: (value: string) => void;
   minHeight?: string;
+  maxHeight?: string;
+  placeholder?: string;
   allowedEmbeds?: RichTextEmbedType[];
+  locale?: 'vi' | 'en';
 }
 
 export function toEmbedUrl(input: string): string {
-  const trimmed = input.trim();
-  if (!trimmed) return '';
-
-  // 1. Check if user pasted full iframe tag
-  const iframeMatch = trimmed.match(/<iframe\b[^>]*\bsrc\s*=\s*["']([^"']+)["']/i);
-  if (iframeMatch?.[1]) {
-    return iframeMatch[1];
-  }
-
-  // 2. YouTube (standard watch, short youtu.be, shorts, embed)
-  const ytMatch = trimmed.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
-  if (ytMatch?.[1]) {
-    return `https://www.youtube.com/embed/${ytMatch[1]}`;
-  }
-
-  // 3. Vimeo
-  const vimeoMatch = trimmed.match(/(?:vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/[^/]*\/videos\/|video\/|album\/(?:\d+\/)?video\/|)(\d+)|player\.vimeo\.com\/video\/(\d+))/i);
-  const vimeoId = vimeoMatch?.[1] || vimeoMatch?.[2];
-  if (vimeoId) {
-    return `https://player.vimeo.com/video/${vimeoId}`;
-  }
-
-  // 4. Any direct web URL fallback
-  if (/^https?:\/\//i.test(trimmed)) {
-    return trimmed;
-  }
-
-  return trimmed;
-}
-
-class UploadAdapter {
-  private controller = new AbortController();
-
-  constructor(private loader: FileLoader) {}
-
-  async upload(): Promise<{ default: string }> {
-    const file = await this.loader.file;
-    if (!file) throw new Error('Không tìm thấy ảnh cần tải lên.');
-    const body = new FormData();
-    body.append('upload', file);
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      body,
-      credentials: 'same-origin',
-      signal: this.controller.signal,
-    });
-    const payload = await response.json().catch(() => null) as { url?: string; default?: string; error?: { message?: string } } | null;
-    if (!response.ok) throw new Error(payload?.error?.message || `Tải ảnh thất bại (${response.status}).`);
-    const url = payload?.url || payload?.default;
-    if (!url) throw new Error('API /api/upload không trả về url của ảnh.');
-    return { default: url };
-  }
-
-  abort() {
-    this.controller.abort();
-  }
-}
-
-function UploadAdapterPlugin(editor: Editor) {
-  editor.plugins.get('FileRepository').createUploadAdapter = (loader: FileLoader) => new UploadAdapter(loader);
+  return resolveAllowedVideoEmbedSrc(input) ?? '';
 }
 
 type CmsReferenceType = 'cta' | 'form';
@@ -141,80 +102,36 @@ interface CmsReferenceAttributes extends Record<string, unknown> {
   alignment: CmsReferenceAlignment;
 }
 
-const EMBED_SOURCE_REGEX = /^(https?:)?\/\//i;
-const MEDIA_IFRAME_ATTRIBUTES = ['src', 'title', 'width', 'height', 'style', 'frameborder', 'allow', 'referrerpolicy', 'allowfullscreen'] as const;
+interface CmsCtaOption {
+  id: string;
+  code: string;
+  adminName: string;
+  displayText: string;
+  description?: string;
+  styleVariant?: string;
+  status?: string;
+}
 
-class CmsMediaEmbedPlugin extends Plugin {
-  static get requires() {
-    return [Widget] as const;
-  }
+interface CmsFormFieldOption {
+  id: string;
+  label: string;
+  fieldType: string;
+  placeholder?: string;
+  isRequired?: boolean;
+  position: number;
+}
 
-  init() {
-    const editor = this.editor;
-
-    editor.model.schema.register('cmsMediaEmbed', {
-      inheritAllFrom: '$blockObject',
-      allowAttributes: [...MEDIA_IFRAME_ATTRIBUTES],
-    });
-
-    editor.conversion.for('upcast').elementToElement({
-      view: {
-        name: 'iframe',
-        attributes: { src: EMBED_SOURCE_REGEX },
-      },
-      model: (viewElement, { writer }) => {
-        const attributes = Object.fromEntries(
-          MEDIA_IFRAME_ATTRIBUTES.flatMap((name) => {
-            const value = viewElement.getAttribute(name);
-            return value === undefined ? [] : [[name, value]];
-          }),
-        );
-        return writer.createElement('cmsMediaEmbed', attributes);
-      },
-      converterPriority: 'high',
-    });
-
-    editor.conversion.for('dataDowncast').elementToElement({
-      model: 'cmsMediaEmbed',
-      view: (modelElement, { writer }) => {
-        const attributes = Object.fromEntries(
-          MEDIA_IFRAME_ATTRIBUTES.flatMap((name) => {
-            const value = modelElement.getAttribute(name);
-            return value === undefined ? [] : [[name, String(value)]];
-          }),
-        );
-        return writer.createContainerElement('iframe', attributes);
-      },
-    });
-
-    editor.conversion.for('editingDowncast').elementToElement({
-      model: 'cmsMediaEmbed',
-      view: (modelElement, { writer }) => {
-        const src = String(modelElement.getAttribute('src') || '');
-        const title = String(modelElement.getAttribute('title') || 'Video player');
-        const style = String(modelElement.getAttribute('style') || '');
-        const width = String(modelElement.getAttribute('width') || '');
-        const height = String(modelElement.getAttribute('height') || '');
-        const allow = String(modelElement.getAttribute('allow') || 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
-        const wrapper = writer.createContainerElement('figure', { class: 'cms-rich-media-embed' });
-        const iframeAttrs: Record<string, string> = {
-          src,
-          title,
-          allow,
-          referrerpolicy: String(modelElement.getAttribute('referrerpolicy') || 'strict-origin-when-cross-origin'),
-          allowfullscreen: 'allowfullscreen',
-          frameborder: String(modelElement.getAttribute('frameborder') || '0'),
-          tabindex: '-1',
-        };
-        if (style) iframeAttrs.style = style;
-        if (width) iframeAttrs.width = width;
-        if (height) iframeAttrs.height = height;
-        const iframe = writer.createRawElement('iframe', iframeAttrs);
-        writer.insert(writer.createPositionAt(wrapper, 0), iframe);
-        return toWidget(wrapper, writer, { label: `Video: ${title}` });
-      },
-    });
-  }
+interface CmsFormOption {
+  id: string;
+  code: string;
+  adminName: string;
+  title: string;
+  description?: string;
+  status?: string;
+  fields?: CmsFormFieldOption[];
+  submitConfig?: {
+    submitButtonText?: string;
+  };
 }
 
 class CmsReferencePlugin extends Plugin {
@@ -240,9 +157,16 @@ class CmsReferencePlugin extends Plugin {
         const referenceId = viewElement.getAttribute(`data-${referenceType}-id`) || '';
         const label = viewElement.getAttribute('data-reference-label') || '';
         const description = viewElement.getAttribute('data-reference-description') || '';
-        const alignment = (viewElement.getAttribute('data-reference-alignment') || (referenceType === 'cta' ? 'center' : 'full')) as CmsReferenceAlignment;
+        const alignment = (viewElement.getAttribute('data-reference-alignment') ||
+          (referenceType === 'cta' ? 'center' : 'full')) as CmsReferenceAlignment;
 
-        return writer.createElement('cmsReference', { referenceType, referenceId, label, description, alignment });
+        return writer.createElement('cmsReference', {
+          referenceType,
+          referenceId,
+          label,
+          description,
+          alignment,
+        });
       },
       converterPriority: 'high',
     });
@@ -254,7 +178,9 @@ class CmsReferencePlugin extends Plugin {
         const referenceId = String(modelElement.getAttribute('referenceId') || '');
         const label = String(modelElement.getAttribute('label') || '');
         const description = String(modelElement.getAttribute('description') || '');
-        const alignment = String(modelElement.getAttribute('alignment') || (referenceType === 'cta' ? 'center' : 'full'));
+        const alignment = String(
+          modelElement.getAttribute('alignment') || (referenceType === 'cta' ? 'center' : 'full'),
+        );
         const container = writer.createContainerElement('div', {
           class: `cms-rich-reference cms-rich-${referenceType} cms-rich-align-${alignment}`,
           'data-cms-reference': referenceType,
@@ -264,7 +190,6 @@ class CmsReferencePlugin extends Plugin {
           'data-reference-alignment': alignment,
         });
         writer.insert(writer.createPositionAt(container, 0), writer.createText(label));
-
         return container;
       },
     });
@@ -276,7 +201,9 @@ class CmsReferencePlugin extends Plugin {
         const referenceId = String(modelElement.getAttribute('referenceId') || '');
         const label = String(modelElement.getAttribute('label') || '');
         const description = String(modelElement.getAttribute('description') || '');
-        const alignment = String(modelElement.getAttribute('alignment') || (referenceType === 'cta' ? 'center' : 'full'));
+        const alignment = String(
+          modelElement.getAttribute('alignment') || (referenceType === 'cta' ? 'center' : 'full'),
+        );
         const visibleText = description ? `${label} · ${description}` : label;
         const container = writer.createContainerElement('div', {
           class: `cms-rich-reference cms-rich-${referenceType} cms-rich-align-${alignment}`,
@@ -294,187 +221,414 @@ class CmsReferencePlugin extends Plugin {
   }
 }
 
-class CmsVideoToolbarPlugin extends Plugin {
-  init() {
-    const editor = this.editor;
-    editor.ui.componentFactory.add('insertCmsVideo', (locale) => {
-      const button = new ButtonView(locale);
-      button.set({
-        label: 'Chèn video (YouTube, Vimeo, iframe)',
-        icon: IconMedia,
-        tooltip: true,
-      });
-      button.on('execute', () => {
-        editor.fire('cms:openVideoModal');
-      });
-      return button;
-    });
-  }
-}
+export const RichTextEditor: React.FC<RichTextEditorProps> = ({
+  value,
+  onChange,
+  onBlur,
+  minHeight = '280px',
+  maxHeight = '560px',
+  placeholder = 'Nhập nội dung chi tiết tại đây…',
+  allowedEmbeds = [],
+  locale: propLocale,
+}) => {
+  const workspaceLocale = useCmsWorkspaceLocale();
+  const effectiveLocale: 'vi' | 'en' = propLocale ?? workspaceLocale ?? 'vi';
 
-const editorPlugins: PluginConstructor<Editor>[] = [
-  Essentials, Paragraph, Heading, Autoformat, Undo,
-  Bold, Italic, Underline, Strikethrough, RemoveFormat,
-  FontFamily, FontSize, FontColor, FontBackgroundColor,
-  Alignment, Indent, IndentBlock, BlockQuote,
-  List, ListProperties, Link, PasteFromOffice,
-  Image, ImageCaption, ImageStyle, ImageToolbar, ImageUpload, ImageInsert, ImageResize, LinkImage, AutoImage,
-  Table, TableToolbar, TableCaption, TableProperties, TableCellProperties, TableColumnResize,
-  MediaEmbed, SourceEditing, GeneralHtmlSupport, CmsReferencePlugin, CmsMediaEmbedPlugin, CmsVideoToolbarPlugin,
-];
-
-export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, onBlur, minHeight = '280px', allowedEmbeds = [] }) => {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<Editor | null>(null);
-  const lastDataRef = useRef<string>(value || '');
-  const [editorData, setEditorData] = useState<string>(value || '');
+  const localeRef = useRef<'vi' | 'en'>(effectiveLocale);
+  localeRef.current = effectiveLocale;
+
+  // Preserve initial HTML reference so <CKEditor> never resets cursor while user is typing
+  const initialHtmlRef = useRef<string>(value || '');
+  const lastEmittedHtmlRef = useRef<string>(value || '');
+  const [externalSyncState, setExternalSyncState] = useState<{ html: string; version: number }>(() => ({
+    html: value || '',
+    version: 0,
+  }));
+  const lastAppliedSyncVersionRef = useRef<number>(0);
+  const cleanupSourceListenerRef = useRef<(() => void) | null>(null);
+
+  const onChangeRef = useRef(onChange);
+  const onBlurRef = useRef(onBlur);
+  onChangeRef.current = onChange;
+  onBlurRef.current = onBlur;
+
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showMediaLibrary, setShowMediaLibrary] = useState(false);
+  const [showYoutubeModal, setShowYoutubeModal] = useState(false);
+
+  const openMediaRef = useRef(() => setShowMediaLibrary(true));
+  const openYoutubeRef = useRef(() => setShowYoutubeModal(true));
+
+  // CTA / Form reference picker states
+  const [activeCtas, setActiveCtas] = useState<CmsCtaOption[]>([]);
+  const [activeForms, setActiveForms] = useState<CmsFormOption[]>([]);
   const [selectedCtaId, setSelectedCtaId] = useState('');
   const [selectedFormId, setSelectedFormId] = useState('');
   const [referencePicker, setReferencePicker] = useState<CmsReferenceType | null>(null);
   const [referenceAlignment, setReferenceAlignment] = useState<CmsReferenceAlignment>('center');
 
-  // Video Embed states
-  const [videoModalOpen, setVideoModalOpen] = useState(false);
-  const [videoInputUrl, setVideoInputUrl] = useState('');
-  const [videoResizeType, setVideoResizeType] = useState<'responsive' | 'default' | '560x315' | '854x480' | '1280x720'>('responsive');
-  const [videoAlignment, setVideoAlignment] = useState<'none' | 'left' | 'center' | 'right'>('none');
-  const [videoError, setVideoError] = useState<string | null>(null);
+  const hasCtaEmbed = allowedEmbeds.includes('cta');
+  const hasFormEmbed = allowedEmbeds.includes('form');
 
-  const previewEmbedUrl = useMemo(() => {
-    if (!videoInputUrl.trim()) return '';
-    return toEmbedUrl(videoInputUrl);
-  }, [videoInputUrl]);
-
-  const handleInsertVideo = () => {
-    const editor = editorRef.current;
-    if (!editor) return;
-    const trimmed = videoInputUrl.trim();
-    if (!trimmed) {
-      setVideoError('Vui lòng nhập đường dẫn URL hoặc mã nhúng video.');
-      return;
-    }
-    const embedUrl = toEmbedUrl(trimmed);
-    if (!embedUrl) {
-      setVideoError('Không nhận diện được định dạng liên kết video hợp lệ.');
-      return;
-    }
-
-    const alignStyle =
-      videoAlignment === 'center'
-        ? 'display:flex;justify-content:center;margin:16px auto;text-align:center;'
-        : videoAlignment === 'right'
-          ? 'display:flex;justify-content:flex-end;margin:16px 0 16px auto;text-align:right;'
-          : videoAlignment === 'left'
-            ? 'display:flex;justify-content:flex-start;margin:16px auto 16px 0;text-align:left;'
-            : 'margin:16px 0;';
-
-    let videoHtml = '';
-    if (videoResizeType === 'responsive') {
-      videoHtml = `<div class="cms-video-wrapper" style="${alignStyle}"><div style="position:relative;width:100%;max-width:100%;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;"><iframe src="${embedUrl}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen"></iframe></div></div>`;
-    } else {
-      let width = '640';
-      let height = '360';
-      if (videoResizeType === '560x315') { width = '560'; height = '315'; }
-      else if (videoResizeType === '854x480') { width = '854'; height = '480'; }
-      else if (videoResizeType === '1280x720') { width = '1280'; height = '720'; }
-
-      videoHtml = `<div class="cms-video-wrapper" style="${alignStyle}"><iframe src="${embedUrl}" width="${width}" height="${height}" style="max-width:100%;border:0;border-radius:10px;" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen"></iframe></div>`;
-    }
-
-    try {
-      const viewFragment = editor.data.processor.toView(videoHtml);
-      const modelFragment = editor.data.toModel(viewFragment);
-      editor.model.insertContent(modelFragment);
-      const nextData = editor.getData();
-      lastDataRef.current = nextData;
-      onChange(nextData);
-      editor.editing.view.focus();
-    } catch (err) {
-      console.warn('Error inserting video embed:', err);
-    }
-
-    setVideoModalOpen(false);
-    setVideoInputUrl('');
-    setVideoResizeType('responsive');
-    setVideoAlignment('none');
-    setVideoError(null);
-  };
-
-  // Synchronize when the external value changes and differs from the last emitted editor data
+  // Lock body scroll & Escape handler when Fullscreen is active
   useEffect(() => {
-    if (value !== lastDataRef.current) {
-      lastDataRef.current = value || '';
-      setEditorData(value || '');
-      if (editorRef.current && editorRef.current.getData() !== (value || '')) {
-        try {
-          editorRef.current.setData(value || '');
-        } catch (err) {
-          console.warn('CKEditor external setData warning:', err);
-        }
+    if (!isFullscreen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !showMediaLibrary && !showYoutubeModal && !referencePicker) {
+        setIsFullscreen(false);
       }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isFullscreen, showMediaLibrary, showYoutubeModal, referencePicker]);
+
+  // Cleanup source listeners on unmount
+  useEffect(() => {
+    return () => {
+      cleanupSourceListenerRef.current?.();
+      cleanupSourceListenerRef.current = null;
+      editorRef.current = null;
+    };
+  }, []);
+
+  // Load real CTAs & Forms from database API when allowedEmbeds enables them
+  useEffect(() => {
+    if (!hasCtaEmbed && !hasFormEmbed) return;
+    let active = true;
+
+    if (hasCtaEmbed) {
+      fetch(`/api/cms/cta?workspace=${effectiveLocale}&status=active`, { credentials: 'same-origin' })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data: { ctas?: CmsCtaOption[] } | null) => {
+          if (active && Array.isArray(data?.ctas)) {
+            setActiveCtas(data.ctas);
+          }
+        })
+        .catch(() => undefined);
+    }
+
+    if (hasFormEmbed) {
+      fetch(`/api/cms/forms?workspace=${effectiveLocale}&status=active`, { credentials: 'same-origin' })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data: { forms?: CmsFormOption[] } | null) => {
+          if (active && Array.isArray(data?.forms)) {
+            setActiveForms(data.forms);
+          }
+        })
+        .catch(() => undefined);
+    }
+
+    return () => {
+      active = false;
+    };
+  }, [effectiveLocale, hasCtaEmbed, hasFormEmbed]);
+
+  // Only push external `value` updates into CKEditor when `value` changes from outside (record switch, reset, AI translation)
+  useEffect(() => {
+    const normalized = value || '';
+    if (normalized !== lastEmittedHtmlRef.current) {
+      lastEmittedHtmlRef.current = normalized;
+      setExternalSyncState((prev) => ({
+        html: normalized,
+        version: prev.version + 1,
+      }));
     }
   }, [value]);
 
-  const activeCtas = useMemo(
-    () => getDemoCtaModuleData('vi').ctas.filter((item) => item.status === 'active' && item.governance.allowedPlacements.includes('rich_text')),
-    [],
-  );
-  const activeForms = useMemo(
-    () => getDemoFormModuleData('vi').forms.filter((item) => item.status === 'active' && item.governance.allowedPlacements.includes('rich_text')),
-    [],
-  );
-  const previewCta = activeCtas.find((item) => item.id === selectedCtaId) || null;
-  const previewForm = activeForms.find((item) => item.id === selectedFormId) || null;
-  const alignmentLabel: Record<CmsReferenceAlignment, string> = { left: 'Trái', center: 'Giữa', right: 'Phải', full: 'Toàn chiều rộng' };
-  const previewAlignmentClass = referenceAlignment === 'left' ? 'mr-auto' : referenceAlignment === 'right' ? 'ml-auto' : referenceAlignment === 'center' ? 'mx-auto' : 'w-full';
+  useEffect(() => {
+    if (externalSyncState.version === lastAppliedSyncVersionRef.current) return;
+    lastAppliedSyncVersionRef.current = externalSyncState.version;
+    const editor = editorRef.current;
+    if (!editor) return;
 
-  const config = useMemo(() => ({
-    licenseKey: 'GPL',
-    plugins: editorPlugins,
-    extraPlugins: [UploadAdapterPlugin],
-    toolbar: {
-      shouldNotGroupWhenFull: true,
-      items: [
-        'sourceEditing', '|', 'undo', 'redo', '|',
-        'heading', 'fontFamily', 'fontSize', '|',
-        'bold', 'italic', 'underline', 'strikethrough', 'removeFormat', '|',
-        'fontColor', 'fontBackgroundColor', '|',
-        'alignment', 'bulletedList', 'numberedList', 'outdent', 'indent', '|',
-        'link', 'uploadImage', 'insertImage',
-        ...(allowedEmbeds.includes('video') ? ['insertCmsVideo'] : []),
-        'insertTable', 'blockQuote',
-      ],
+    const sourceEditing = editor.plugins.has('SourceEditing')
+      ? (editor.plugins.get('SourceEditing') as unknown as SourceEditingPluginLike)
+      : null;
+
+    if (sourceEditing?.isSourceEditingMode) {
+      const textarea = wrapperRef.current?.querySelector<HTMLTextAreaElement>(
+        '.ck-source-editing-area textarea',
+      );
+      if (textarea && textarea.value !== externalSyncState.html) {
+        textarea.value = externalSyncState.html;
+      }
+      sourceEditing.isSourceEditingMode = false;
+    }
+
+    if (editor.getData() !== externalSyncState.html) {
+      try {
+        editor.setData(externalSyncState.html);
+      } catch (err) {
+        console.warn('CKEditor external setData warning:', err);
+      }
+    }
+  }, [externalSyncState]);
+
+  const emitHtmlChange = useCallback((nextHtml: string) => {
+    lastEmittedHtmlRef.current = nextHtml;
+    onChangeRef.current(nextHtml);
+  }, []);
+
+  const insertHtmlSnippet = useCallback(
+    (htmlSnippet: string) => {
+      const editor = editorRef.current;
+      if (!editor) return;
+
+      const sourceEditing = editor.plugins.has('SourceEditing')
+        ? (editor.plugins.get('SourceEditing') as unknown as SourceEditingPluginLike)
+        : null;
+
+      if (sourceEditing?.isSourceEditingMode) {
+        const textarea = wrapperRef.current?.querySelector<HTMLTextAreaElement>(
+          '.ck-source-editing-area textarea',
+        );
+        if (textarea) {
+          const start = textarea.selectionStart ?? textarea.value.length;
+          const end = textarea.selectionEnd ?? textarea.value.length;
+          const nextVal =
+            textarea.value.slice(0, start) +
+            `\n${htmlSnippet}\n` +
+            textarea.value.slice(end);
+          textarea.value = nextVal;
+          textarea.focus();
+          emitHtmlChange(nextVal);
+          return;
+        }
+      }
+
+      const mediaEmbedMatch = htmlSnippet.match(
+        /^\s*<figure\b[^>]*class="media[^"]*"[^>]*>\s*<div\b[^>]*data-oembed-url="([^"]+)"[\s\S]*<\/figure>\s*$/i,
+      );
+      if (mediaEmbedMatch?.[1] && editor.commands.get('mediaEmbed')) {
+        try {
+          editor.execute('mediaEmbed', mediaEmbedMatch[1]);
+          editor.editing.view.focus();
+          emitHtmlChange(editor.getData());
+          return;
+        } catch {
+          // Fallback to direct view/model fragment insertion below
+        }
+      }
+
+      try {
+        const viewFragment = editor.data.processor.toView(htmlSnippet);
+        const modelFragment = editor.data.toModel(viewFragment);
+        editor.model.insertContent(modelFragment);
+        editor.editing.view.focus();
+        emitHtmlChange(editor.getData());
+      } catch {
+        const next = `${editor.getData()}\n${htmlSnippet}`;
+        editor.setData(next);
+        emitHtmlChange(next);
+      }
     },
-    heading: {
-      options: [
-        { model: 'paragraph' as const, title: 'Đoạn văn', class: 'ck-heading_paragraph' },
-        { model: 'heading1' as const, view: 'h1', title: 'Tiêu đề H1', class: 'ck-heading_heading1' },
-        { model: 'heading2' as const, view: 'h2', title: 'Tiêu đề H2', class: 'ck-heading_heading2' },
-        { model: 'heading3' as const, view: 'h3', title: 'Tiêu đề H3', class: 'ck-heading_heading3' },
-        { model: 'heading4' as const, view: 'h4', title: 'Tiêu đề H4', class: 'ck-heading_heading4' },
+    [emitHtmlChange],
+  );
+
+  const config: EditorConfig = useMemo(() => {
+    const UploadAdapterPlugin = createUploadAdapterPlugin(() => localeRef.current);
+
+    function CicToolbarExtrasPlugin(editor: Editor): void {
+      editor.ui.componentFactory.add('cicMediaLibrary', (locale) => {
+        const button = new ButtonView(locale) as unknown as {
+          set: (props: Record<string, unknown>) => void;
+          on: (evt: string, cb: () => void) => void;
+        };
+        button.set({
+          label: 'Chọn ảnh từ Thư viện Media',
+          icon: MEDIA_VIDEO_LIBRARY_ICON,
+          tooltip: true,
+        });
+        button.on('execute', () => {
+          openMediaRef.current();
+        });
+        return button as unknown as ButtonView;
+      });
+
+      editor.ui.componentFactory.add('cicYoutubeEmbed', (locale) => {
+        const button = new ButtonView(locale) as unknown as {
+          set: (props: Record<string, unknown>) => void;
+          on: (evt: string, cb: () => void) => void;
+        };
+        button.set({
+          label: 'Nhúng Video YouTube / Vimeo (16:9)',
+          icon: YOUTUBE_EMBED_ICON,
+          tooltip: true,
+        });
+        button.on('execute', () => {
+          openYoutubeRef.current();
+        });
+        return button as unknown as ButtonView;
+      });
+    }
+
+    return {
+      licenseKey: 'GPL',
+      extraPlugins: [UploadAdapterPlugin, CicToolbarExtrasPlugin],
+      plugins: [
+        Essentials,
+        Paragraph,
+        Heading,
+        Autoformat,
+        Undo,
+        Bold,
+        Italic,
+        Underline,
+        Strikethrough,
+        Code,
+        RemoveFormat,
+        FontFamily,
+        FontSize,
+        FontColor,
+        FontBackgroundColor,
+        Alignment,
+        Indent,
+        IndentBlock,
+        BlockQuote,
+        HorizontalLine,
+        List,
+        ListProperties,
+        Link,
+        PasteFromOffice,
+        Image,
+        ImageCaption,
+        ImageStyle,
+        ImageToolbar,
+        ImageUpload,
+        ImageInsert,
+        ImageResize,
+        LinkImage,
+        AutoImage,
+        Table,
+        TableToolbar,
+        TableCaption,
+        TableProperties,
+        TableCellProperties,
+        TableColumnResize,
+        MediaEmbed,
+        AutoMediaEmbed,
+        FindAndReplace,
+        SourceEditing,
+        GeneralHtmlSupport,
+        CmsReferencePlugin,
       ],
-    },
-    fontFamily: { supportAllValues: true },
-    fontSize: { options: [10, 12, 14, 'default' as const, 18, 24, 32, 40], supportAllValues: true },
-    image: {
-      upload: { types: ['jpeg', 'png', 'gif', 'webp'] },
-      toolbar: ['imageTextAlternative', 'toggleImageCaption', '|', 'imageStyle:inline', 'imageStyle:block', 'imageStyle:side', '|', 'resizeImage'],
-      resizeOptions: [
-        { name: 'resizeImage:original', value: null, label: 'Kích thước gốc' },
-        { name: 'resizeImage:50', value: '50', label: '50%' },
-        { name: 'resizeImage:75', value: '75', label: '75%' },
-      ],
-    },
-    table: { contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', '|', 'toggleTableCaption', 'tableProperties', 'tableCellProperties'] },
-    link: { addTargetToExternalLinks: true, defaultProtocol: 'https://' },
-    htmlSupport: {
-      allow: [
-        { name: /.*/, attributes: /.*/, classes: /.*/, styles: /.*/ },
-      ],
-    },
-    placeholder: 'Nhập nội dung tại đây…',
-  }), [allowedEmbeds]);
+      toolbar: {
+        shouldNotGroupWhenFull: true,
+        items: [
+          'sourceEditing',
+          '|',
+          'undo',
+          'redo',
+          '|',
+          'heading',
+          'fontFamily',
+          'fontSize',
+          '|',
+          'fontColor',
+          'fontBackgroundColor',
+          '|',
+          'bold',
+          'italic',
+          'underline',
+          'strikethrough',
+          'code',
+          'removeFormat',
+          '|',
+          'alignment',
+          'bulletedList',
+          'numberedList',
+          'outdent',
+          'indent',
+          '|',
+          'link',
+          'uploadImage',
+          'cicMediaLibrary',
+          'cicYoutubeEmbed',
+          'insertTable',
+          'blockQuote',
+          'horizontalLine',
+          '|',
+          'findAndReplace',
+        ],
+      },
+      heading: {
+        options: [
+          { model: 'paragraph', title: 'Đoạn văn (Paragraph)', class: 'ck-heading_paragraph' },
+          { model: 'heading1', view: 'h1', title: 'Tiêu đề H1', class: 'ck-heading_heading1' },
+          { model: 'heading2', view: 'h2', title: 'Tiêu đề chính H2', class: 'ck-heading_heading2' },
+          { model: 'heading3', view: 'h3', title: 'Tiêu đề mục H3', class: 'ck-heading_heading3' },
+          { model: 'heading4', view: 'h4', title: 'Tiêu đề phụ H4', class: 'ck-heading_heading4' },
+        ],
+      },
+      fontFamily: { supportAllValues: true },
+      fontSize: {
+        options: [12, 14, 'default', 18, 22, 28, 32, 40],
+        supportAllValues: true,
+      },
+      fontColor: {
+        colors: [
+          { color: 'rgb(15, 23, 42)', label: 'Đen Slate chuẩn CIC' },
+          { color: 'rgb(234, 88, 12)', label: 'Cam thương hiệu CIC' },
+          { color: 'rgb(71, 85, 105)', label: 'Xám kỹ thuật' },
+          { color: 'rgb(2, 132, 199)', label: 'Xanh dương công nghệ' },
+          { color: 'rgb(4, 120, 87)', label: 'Xanh lục đạt chuẩn' },
+          { color: 'rgb(180, 83, 9)', label: 'Vàng cảnh báo' },
+          { color: 'rgb(220, 38, 38)', label: 'Đỏ nhấn mạnh' },
+        ],
+      },
+      fontBackgroundColor: {
+        colors: [
+          { color: 'rgb(255, 247, 237)', label: 'Nền Cam nhạt CIC' },
+          { color: 'rgb(248, 250, 252)', label: 'Nền Xám sáng' },
+          { color: 'rgb(240, 249, 255)', label: 'Nền Xanh dương nhạt' },
+          { color: 'rgb(236, 253, 245)', label: 'Nền Xanh lục nhạt' },
+          { color: 'rgb(255, 251, 235)', label: 'Nền Vàng nhạt' },
+        ],
+      },
+      mediaEmbed: {
+        previewsInData: true,
+      },
+      image: {
+        upload: { types: ['jpeg', 'png', 'gif', 'webp'] },
+        toolbar: [
+          'imageTextAlternative',
+          'toggleImageCaption',
+          '|',
+          'imageStyle:inline',
+          'imageStyle:block',
+          'imageStyle:side',
+          '|',
+          'resizeImage',
+        ],
+        resizeOptions: [
+          { name: 'resizeImage:original', value: null, label: 'Kích thước gốc (100%)' },
+          { name: 'resizeImage:75', value: '75', label: '75% khung' },
+          { name: 'resizeImage:50', value: '50', label: '50% khung' },
+        ],
+      },
+      table: {
+        contentToolbar: [
+          'tableColumn',
+          'tableRow',
+          'mergeTableCells',
+          '|',
+          'toggleTableCaption',
+          'tableProperties',
+          'tableCellProperties',
+        ],
+      },
+      link: { addTargetToExternalLinks: true, defaultProtocol: 'https://' },
+      htmlSupport: CIC_CKEDITOR_HTML_SUPPORT,
+      placeholder,
+    };
+  }, [placeholder]);
 
   const insertReference = (attributes: CmsReferenceAttributes) => {
     const editor = editorRef.current;
@@ -484,322 +638,471 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
         const reference = writer.createElement('cmsReference', attributes);
         editor.model.insertObject(reference, null, null, { setSelection: 'after' });
       });
-      const nextData = editor.getData();
-      lastDataRef.current = nextData;
-      onChange(nextData);
+      emitHtmlChange(editor.getData());
       editor.editing.view.focus();
     } catch (err) {
       console.warn('Error inserting reference widget:', err);
     }
   };
 
+  const previewCta = activeCtas.find((item) => String(item.id) === selectedCtaId) || null;
+  const previewForm = activeForms.find((item) => String(item.id) === selectedFormId) || null;
+  const alignmentLabel: Record<CmsReferenceAlignment, string> = {
+    left: 'Trái',
+    center: 'Giữa',
+    right: 'Phải',
+    full: 'Toàn chiều rộng',
+  };
+  const previewAlignmentClass =
+    referenceAlignment === 'left'
+      ? 'mr-auto'
+      : referenceAlignment === 'right'
+        ? 'ml-auto'
+        : referenceAlignment === 'center'
+          ? 'mx-auto'
+          : 'w-full';
+
   const insertCta = () => {
-    const cta = activeCtas.find((item) => item.id === selectedCtaId);
-    if (!cta) return;
+    if (!previewCta) return;
     insertReference({
       referenceType: 'cta',
-      referenceId: cta.id,
-      label: cta.displayText,
-      description: cta.adminName,
+      referenceId: String(previewCta.code || previewCta.id),
+      label: previewCta.displayText,
+      description: previewCta.adminName,
       alignment: referenceAlignment,
     });
     setSelectedCtaId('');
     setReferencePicker(null);
   };
 
-  const insertForm = (formId = selectedFormId) => {
-    const form = activeForms.find((item) => item.id === formId);
-    if (!form) return;
+  const insertForm = () => {
+    if (!previewForm) return;
     insertReference({
       referenceType: 'form',
-      referenceId: form.id,
-      label: form.title,
-      description: form.adminName,
+      referenceId: String(previewForm.code || previewForm.id),
+      label: previewForm.title,
+      description: previewForm.adminName,
       alignment: referenceAlignment,
     });
     setSelectedFormId('');
     setReferencePicker(null);
   };
 
-  if (!mounted) {
-    return (
-      <div className="cms-ckeditor flex items-center justify-center rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900" style={{ minHeight }}>
-        <p className="text-xs font-medium text-slate-400 animate-pulse">Đang nạp trình soạn thảo…</p>
+  const stats = useMemo(() => {
+    const plain = (value || '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const words = plain ? plain.split(/\s+/).length : 0;
+    const chars = plain.length;
+    const readMinutes = Math.max(1, Math.ceil(words / 200));
+    return { words, chars, readMinutes };
+  }, [value]);
+
+  const effectiveMinHeight = isFullscreen ? 'calc(100dvh - 190px)' : minHeight;
+  const effectiveMaxHeight = isFullscreen ? 'calc(100dvh - 190px)' : maxHeight;
+
+  const containerClass = isFullscreen
+    ? 'cms-ckeditor fixed inset-3 z-[9000] flex flex-col overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900'
+    : 'cms-ckeditor overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition focus-within:border-orange-400 focus-within:ring-4 focus-within:ring-orange-500/10 dark:border-slate-700 dark:bg-slate-900';
+
+  const editorElement = (
+    <div
+      ref={wrapperRef}
+      className={containerClass}
+      style={
+        {
+          '--cms-editor-min-height': effectiveMinHeight,
+          '--cms-editor-max-height': effectiveMaxHeight,
+        } as React.CSSProperties
+      }
+    >
+      <div className="min-h-0 flex-1">
+        <CKEditor
+          editor={ClassicEditor}
+          config={config}
+          data={initialHtmlRef.current}
+          onReady={(editor) => {
+            editorRef.current = editor;
+
+            const sourceEditing = editor.plugins.has('SourceEditing')
+              ? (editor.plugins.get('SourceEditing') as unknown as SourceEditingPluginLike)
+              : null;
+
+            if (sourceEditing) {
+              let timer: ReturnType<typeof setTimeout> | null = null;
+              sourceEditing.on('change:isSourceEditingMode', (_evt, _name, isSourceMode) => {
+                cleanupSourceListenerRef.current?.();
+                cleanupSourceListenerRef.current = null;
+                if (timer) {
+                  clearTimeout(timer);
+                  timer = null;
+                }
+
+                if (isSourceMode) {
+                  requestAnimationFrame(() => {
+                    const textarea = wrapperRef.current?.querySelector<HTMLTextAreaElement>(
+                      '.ck-source-editing-area textarea',
+                    );
+                    if (!textarea) return;
+                    const onSourceInput = () => {
+                      if (timer) clearTimeout(timer);
+                      timer = setTimeout(() => {
+                        emitHtmlChange(textarea.value);
+                      }, 120);
+                    };
+                    const onSourceBlur = () => {
+                      if (timer) {
+                        clearTimeout(timer);
+                        timer = null;
+                      }
+                      emitHtmlChange(textarea.value);
+                      onBlurRef.current?.(textarea.value);
+                    };
+                    textarea.addEventListener('input', onSourceInput);
+                    textarea.addEventListener('blur', onSourceBlur);
+                    cleanupSourceListenerRef.current = () => {
+                      if (timer) clearTimeout(timer);
+                      textarea.removeEventListener('input', onSourceInput);
+                      textarea.removeEventListener('blur', onSourceBlur);
+                    };
+                  });
+                } else {
+                  const currentRaw = editor.getData();
+                  const upgraded = upgradeBareVideoIframesToMediaFigures(currentRaw);
+                  if (upgraded !== currentRaw) {
+                    editor.setData(upgraded);
+                    emitHtmlChange(upgraded);
+                  } else {
+                    emitHtmlChange(currentRaw);
+                  }
+                }
+              });
+            }
+          }}
+          onChange={(_, editor) => {
+            try {
+              emitHtmlChange(editor.getData());
+            } catch (err) {
+              console.warn('CKEditor getData warning:', err);
+            }
+          }}
+          onBlur={(_, editor) => onBlurRef.current?.(editor.getData())}
+          onError={(error, details) => {
+            console.warn('CKEditor runtime error captured:', error, details);
+          }}
+          onAfterDestroy={() => {
+            cleanupSourceListenerRef.current?.();
+            cleanupSourceListenerRef.current = null;
+            editorRef.current = null;
+          }}
+        />
       </div>
-    );
-  }
 
-  return (
-    <div className="cms-ckeditor overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition focus-within:border-orange-400 focus-within:ring-4 focus-within:ring-orange-500/10 dark:border-slate-700 dark:bg-slate-900" style={{ '--cms-editor-min-height': minHeight } as React.CSSProperties}>
-      <CKEditor
-        editor={ClassicEditor}
-        config={config}
-        data={editorData}
-        onReady={(editor) => {
-          editorRef.current = editor;
-          editor.on('cms:openVideoModal', () => {
-            setVideoModalOpen(true);
-            setVideoError(null);
-          });
-          const root = editor.editing.view.document.getRoot();
-          if (root) {
-            editor.editing.view.change((writer) => {
-              writer.setStyle('min-height', minHeight, root);
-              writer.setStyle('height', minHeight, root);
-              writer.setStyle('max-height', minHeight, root);
-              writer.setStyle('overflow-y', 'auto', root);
-            });
-          }
-        }}
-        onChange={(_, editor) => {
-          try {
-            const data = editor.getData();
-            lastDataRef.current = data;
-            onChange(data);
-          } catch (err) {
-            console.warn('CKEditor getData warning:', err);
-          }
-        }}
-        onBlur={(_, editor) => onBlur?.(editor.getData())}
-        onError={(error, details) => {
-          console.warn('CKEditor runtime error captured:', error, details);
-        }}
-        onAfterDestroy={() => {
-          editorRef.current = null;
-        }}
-      />
-
-      {(allowedEmbeds.includes('cta') || allowedEmbeds.includes('form')) && (
-        <div className="flex flex-wrap gap-2 border-t border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">
-          {allowedEmbeds.includes('cta') && (
-            <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedCtaId((current) => current || activeCtas[0]?.id || '');
-                  setReferenceAlignment('center');
-                  setReferencePicker('cta');
-                }}
-                className="flex items-center justify-center gap-1.5 rounded-xl bg-orange-600 px-3 py-2 text-xs font-bold text-white hover:bg-orange-700 transition"
-              >
-                <Megaphone className="h-4 w-4" />
-                Chèn CTA
-              </button>
-            </div>
+      {(hasCtaEmbed || hasFormEmbed) && (
+        <div className="flex flex-wrap gap-2 border-t border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/60">
+          {hasCtaEmbed && (
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedCtaId((current) => current || String(activeCtas[0]?.id ?? ''));
+                setReferenceAlignment('center');
+                setReferencePicker('cta');
+              }}
+              className="flex items-center justify-center gap-1.5 rounded-xl bg-orange-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-orange-700 cursor-pointer"
+            >
+              <Megaphone className="h-3.5 w-3.5" />
+              Chèn CTA
+            </button>
           )}
-          {allowedEmbeds.includes('form') && (
-            <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedFormId((current) => current || activeForms[0]?.id || '');
-                  setReferenceAlignment('full');
-                  setReferencePicker('form');
-                }}
-                className="flex items-center justify-center gap-1.5 rounded-xl bg-slate-800 px-3 py-2 text-xs font-bold text-white hover:bg-slate-900 dark:bg-slate-600 dark:hover:bg-slate-500 transition"
-              >
-                <FileInput className="h-4 w-4" />
-                Chèn Form
-              </button>
-            </div>
+          {hasFormEmbed && (
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedFormId((current) => current || String(activeForms[0]?.id ?? ''));
+                setReferenceAlignment('full');
+                setReferencePicker('form');
+              }}
+              className="flex items-center justify-center gap-1.5 rounded-xl bg-slate-800 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-slate-900 dark:bg-slate-600 dark:hover:bg-slate-500 cursor-pointer"
+            >
+              <FileInput className="h-3.5 w-3.5" />
+              Chèn Biểu mẫu
+            </button>
           )}
         </div>
       )}
 
-      {/* Modal Chèn Video / Đa phương tiện theo chuẩn tiếng Việt */}
-      {videoModalOpen && typeof document !== 'undefined' && createPortal(
-        <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="video-embed-title"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setVideoModalOpen(false);
-          }}
-        >
-          <div className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800 animate-in fade-in-0 zoom-in-95 duration-150">
-            {/* Header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                  <Video className="h-5 w-5" />
-                </div>
+      {/* Status & Fullscreen Bar (robot-web pattern) */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-slate-50/80 px-3.5 py-1.5 text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-400">
+        <div className="flex items-center gap-2.5">
+          <span>
+            <strong className="text-slate-800 dark:text-slate-200">{stats.words}</strong> từ
+          </span>
+          <span>•</span>
+          <span>
+            <strong className="text-slate-800 dark:text-slate-200">{stats.chars}</strong> ký tự
+          </span>
+          <span>•</span>
+          <span>~{stats.readMinutes} phút đọc</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="hidden text-slate-400 sm:inline">
+            Hỗ trợ Kho Media · Video 16:9 · Nút <strong className="text-slate-700 dark:text-slate-300">Source</strong> sửa trực tiếp HTML
+          </span>
+          <button
+            type="button"
+            onClick={() => setIsFullscreen((prev) => !prev)}
+            className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer"
+            title={isFullscreen ? 'Thu nhỏ khung soạn thảo' : 'Mở rộng toàn màn hình'}
+          >
+            {isFullscreen ? (
+              <>
+                <Minimize2 className="h-3.5 w-3.5" />
+                <span>Thu nhỏ</span>
+              </>
+            ) : (
+              <>
+                <Maximize2 className="h-3.5 w-3.5" />
+                <span>Toàn màn hình</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {showMediaLibrary &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <PageMediaPickerModal
+            locale={effectiveLocale}
+            currentId=""
+            returnValue="url"
+            onClose={() => setShowMediaLibrary(false)}
+            onConfirm={(mediaUrl) => {
+              if (mediaUrl) {
+                insertHtmlSnippet(
+                  `<figure class="image"><img src="${mediaUrl}" alt="Hình ảnh minh họa CIC" loading="lazy" decoding="async" /></figure>`,
+                );
+              }
+              setShowMediaLibrary(false);
+            }}
+          />,
+          document.body,
+        )}
+
+      <RichTextYoutubeModal
+        open={showYoutubeModal}
+        onClose={() => setShowYoutubeModal(false)}
+        onInsertHtml={insertHtmlSnippet}
+      />
+
+      {referencePicker &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reference-preview-title"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setReferencePicker(null);
+            }}
+          >
+            <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+              <div className="sticky top-0 z-10 flex items-start justify-between border-b border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
                 <div>
-                  <h3 id="video-embed-title" className="text-base font-bold text-slate-900 dark:text-white">
-                    Chèn Video / Đa phương tiện
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-orange-600">
+                    Chọn từ Cơ sở dữ liệu &amp; xem trước
+                  </p>
+                  <h3 id="reference-preview-title" className="mt-1 text-lg font-bold dark:text-white">
+                    {referencePicker === 'cta' ? 'Chèn nút CTA' : 'Chèn Biểu mẫu'}
                   </h3>
-                  <p className="text-[11px] text-slate-500">Embed Media Content (Photo, Video, Audio or Rich Content)</p>
                 </div>
-              </div>
-              <button
-                type="button"
-                aria-label="Đóng"
-                onClick={() => setVideoModalOpen(false)}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* Body */}
-            <div className="space-y-4 p-5">
-              {/* Instructions */}
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
-                Dán đường dẫn (hỗ trợ cả link rút gọn) từ bất kỳ nguồn nào như <strong className="text-slate-700 dark:text-slate-200">YouTube, Vimeo, TikTok, Bilibili, Facebook, Google Drive...</strong> hoặc dán trực tiếp toàn bộ thẻ <strong className="text-slate-700 dark:text-slate-200">&lt;iframe&gt;</strong>.
-              </p>
-
-              {/* URL Input */}
-              <div>
-                <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-200">
-                  URL <span className="font-normal text-slate-400">(Đường dẫn video hoặc mã nhúng):</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={videoInputUrl}
-                    onChange={(e) => {
-                      setVideoInputUrl(e.target.value);
-                      if (videoError) setVideoError(null);
-                    }}
-                    placeholder="VD: https://www.youtube.com/watch?v=... hoặc <iframe src=...>"
-                    className={`w-full rounded-xl border px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 dark:bg-slate-800 dark:text-white ${
-                      videoError
-                        ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20'
-                        : 'border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20 dark:border-slate-700'
-                    }`}
-                    autoFocus
-                  />
-                  {videoInputUrl && (
-                    <button
-                      type="button"
-                      onClick={() => setVideoInputUrl('')}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-                {videoError && <p className="mt-1 text-xs text-red-500">{videoError}</p>}
-              </div>
-
-              {/* Resize Type */}
-              <div>
-                <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-200">
-                  Kích thước <span className="font-normal text-slate-400">(Resize Type - chỉ áp dụng video):</span>
-                </label>
-                <select
-                  value={videoResizeType}
-                  onChange={(e) => setVideoResizeType(e.target.value as any)}
-                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                <button
+                  type="button"
+                  aria-label="Đóng"
+                  onClick={() => setReferencePicker(null)}
+                  className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
-                  <option value="responsive">Tự động co giãn (Responsive 16:9 - Khuyên dùng)</option>
-                  <option value="default">Mặc định (Không đổi kích thước)</option>
-                  <option value="560x315">Kích thước chuẩn (560 x 315 px)</option>
-                  <option value="854x480">Kích thước lớn (854 x 480 px)</option>
-                  <option value="1280x720">Kích thước Full HD (1280 x 720 px)</option>
-                </select>
+                  <X className="h-5 w-5" />
+                </button>
               </div>
-
-              {/* Alignment */}
-              <div>
-                <label className="mb-2 block text-xs font-bold text-slate-700 dark:text-slate-200">
-                  Căn chỉnh <span className="font-normal text-slate-400">(Alignment):</span>
-                </label>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {[
-                    { id: 'none', label: 'Không căn (None)' },
-                    { id: 'left', label: 'Trái (Left)' },
-                    { id: 'center', label: 'Giữa (Center)' },
-                    { id: 'right', label: 'Phải (Right)' },
-                  ].map((align) => (
-                    <label
-                      key={align.id}
-                      className={`flex cursor-pointer items-center gap-2 rounded-xl border p-2.5 text-xs font-semibold transition ${
-                        videoAlignment === align.id
-                          ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-500'
-                          : 'border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:text-slate-300'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="video-alignment"
-                        value={align.id}
-                        checked={videoAlignment === align.id}
-                        onChange={() => setVideoAlignment(align.id as any)}
-                        className="text-emerald-600 focus:ring-emerald-500"
-                      />
-                      <span>{align.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Live Preview */}
-              <div>
-                <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-200">
-                  Xem trước:
-                </label>
-                {previewEmbedUrl ? (
-                  <div className="overflow-hidden rounded-xl border border-slate-200 bg-black dark:border-slate-800 aspect-video max-h-52 w-full">
-                    <iframe
-                      src={previewEmbedUrl}
-                      title="Xem trước video"
-                      className="h-full w-full border-0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
+              <div className="space-y-5 p-5">
+                {referencePicker === 'cta' ? (
+                  <select
+                    aria-label="Chọn CTA để xem trước"
+                    value={selectedCtaId}
+                    onChange={(event) => setSelectedCtaId(event.target.value)}
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-slate-600 dark:bg-slate-900"
+                  >
+                    <option value="">Chọn CTA đang hoạt động</option>
+                    {activeCtas.map((cta) => (
+                      <option key={cta.id} value={String(cta.id)}>
+                        {cta.adminName} · {cta.displayText}
+                      </option>
+                    ))}
+                  </select>
                 ) : (
-                  <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 py-7 text-center text-xs text-slate-400 dark:border-slate-700 dark:bg-slate-800/40">
-                    <Play className="mb-2 h-7 w-7 text-slate-300 dark:text-slate-600" />
-                    <span>Dán đường dẫn video vào ô trên để xem trước tại đây</span>
+                  <select
+                    aria-label="Chọn biểu mẫu để xem trước"
+                    value={selectedFormId}
+                    onChange={(event) => setSelectedFormId(event.target.value)}
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-slate-600 dark:bg-slate-900"
+                  >
+                    <option value="">Chọn biểu mẫu đang hoạt động</option>
+                    {activeForms.map((form) => (
+                      <option key={form.id} value={String(form.id)}>
+                        {form.adminName} · {form.title}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                <div>
+                  <p className="mb-2 text-xs font-bold text-slate-700 dark:text-slate-200">Căn chỉnh hiển thị</p>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    {(['left', 'center', 'right', 'full'] as CmsReferenceAlignment[]).map((alignment) => (
+                      <button
+                        key={alignment}
+                        type="button"
+                        onClick={() => setReferenceAlignment(alignment)}
+                        className={`rounded-lg border px-3 py-2 text-xs font-semibold transition ${
+                          referenceAlignment === alignment
+                            ? 'border-orange-600 bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:text-orange-300'
+                            : 'border-slate-300 text-slate-600 hover:border-slate-400 dark:border-slate-700 dark:text-slate-300'
+                        }`}
+                      >
+                        {alignmentLabel[alignment]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {referencePicker === 'cta' && previewCta && (
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 dark:border-slate-700 dark:bg-slate-800">
+                    <div className={`${previewAlignmentClass} ${referenceAlignment === 'full' ? '' : 'w-fit'} text-center`}>
+                      <p className="mb-4 text-xs font-bold text-slate-500">{previewCta.adminName}</p>
+                      <button
+                        type="button"
+                        className={`inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold ${
+                          referenceAlignment === 'full' ? 'w-full' : ''
+                        } ${
+                          previewCta.styleVariant === 'outline'
+                            ? 'border border-orange-600 text-orange-600'
+                            : previewCta.styleVariant === 'secondary'
+                              ? 'bg-slate-800 text-white'
+                              : 'bg-orange-600 text-white'
+                        }`}
+                      >
+                        <Megaphone className="h-4 w-4" />
+                        {previewCta.displayText}
+                      </button>
+                      {previewCta.description && (
+                        <p className="mt-4 text-xs text-slate-500">{previewCta.description}</p>
+                      )}
+                    </div>
                   </div>
                 )}
+
+                {referencePicker === 'form' && previewForm && (
+                  <div
+                    className={`${previewAlignmentClass} ${
+                      referenceAlignment === 'full' ? '' : 'max-w-md'
+                    } space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-800`}
+                  >
+                    <div>
+                      <h4 className="font-bold dark:text-white">{previewForm.title}</h4>
+                      {previewForm.description && (
+                        <p className="mt-1 text-xs text-slate-500">{previewForm.description}</p>
+                      )}
+                    </div>
+                    {[...(previewForm.fields ?? [])]
+                      .filter((field) => field.fieldType !== 'hidden')
+                      .sort((a, b) => a.position - b.position)
+                      .map((field) => (
+                        <div key={field.id}>
+                          <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-200">
+                            {field.label}
+                            {field.isRequired && <span className="ml-1 text-red-500">*</span>}
+                          </label>
+                          {field.fieldType === 'textarea' ? (
+                            <textarea
+                              disabled
+                              rows={3}
+                              placeholder={field.placeholder}
+                              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900"
+                            />
+                          ) : (
+                            <input
+                              disabled
+                              type="text"
+                              placeholder={field.placeholder}
+                              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900"
+                            />
+                          )}
+                        </div>
+                      ))}
+                    <button
+                      type="button"
+                      disabled
+                      className="w-full rounded-xl bg-orange-600 px-4 py-3 text-xs font-bold text-white"
+                    >
+                      {previewForm.submitConfig?.submitButtonText || 'Gửi thông tin'}
+                    </button>
+                  </div>
+                )}
+
+                {((referencePicker === 'cta' && !previewCta) || (referencePicker === 'form' && !previewForm)) && (
+                  <p className="rounded-xl bg-slate-100 p-6 text-center text-sm text-slate-500 dark:bg-slate-800">
+                    Chưa có mục khả dụng để xem trước.
+                  </p>
+                )}
+              </div>
+              <div className="flex justify-end gap-2 border-t border-slate-200 p-4 dark:border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => setReferencePicker(null)}
+                  className="rounded-xl border border-slate-300 px-4 py-2 text-xs font-bold dark:border-slate-600"
+                >
+                  Đóng
+                </button>
+                <button
+                  type="button"
+                  disabled={referencePicker === 'cta' ? !previewCta : !previewForm}
+                  onClick={() => (referencePicker === 'cta' ? insertCta() : insertForm())}
+                  className="rounded-xl bg-orange-600 px-4 py-2 text-xs font-bold text-white disabled:opacity-40"
+                >
+                  {referencePicker === 'cta' ? 'Chèn CTA này' : 'Chèn biểu mẫu này'}
+                </button>
               </div>
             </div>
-
-            {/* Footer Buttons */}
-            <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-slate-50 px-5 py-3.5 dark:border-slate-800 dark:bg-slate-900/60">
-              <button
-                type="button"
-                onClick={() => setVideoModalOpen(false)}
-                className="rounded-xl border border-slate-300 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-              >
-                Hủy bỏ (Cancel)
-              </button>
-              <button
-                type="button"
-                disabled={!videoInputUrl.trim()}
-                onClick={handleInsertVideo}
-                className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-5 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition disabled:opacity-40"
-              >
-                <Check className="h-4 w-4" />
-                Xác nhận chèn (OK)
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body,
-      )}
-
-      {referencePicker && typeof document !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/60 p-4" role="dialog" aria-modal="true" aria-labelledby="reference-preview-title" onMouseDown={(event) => { if (event.target === event.currentTarget) setReferencePicker(null); }}>
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl dark:bg-slate-900">
-            <div className="sticky top-0 z-10 flex items-start justify-between border-b border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900"><div><p className="text-[10px] font-bold uppercase tracking-wider text-orange-600">Chọn và xem trước</p><h3 id="reference-preview-title" className="mt-1 text-lg font-bold dark:text-white">{referencePicker === 'cta' ? 'CTA' : 'Biểu mẫu'}</h3></div><button type="button" aria-label="Đóng" onClick={() => setReferencePicker(null)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"><X className="h-5 w-5" /></button></div>
-            <div className="space-y-5 p-5">
-              {referencePicker === 'cta' ? <select aria-label="Chọn CTA để xem trước" value={selectedCtaId} onChange={(event) => setSelectedCtaId(event.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-slate-600 dark:bg-slate-900"><option value="">Chọn CTA từ module CTA</option>{activeCtas.map((cta) => <option key={cta.id} value={cta.id}>{cta.adminName} · {cta.displayText}</option>)}</select> : <select aria-label="Chọn biểu mẫu để xem trước" value={selectedFormId} onChange={(event) => setSelectedFormId(event.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-slate-600 dark:bg-slate-900"><option value="">Chọn biểu mẫu từ module Biểu mẫu</option>{activeForms.map((form) => <option key={form.id} value={form.id}>{form.adminName} · {form.title}</option>)}</select>}
-              <div><p className="mb-2 text-xs font-bold text-slate-700 dark:text-slate-200">Căn chỉnh hiển thị</p><div className="grid grid-cols-2 gap-2 sm:grid-cols-4">{(['left', 'center', 'right', 'full'] as CmsReferenceAlignment[]).map((alignment) => <button key={alignment} type="button" onClick={() => setReferenceAlignment(alignment)} className={`rounded-lg border px-3 py-2 text-xs font-semibold transition ${referenceAlignment === alignment ? 'border-orange-600 bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:text-orange-300' : 'border-slate-300 text-slate-600 hover:border-slate-400 dark:border-slate-700 dark:text-slate-300'}`}>{alignmentLabel[alignment]}</button>)}</div><p className="mt-2 text-[11px] text-slate-500">CTA mặc định căn giữa; biểu mẫu mặc định chiếm toàn bộ chiều rộng vùng nội dung.</p></div>
-              {referencePicker === 'cta' && previewCta && <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 dark:border-slate-700 dark:bg-slate-800"><div className={`${previewAlignmentClass} ${referenceAlignment === 'full' ? '' : 'w-fit'} text-center`}><p className="mb-4 text-xs font-bold text-slate-500">{previewCta.adminName}</p><button type="button" className={`inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold ${referenceAlignment === 'full' ? 'w-full' : ''} ${previewCta.styleVariant === 'outline' ? 'border border-orange-600 text-orange-600' : previewCta.styleVariant === 'secondary' ? 'bg-slate-800 text-white' : previewCta.styleVariant === 'gradient' ? 'bg-gradient-to-r from-orange-600 to-amber-500 text-white' : 'bg-orange-600 text-white'}`}><Megaphone className="h-4 w-4" />{previewCta.displayText}</button><p className="mt-4 text-xs text-slate-500">{previewCta.description}</p></div></div>}
-              {referencePicker === 'form' && previewForm && <div className={`${previewAlignmentClass} ${referenceAlignment === 'full' ? '' : 'max-w-md'} space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-800`}><div><h4 className="font-bold dark:text-white">{previewForm.title}</h4><p className="mt-1 text-xs text-slate-500">{previewForm.description}</p></div>{[...previewForm.fields].filter((field) => field.fieldType !== 'hidden').sort((a, b) => a.position - b.position).map((field) => <div key={field.id}><label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-200">{field.label}{field.isRequired && <span className="ml-1 text-red-500">*</span>}</label>{field.fieldType === 'textarea' ? <textarea disabled rows={3} placeholder={field.placeholder} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900" /> : <input disabled type="text" placeholder={field.placeholder} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900" />}</div>)}<button type="button" disabled className="w-full rounded-xl bg-orange-600 px-4 py-3 text-xs font-bold text-white">{previewForm.submitConfig.submitButtonText || 'Gửi thông tin'}</button></div>}
-              {((referencePicker === 'cta' && !previewCta) || (referencePicker === 'form' && !previewForm)) && <p className="rounded-xl bg-slate-100 p-6 text-center text-sm text-slate-500 dark:bg-slate-800">Chưa có mục khả dụng để xem trước.</p>}
-            </div>
-            <div className="flex justify-end gap-2 border-t border-slate-200 p-4 dark:border-slate-700"><button type="button" onClick={() => setReferencePicker(null)} className="rounded-xl border border-slate-300 px-4 py-2 text-xs font-bold dark:border-slate-600">Đóng</button><button type="button" disabled={referencePicker === 'cta' ? !previewCta : !previewForm} onClick={() => referencePicker === 'cta' ? insertCta() : insertForm()} className="rounded-xl bg-orange-600 px-4 py-2 text-xs font-bold text-white disabled:opacity-40">{referencePicker === 'cta' ? 'Chèn CTA này' : 'Chèn biểu mẫu này'}</button></div>
-          </div>
-        </div>,
-        document.body,
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
+
+  if (isFullscreen && typeof document !== 'undefined' && document.body) {
+    return (
+      <>
+        <div
+          className="flex items-center justify-center rounded-2xl border border-dashed border-orange-300 bg-orange-50/50 p-6 text-xs font-semibold text-orange-700 dark:border-orange-800 dark:bg-orange-950/20 dark:text-orange-300"
+          style={{ minHeight }}
+        >
+          Đang mở trình soạn thảo ở chế độ Toàn màn hình (Nhấn Esc hoặc Thu nhỏ để quay lại)…
+        </div>
+        {createPortal(
+          <div className="fixed inset-0 z-[8999] bg-slate-950/60 backdrop-blur-xs">
+            {editorElement}
+          </div>,
+          document.body,
+        )}
+      </>
+    );
+  }
+
+  return editorElement;
 };
 
 export default RichTextEditor;

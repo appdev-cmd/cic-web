@@ -14,7 +14,6 @@ import {
   Trash2,
 } from 'lucide-react';
 import type { PageBuilderConfigValue, PageBuilderEntityOption } from '../pageBuilderTypes';
-import { mockArticles } from '../../news/mockData';
 
 interface HotNewsTickerEditorProps {
   items: string[];
@@ -36,22 +35,10 @@ export function HotNewsTickerEditor({
   const [newItem, setNewItem] = useState('');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  // Consolidate available news from mockArticles and entityOptions
+  // Consolidate available news from database entityOptions
   const allNews = useMemo(() => {
     const list: Array<{ id: string; title: string; is_hot: boolean; published: boolean; date?: string; category?: string }> = [];
     const seen = new Set<string>();
-
-    mockArticles.forEach((art) => {
-      seen.add(art.id);
-      list.push({
-        id: art.id,
-        title: art.title,
-        is_hot: Boolean(art.is_hot),
-        published: Boolean(art.published),
-        date: art.created_time?.split(' ')[0] || '2026-08-01',
-        category: art.category_id,
-      });
-    });
 
     entityOptions
       .filter((opt) => opt.entityType === 'news')
@@ -61,10 +48,10 @@ export function HotNewsTickerEditor({
           list.push({
             id: opt.id,
             title: opt.label,
-            is_hot: true,
-            published: true,
-            date: '2026-08-01',
-            category: opt.description,
+            is_hot: Boolean((opt.meta as Record<string, unknown> | undefined)?.isFeatured ?? true),
+            published: (opt.status ?? 'published') === 'published',
+            date: String((opt.meta as Record<string, unknown> | undefined)?.date ?? '').slice(0, 10) || 'Mới nhất',
+            category: String((opt.meta as Record<string, unknown> | undefined)?.category ?? opt.description ?? ''),
           });
         }
       });

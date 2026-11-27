@@ -4,6 +4,7 @@ import { createElementBinding } from '@shared/visual-editing/elementBindingTypes
 import type { ElementBindingRegistry } from '@shared/visual-editing/elementBindingRegistry';
 import type { PageRenderPolicy } from '@shared/page-content/models';
 import { useI18n } from '@/shared/i18n';
+import { hasSafeInlineHtml, sanitizeInlineTextHtml } from '@/shared/lib/sanitize';
 import { bindElement, textFrom } from './aboutUtils';
 
 export type AboutTabKey = 'overview' | 'structure' | 'experience';
@@ -110,7 +111,10 @@ export function AboutHeroBanner({
             data-page-builder-config-path={JSON.stringify(['title'])}
             className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight mb-3 lg:mb-4 tracking-tighter max-w-4xl mx-auto [text-shadow:_0_4px_12px_rgb(0_0_0_/_80%)]"
           >
-            {textFrom(heroConfig, 'title', isEn ? 'OVER 35 YEARS OF ADVANCING WITH TECHNOLOGY' : 'HƠN 35 NĂM NHỊP BƯỚC CÙNG CÔNG NGHỆ')}
+            {(() => {
+              const rawTitle = textFrom(heroConfig, 'title', isEn ? 'OVER 35 YEARS OF ADVANCING WITH TECHNOLOGY' : 'HƠN 35 NĂM NHỊP BƯỚC CÙNG CÔNG NGHỆ');
+              return hasSafeInlineHtml(rawTitle) ? <span dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(rawTitle) }} /> : rawTitle;
+            })()}
           </h1>
 
           <p
@@ -127,13 +131,16 @@ export function AboutHeroBanner({
             data-page-builder-config-path={JSON.stringify(['subtitle'])}
             className="text-slate-100 text-sm md:text-base max-w-2xl mx-auto font-medium leading-relaxed [text-shadow:_0_2px_8px_rgb(0_0_0_/_80%)]"
           >
-            {textFrom(
-              heroConfig,
-              'subtitle',
-              isEn
-                ? 'Pioneering in engineering software solutions, technological equipment, and comprehensive digital transformation consulting for Vietnam construction industry.'
-                : 'Tiên phong cung cấp giải pháp phần mềm kỹ thuật, thiết bị công nghệ và tư vấn chuyển đổi số toàn diện cho ngành Xây dựng Việt Nam.'
-            )}
+            {(() => {
+              const rawSubtitle = textFrom(
+                heroConfig,
+                'subtitle',
+                isEn
+                  ? 'Pioneering in engineering software solutions, technological equipment, and comprehensive digital transformation consulting for Vietnam construction industry.'
+                  : 'Tiên phong cung cấp giải pháp phần mềm kỹ thuật, thiết bị công nghệ và tư vấn chuyển đổi số toàn diện cho ngành Xây dựng Việt Nam.'
+              );
+              return hasSafeInlineHtml(rawSubtitle) ? <span dangerouslySetInnerHTML={{ __html: sanitizeInlineTextHtml(rawSubtitle) }} /> : rawSubtitle;
+            })()}
           </p>
         </div>
       </section>

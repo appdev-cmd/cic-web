@@ -1,40 +1,62 @@
 'use client';
 
-import React, { useMemo, useState, useTransition } from 'react';
+import React, { useEffect, useMemo, useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   CheckCircle2,
   Edit,
-  Eye,
+  ExternalLink,
   FileText,
+  Globe,
   Globe2,
+  HelpCircle,
+  Loader2,
   Plus,
   RefreshCw,
   RotateCcw,
   Search,
   X,
-  Loader2,
-  AlertTriangle,
 } from 'lucide-react';
 import { useCmsWorkspaceLocale } from '@/cms/context/CmsWorkspaceLocaleContext';
 import { useCmsToast } from '@/cms/context/CmsToastContext';
 import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
+import type { CmsLocale } from '../../data/CmsDataSource';
+import type { CmsMediaPickerItem } from '../../data/MediaPickerDataSource';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { PageBuilderEditor } from './PageBuilderEditor';
 import { PageBuilderPreviewModal } from './PageBuilderPreviewModal';
 import { pageBuilderEntityOptions } from './pageBuilderData';
-import { getDemoMediaPickerItems } from '../../data/demoMediaDataSource';
-import type { CmsStaticPageListItem, SaveDraftInput, StaticPageFullDetail } from '@/features/static-pages/types';
-import type { PageBuilderPage, PageBuilderEntityType, PageBuilderReference, PageBuilderEntityOption } from './pageBuilderTypes';
+import { PageBuilderGuideCard, PageInlineSeoPanel, type PageInlineSeoValues } from './builder/PageInlineSeoPanel';
+import { getMediaPickerItemsAction } from '@/features/media/server/actions';
+import type {
+  CmsStaticPageListItem,
+  SaveDraftInput,
+  StaticPageFullDetail,
+  StaticPageRevisionDetail,
+} from '@/features/static-pages/types';
+import type {
+  PageBuilderEntityOption,
+  PageBuilderEntityType,
+  PageBuilderPage,
+  PageBuilderReference,
+  PageBuilderSection,
+  PageBuilderVersion,
+} from './pageBuilderTypes';
 import {
   savePageDraftAction,
   publishPageAction,
   createLegalPageAction,
   getCmsPageDetailAction,
+  getCmsPageRevisionAction,
   getPageBuilderEntityOptionsAction,
 } from '@/features/static-pages/server/actions';
-import { getLegacyAboutCapacityContent, getLegacyAboutPageContent, getLegacyHomePageContent } from '@/shared/page-content/legacyPageContent';
+import {
+  getLegacyAboutCapacityContent,
+  getLegacyAboutPageContent,
+  getLegacyHomePageContent,
+} from '@/shared/page-content/legacyPageContent';
 import { deepClone } from './editor/editorUtils';
 
 interface StaticPagesScreenProps {
@@ -127,26 +149,41 @@ const defaultEcosystemItems = [
 const defaultExperienceItems = [
   {
     title: 'Phát triển nguồn nhân lực chất lượng cao',
-    description: 'Chú trọng đào tạo, phát triển nguồn nhân sự chất lượng cao, thu hút nhân sự trẻ, chất lượng, nhiệt huyết và sẵn sàng học hỏi, tiếp cận công nghệ mới.',
+    description:
+      'Chú trọng đào tạo, phát triển nguồn nhân sự chất lượng cao, thu hút nhân sự trẻ, chất lượng, nhiệt huyết và sẵn sàng học hỏi, tiếp cận công nghệ mới.',
     imageId: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80',
   },
   {
     title: 'Đối tác chiến lược với các hãng công nghệ danh tiếng',
-    description: 'Hợp tác sâu rộng với hơn 100 hãng công nghệ, sản xuất phần mềm, thiết bị danh tiếng trên thế giới. Là partner chính thức tại Việt Nam.',
+    description:
+      'Hợp tác sâu rộng với hơn 100 hãng công nghệ, sản xuất phần mềm, thiết bị danh tiếng trên thế giới. Là partner chính thức tại Việt Nam.',
     imageId: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80',
   },
   {
     title: 'Cập nhật xu hướng công nghệ hàng đầu',
-    description: 'Đa dạng sản phẩm, dịch vụ về các giải pháp phần mềm, khoa học công nghệ hàng đầu trong các ngành kỹ thuật.',
+    description:
+      'Đa dạng sản phẩm, dịch vụ về các giải pháp phần mềm, khoa học công nghệ hàng đầu trong các ngành kỹ thuật.',
     imageId: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80',
   },
 ];
 
 const defaultOfferingsItems = [
-  { title: 'Phần mềm và Giải pháp Kỹ thuật', desc: 'Cung cấp bản quyền và giải pháp phần mềm chuyên ngành Xây dựng, Giao thông, Thủy lợi, Địa kỹ thuật từ các hãng hàng đầu thế giới.' },
-  { title: 'Tư vấn Chuyển đổi số & BIM', desc: 'Tư vấn lộ trình chuyển đổi số, áp dụng Mô hình thông tin công trình (BIM), đào tạo và chuyển giao công nghệ cho doanh nghiệp.' },
-  { title: 'Giải pháp Công nghệ thông minh', desc: 'Cung cấp và tư vấn ứng dụng các giải pháp công nghệ thông minh, AI, Big Data, IoT vào quản lý vận hành.' },
-  { title: 'Giải pháp phát triển bền vững', desc: 'Tư vấn phát triển bền vững, Net Zero, EPD, ESG cho các doanh nghiệp xây dựng hướng tới tương lai xanh.' },
+  {
+    title: 'Phần mềm và Giải pháp Kỹ thuật',
+    desc: 'Cung cấp bản quyền và giải pháp phần mềm chuyên ngành Xây dựng, Giao thông, Thủy lợi, Địa kỹ thuật từ các hãng hàng đầu thế giới.',
+  },
+  {
+    title: 'Tư vấn Chuyển đổi số & BIM',
+    desc: 'Tư vấn lộ trình chuyển đổi số, áp dụng Mô hình thông tin công trình (BIM), đào tạo và chuyển giao công nghệ cho doanh nghiệp.',
+  },
+  {
+    title: 'Giải pháp Công nghệ thông minh',
+    desc: 'Cung cấp và tư vấn ứng dụng các giải pháp công nghệ thông minh, AI, Big Data, IoT vào quản lý vận hành.',
+  },
+  {
+    title: 'Giải pháp phát triển bền vững',
+    desc: 'Tư vấn phát triển bền vững, Net Zero, EPD, ESG cho các doanh nghiệp xây dựng hướng tới tương lai xanh.',
+  },
 ];
 
 const defaultGalleryImages = [
@@ -156,7 +193,10 @@ const defaultGalleryImages = [
   'https://images.unsplash.com/photo-1515169067868-5387ec356754?auto=format&fit=crop&q=80',
 ];
 
-function enrichSectionConfig(sectionKey: string, rawConfig: Record<string, any> | null | undefined): Record<string, any> {
+function enrichSectionConfig(
+  sectionKey: string,
+  rawConfig: Record<string, any> | null | undefined
+): Record<string, any> {
   const cfg = { ...(rawConfig || {}) };
   if (sectionKey === 'home.stats' && (!cfg.items || !Array.isArray(cfg.items) || cfg.items.length === 0)) {
     cfg.items = deepClone(getLegacyHomePageContent().stats?.items ?? []);
@@ -173,8 +213,14 @@ function enrichSectionConfig(sectionKey: string, rawConfig: Record<string, any> 
   if (sectionKey === 'about.hero') {
     if (!cfg.badge) cfg.badge = 'Về chúng tôi';
     if (!cfg.title) cfg.title = 'HƠN 35 NĂM NHỊP BƯỚC CÙNG CÔNG NGHỆ';
-    if (!cfg.subtitle) cfg.subtitle = 'Tiên phong cung cấp giải pháp phần mềm kỹ thuật, thiết bị công nghệ và tư vấn chuyển đổi số toàn diện cho ngành Xây dựng Việt Nam.';
-    if (!cfg.backgroundImageId) cfg.backgroundImageId = 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=80';
+    if (!cfg.subtitle) {
+      cfg.subtitle =
+        'Tiên phong cung cấp giải pháp phần mềm kỹ thuật, thiết bị công nghệ và tư vấn chuyển đổi số toàn diện cho ngành Xây dựng Việt Nam.';
+    }
+    if (!cfg.backgroundImageId) {
+      cfg.backgroundImageId =
+        'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=80';
+    }
   }
   if (sectionKey === 'about.overview') {
     if (!cfg.title) cfg.title = 'Tổng quan doanh nghiệp';
@@ -190,7 +236,10 @@ function enrichSectionConfig(sectionKey: string, rawConfig: Record<string, any> 
   if (sectionKey === 'about.timeline') {
     if (!cfg.badge) cfg.badge = 'Hành trình 35 năm';
     if (!cfg.title) cfg.title = 'Tiến trình phát triển';
-    if (!cfg.description) cfg.description = 'Chặng đường vươn lên trở thành một trong những đơn vị tiên phong trong lĩnh vực công nghệ và tư vấn xây dựng tại Việt Nam.';
+    if (!cfg.description) {
+      cfg.description =
+        'Chặng đường vươn lên trở thành một trong những đơn vị tiên phong trong lĩnh vực công nghệ và tư vấn xây dựng tại Việt Nam.';
+    }
     if (!cfg.milestones || !Array.isArray(cfg.milestones) || cfg.milestones.length === 0) {
       cfg.milestones = deepClone(getLegacyAboutPageContent().timeline.milestones);
     }
@@ -215,7 +264,10 @@ function enrichSectionConfig(sectionKey: string, rawConfig: Record<string, any> 
   if (sectionKey === 'about.awards') {
     if (!cfg.title) cfg.title = 'Thành tựu & Giải thưởng';
     if (!cfg.subtitle) cfg.subtitle = 'Minh chứng cho nỗ lực không ngừng nghỉ';
-    if (!cfg.description) cfg.description = 'Hơn 35 năm phát triển, CIC vinh dự nhận nhiều bằng khen, cúp và giải thưởng uy tín từ các cơ quan Nhà nước và hiệp hội chuyên ngành – tiêu biểu như Huân chương Lao động hạng Ba, Bằng khen của Thủ tướng Chính phủ, cùng các giải thưởng công nghệ danh giá như Sao Khuê, Sao Vàng Đất Việt và Vifotec. Đây là minh chứng cho chất lượng sản phẩm và uy tín thương hiệu mà CIC đã bền bỉ xây dựng trong suốt hành trình đồng hành cùng ngành Xây dựng Việt Nam.';
+    if (!cfg.description) {
+      cfg.description =
+        'Hơn 35 năm phát triển, CIC vinh dự nhận nhiều bằng khen, cúp và giải thưởng uy tín từ các cơ quan Nhà nước và hiệp hội chuyên ngành – tiêu biểu như Huân chương Lao động hạng Ba, Bằng khen của Thủ tướng Chính phủ, cùng các giải thưởng công nghệ danh giá như Sao Khuê, Sao Vàng Đất Việt và Vifotec.';
+    }
     if (cfg.syncWithHome === undefined) cfg.syncWithHome = true;
     if (!cfg.items || !Array.isArray(cfg.items) || cfg.items.length === 0) {
       cfg.items = deepClone(getLegacyHomePageContent().awards?.items ?? []);
@@ -224,7 +276,10 @@ function enrichSectionConfig(sectionKey: string, rawConfig: Record<string, any> 
   if (sectionKey === 'about.partners') {
     if (!cfg.title) cfg.title = 'Đối tác chiến lược & Khách hàng tiêu biểu';
     if (!cfg.subtitle) cfg.subtitle = 'Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới';
-    if (!cfg.description) cfg.description = 'Với mạng lưới khách hàng rộng khắp trên cả nước, CIC hiện là đối tác tin cậy của hơn 1.000 khách hàng tại Việt Nam và là đối tác chính thức của nhiều hãng công nghệ hàng đầu thế giới.';
+    if (!cfg.description) {
+      cfg.description =
+        'Với mạng lưới khách hàng rộng khắp trên cả nước, CIC hiện là đối tác tin cậy của hơn 1.000 khách hàng tại Việt Nam và là đối tác chính thức của nhiều hãng công nghệ hàng đầu thế giới.';
+    }
     if (cfg.syncWithHome === undefined) cfg.syncWithHome = true;
     if (!cfg.galleryImages || !Array.isArray(cfg.galleryImages) || cfg.galleryImages.length === 0) {
       cfg.galleryImages = defaultGalleryImages;
@@ -239,7 +294,10 @@ function enrichSectionConfig(sectionKey: string, rawConfig: Record<string, any> 
   }
   if (sectionKey === 'about.capacity') {
     if (!cfg.title) cfg.title = 'Tiềm lực vững vàng, vươn tầm quốc tế';
-    if (!cfg.description) cfg.description = 'Trải qua hành trình hơn 35 năm phát triển, CIC không ngừng khẳng định vị thế dẫn đầu trong việc cung cấp các giải pháp công nghệ tiên tiến.';
+    if (!cfg.description) {
+      cfg.description =
+        'Trải qua hành trình hơn 35 năm phát triển, CIC không ngừng khẳng định vị thế dẫn đầu trong việc cung cấp các giải pháp công nghệ tiên tiến.';
+    }
     if (!cfg.metrics || !Array.isArray(cfg.metrics) || cfg.metrics.length === 0) {
       cfg.metrics = deepClone(getLegacyAboutCapacityContent().metrics);
     }
@@ -258,8 +316,64 @@ function enrichSectionConfig(sectionKey: string, rawConfig: Record<string, any> 
   return cfg;
 }
 
+function mapRevisionToBuilderVersion(
+  rev: StaticPageRevisionDetail,
+  fallbackName: string
+): PageBuilderVersion {
+  return {
+    revisionId: rev.id,
+    version: rev.versionNumber,
+    status: rev.state,
+    updatedAt: rev.createdAt,
+    publishedAt: rev.publishedAt ?? undefined,
+    seo: {
+      title: rev.seoTitle?.trim() || `${fallbackName} | CIC Technology`,
+      description: rev.seoDescription || '',
+    },
+    sections: rev.sections.map((s): PageBuilderSection => {
+      const refMap = new Map<PageBuilderEntityType, string[]>();
+      s.references?.forEach((r) => {
+        const type = r.entityType as PageBuilderEntityType;
+        const list = refMap.get(type) ?? [];
+        list.push(r.entityId);
+        refMap.set(type, list);
+      });
+      const defaultRefsBySection: Record<string, { entityType: PageBuilderEntityType; defaultIds: string[] }> = {
+        'home.projects': { entityType: 'project', defaultIds: ['3', '4', '5'] },
+        'home.events': { entityType: 'event', defaultIds: ['40', '11', '9', '13'] },
+        'home.news': { entityType: 'news', defaultIds: ['1719', '1718', '1717', '1716'] },
+      };
+      const def = defaultRefsBySection[s.sectionKey];
+      if (def && (!refMap.has(def.entityType) || refMap.get(def.entityType)!.length === 0)) {
+        refMap.set(def.entityType, def.defaultIds);
+      }
+      const cfg = enrichSectionConfig(s.sectionKey, s.config as any);
+      const refSources = (cfg._referenceSources || {}) as Record<string, any>;
+      const references: PageBuilderReference[] = Array.from(refMap.entries()).map(([entityType, entityIds]) => {
+        const isFeatured = cfg.referenceSource?.mode === 'auto_featured' || cfg.referenceSource?.mode === 'featured';
+        const defaultSource = isFeatured ? cfg.referenceSource : { mode: 'featured', limit: entityIds.length };
+        return {
+          entityType,
+          entityIds,
+          source: refSources[entityType] ?? defaultSource,
+        };
+      });
+      return {
+        id: s.id,
+        sectionKey: s.sectionKey,
+        sectionType: s.sectionType,
+        position: s.position,
+        visible: typeof cfg._visible === 'boolean' ? cfg._visible : true,
+        config: cfg as any,
+        references: references.length > 0 ? references : undefined,
+      };
+    }),
+  };
+}
+
 /** Maps StaticPageFullDetail from server to PageBuilderPage for PageBuilderEditor */
 function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
+  const publishedVersionNumber = detail.published?.versionNumber ?? 0;
   return {
     id: detail.id,
     code: detail.code,
@@ -268,101 +382,9 @@ function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
     pageType: detail.pageType,
     templateKey: detail.templateKey,
     systemDefined: detail.systemDefined,
-    draft: {
-      version: detail.draft.versionNumber,
-      status: detail.draft.state,
-      updatedAt: detail.draft.createdAt,
-      publishedAt: detail.draft.publishedAt ?? undefined,
-      seo: {
-        title: detail.draft.seoTitle?.trim() || `${detail.name} | CIC Technology`,
-        description: detail.draft.seoDescription || '',
-      },
-      sections: detail.draft.sections.map((s) => {
-        const refMap = new Map<PageBuilderEntityType, string[]>();
-        s.references?.forEach((r) => {
-          const type = r.entityType as PageBuilderEntityType;
-          const list = refMap.get(type) ?? [];
-          list.push(r.entityId);
-          refMap.set(type, list);
-        });
-        const defaultRefsBySection: Record<string, { entityType: PageBuilderEntityType; defaultIds: string[] }> = {
-          'home.projects': { entityType: 'project', defaultIds: ['3', '4', '5'] },
-          'home.events': { entityType: 'event', defaultIds: ['40', '11', '9', '13'] },
-          'home.news': { entityType: 'news', defaultIds: ['1719', '1718', '1717', '1716'] },
-        };
-        const def = defaultRefsBySection[s.sectionKey];
-        if (def && (!refMap.has(def.entityType) || refMap.get(def.entityType)!.length === 0)) {
-          refMap.set(def.entityType, def.defaultIds);
-        }
-        const cfg = enrichSectionConfig(s.sectionKey, s.config as any);
-        const refSources = (cfg._referenceSources || {}) as Record<string, any>;
-        const references: PageBuilderReference[] = Array.from(refMap.entries()).map(([entityType, entityIds]) => {
-          const isFeatured = cfg.referenceSource?.mode === 'auto_featured' || cfg.referenceSource?.mode === 'featured';
-          const defaultSource = isFeatured ? cfg.referenceSource : { mode: 'featured', limit: entityIds.length };
-          return {
-            entityType,
-            entityIds,
-            source: refSources[entityType] ?? defaultSource,
-          };
-        });
-        return {
-          id: s.id,
-          sectionKey: s.sectionKey,
-          sectionType: s.sectionType,
-          position: s.position,
-          config: cfg as any,
-          references: references.length > 0 ? references : undefined,
-        };
-      }),
-    },
+    draft: mapRevisionToBuilderVersion(detail.draft, detail.name),
     published: detail.published
-      ? {
-          version: detail.published.versionNumber,
-          status: detail.published.state,
-          updatedAt: detail.published.createdAt,
-          publishedAt: detail.published.publishedAt ?? undefined,
-          seo: {
-            title: detail.published.seoTitle?.trim() || `${detail.name} | CIC Technology`,
-            description: detail.published.seoDescription || '',
-          },
-          sections: detail.published.sections.map((s) => {
-            const refMap = new Map<PageBuilderEntityType, string[]>();
-            s.references?.forEach((r) => {
-              const type = r.entityType as PageBuilderEntityType;
-              const list = refMap.get(type) ?? [];
-              list.push(r.entityId);
-              refMap.set(type, list);
-            });
-            const defaultRefsBySection: Record<string, { entityType: PageBuilderEntityType; defaultIds: string[] }> = {
-              'home.projects': { entityType: 'project', defaultIds: ['3', '4', '5'] },
-              'home.events': { entityType: 'event', defaultIds: ['40', '11', '9', '13'] },
-              'home.news': { entityType: 'news', defaultIds: ['1719', '1718', '1717', '1716'] },
-            };
-            const def = defaultRefsBySection[s.sectionKey];
-            if (def && (!refMap.has(def.entityType) || refMap.get(def.entityType)!.length === 0)) {
-              refMap.set(def.entityType, def.defaultIds);
-            }
-            const cfg = enrichSectionConfig(s.sectionKey, s.config as any);
-            const refSources = (cfg._referenceSources || {}) as Record<string, any>;
-            const references: PageBuilderReference[] = Array.from(refMap.entries()).map(([entityType, entityIds]) => {
-              const isFeatured = cfg.referenceSource?.mode === 'auto_featured' || cfg.referenceSource?.mode === 'featured';
-              const defaultSource = isFeatured ? cfg.referenceSource : { mode: 'featured', limit: entityIds.length };
-              return {
-                entityType,
-                entityIds,
-                source: refSources[entityType] ?? defaultSource,
-              };
-            });
-            return {
-              id: s.id,
-              sectionKey: s.sectionKey,
-              sectionType: s.sectionType,
-              position: s.position,
-              config: cfg as any,
-              references: references.length > 0 ? references : undefined,
-            };
-          }),
-        }
+      ? mapRevisionToBuilderVersion(detail.published, detail.name)
       : {
           version: 0,
           status: 'published',
@@ -370,14 +392,17 @@ function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
           seo: { title: detail.name, description: '' },
           sections: [],
         },
-    history: detail.history?.map((h) => ({
-      version: h.versionNumber,
-      status: h.state as any,
-      updatedAt: h.createdAt,
-      publishedAt: h.publishedAt ?? undefined,
-      seo: { title: '', description: '' },
-      sections: [],
-    })),
+    history: detail.history
+      ?.filter((h) => h.versionNumber !== publishedVersionNumber)
+      .map((h) => ({
+        revisionId: h.id,
+        version: h.versionNumber,
+        status: h.state as any,
+        updatedAt: h.createdAt,
+        publishedAt: h.publishedAt ?? undefined,
+        seo: { title: '', description: '' },
+        sections: [],
+      })),
   };
 }
 
@@ -390,6 +415,7 @@ function toSaveDraftInput(page: PageBuilderPage): SaveDraftInput {
     },
     sections: page.draft.sections.map((sec, idx) => {
       const config = { ...sec.config } as Record<string, unknown>;
+      config._visible = sec.visible !== false;
       if (sec.references && sec.references.length > 0) {
         const refSources: Record<string, any> = {};
         sec.references.forEach((ref) => {
@@ -417,9 +443,16 @@ function toSaveDraftInput(page: PageBuilderPage): SaveDraftInput {
 }
 
 export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesScreenProps) {
-  const workspaceLocale = useCmsWorkspaceLocale();
-  const dict = getCmsDictionary(workspaceLocale);
-  const [pages, setPages] = useState<CmsStaticPageListItem[]>(() => pagesByLocale[workspaceLocale] ?? []);
+  const router = useRouter();
+  const globalWorkspaceLocale = useCmsWorkspaceLocale();
+  const [builderLocale, setBuilderLocale] = useState<CmsLocale>(globalWorkspaceLocale);
+  const activeLocale = editingLocaleOrGlobal(builderLocale, globalWorkspaceLocale);
+  const dict = getCmsDictionary(globalWorkspaceLocale);
+
+  const [pagesMap, setPagesMap] = useState<Record<'vi' | 'en', CmsStaticPageListItem[]>>(() => ({
+    vi: pagesByLocale.vi ?? [],
+    en: pagesByLocale.en ?? [],
+  }));
   const [editingPage, setEditingPage] = useState<PageBuilderPage | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [previewPage, setPreviewPage] = useState<PageBuilderPage | null>(null);
@@ -432,25 +465,66 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
   const [pageSize, setPageSize] = useState(10);
   const [isPending, startTransition] = useTransition();
   const [entityOptions, setEntityOptions] = useState<PageBuilderEntityOption[]>(() => pageBuilderEntityOptions);
+  const [mediaImages, setMediaImages] = useState<CmsMediaPickerItem[]>([]);
+  const [showGuide, setShowGuide] = useState(false);
+  const [inlineSeoState, setInlineSeoState] = useState<{
+    page: PageBuilderPage;
+    seo: PageInlineSeoValues;
+    saving: boolean;
+  } | null>(null);
 
-  // Load real entities from database
-  React.useEffect(() => {
-    getPageBuilderEntityOptionsAction(workspaceLocale).then((res) => {
-      if (res.success && res.data && res.data.length > 0) {
-        const existingIds = new Set(res.data.map((item) => item.id));
-        const merged = [...res.data, ...pageBuilderEntityOptions.filter((item) => !existingIds.has(item.id))];
-        setEntityOptions(merged);
-      }
-    }).catch((err) => {
-      console.error('Failed to load DB entity options for page builder:', err);
+  function editingLocaleOrGlobal(local: CmsLocale, global: CmsLocale): CmsLocale {
+    return editingPage ? local : global;
+  }
+
+  // Sync list state when server props refresh
+  useEffect(() => {
+    setPagesMap({
+      vi: pagesByLocale.vi ?? [],
+      en: pagesByLocale.en ?? [],
     });
-  }, [workspaceLocale]);
-
-  // Keep pages in sync when workspace locale changes
-  React.useEffect(() => {
-    setPages(pagesByLocale[workspaceLocale] ?? []);
     setCurrentPage(1);
-  }, [workspaceLocale, pagesByLocale]);
+  }, [pagesByLocale]);
+
+  useEffect(() => {
+    if (!editingPage) {
+      setBuilderLocale(globalWorkspaceLocale);
+    }
+  }, [globalWorkspaceLocale, editingPage]);
+
+  // Load real DB entities & Media Library items for active locale
+  useEffect(() => {
+    let cancelled = false;
+    getPageBuilderEntityOptionsAction(activeLocale)
+      .then((res) => {
+        if (cancelled) return;
+        if (res.success && res.data && res.data.length > 0) {
+          const existingIds = new Set(res.data.map((item) => `${item.entityType}:${item.id}`));
+          const merged = [
+            ...res.data,
+            ...pageBuilderEntityOptions.filter((item) => !existingIds.has(`${item.entityType}:${item.id}`)),
+          ];
+          setEntityOptions(merged);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load DB entity options for page builder:', err);
+      });
+
+    getMediaPickerItemsAction(activeLocale)
+      .then((items) => {
+        if (!cancelled) setMediaImages(items);
+      })
+      .catch(() => {
+        if (!cancelled) setMediaImages([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeLocale]);
+
+  const pages = pagesMap[globalWorkspaceLocale] ?? [];
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     if (type === 'error') {
@@ -459,6 +533,15 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
       toast.success(message);
     }
   };
+
+  const readinessStats = useMemo(() => {
+    const total = pages.length;
+    const publishedCount = pages.filter((p) => p.published.version > 0).length;
+    const draftDiffCount = pages.filter((p) => p.draft.version > p.published.version).length;
+    const enCodes = new Set((pagesMap.en ?? []).map((p) => p.code));
+    const bilingualReadyCount = (pagesMap.vi ?? []).filter((p) => enCodes.has(p.code)).length;
+    return { total, publishedCount, draftDiffCount, bilingualReadyCount };
+  }, [pages, pagesMap]);
 
   const filteredPages = useMemo(() => {
     return pages.filter((page) => {
@@ -489,7 +572,7 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
     return `${base}-${suffix}`;
   }, [newPageName, pages]);
 
-  const handleEdit = async (pageListItem: CmsStaticPageListItem) => {
+  const handleEdit = async (pageListItem: CmsStaticPageListItem, targetLocale = globalWorkspaceLocale) => {
     setIsLoadingDetail(true);
     try {
       const res = await getCmsPageDetailAction(Number(pageListItem.id));
@@ -498,6 +581,7 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
         return;
       }
       const editorPage = toPageBuilderPage(res.data as StaticPageFullDetail);
+      setBuilderLocale(targetLocale);
       setEditingPage(editorPage);
     } catch {
       showToast('Lỗi khi tải chi tiết trang.', 'error');
@@ -506,7 +590,55 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
     }
   };
 
-  const handleSaveDraft = async (nextPage: PageBuilderPage): Promise<void> => {
+  const handleOpenInlineSeo = async (pageListItem: CmsStaticPageListItem) => {
+    if (inlineSeoState?.page.id === pageListItem.id) {
+      setInlineSeoState(null);
+      return;
+    }
+    setIsLoadingDetail(true);
+    try {
+      const res = await getCmsPageDetailAction(Number(pageListItem.id));
+      if (!res.success || !res.data) {
+        showToast(res.error ?? 'Không thể tải cấu hình SEO của trang.', 'error');
+        return;
+      }
+      const fullPage = toPageBuilderPage(res.data as StaticPageFullDetail);
+      setInlineSeoState({
+        page: fullPage,
+        seo: { ...fullPage.draft.seo },
+        saving: false,
+      });
+    } finally {
+      setIsLoadingDetail(false);
+    }
+  };
+
+  const handleSaveInlineSeo = async () => {
+    if (!inlineSeoState) return;
+    setInlineSeoState((curr) => (curr ? { ...curr, saving: true } : null));
+    try {
+      const updatedPage: PageBuilderPage = {
+        ...inlineSeoState.page,
+        draft: {
+          ...inlineSeoState.page.draft,
+          seo: {
+            ...inlineSeoState.page.draft.seo,
+            title: inlineSeoState.seo.title.trim() || `${inlineSeoState.page.name} | CIC Technology`,
+            description: inlineSeoState.seo.description,
+          },
+        },
+      };
+      await handleSaveDraft(updatedPage, globalWorkspaceLocale);
+      setInlineSeoState(null);
+    } finally {
+      setInlineSeoState((curr) => (curr ? { ...curr, saving: false } : null));
+    }
+  };
+
+  const handleSaveDraft = async (
+    nextPage: PageBuilderPage,
+    localeForUpdate: CmsLocale = builderLocale
+  ): Promise<void> => {
     try {
       const input = toSaveDraftInput(nextPage);
       const res = await savePageDraftAction(Number(nextPage.id), input);
@@ -515,30 +647,34 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
         return;
       }
       const newVersion = res.data.versionNumber;
+      const nowIso = new Date().toISOString();
       const updatedPage: PageBuilderPage = {
         ...nextPage,
         draft: {
           ...nextPage.draft,
           version: newVersion,
           status: 'draft',
-          updatedAt: new Date().toISOString(),
+          updatedAt: nowIso,
         },
       };
-      setEditingPage(updatedPage);
-      setPages((current) =>
-        current.map((p) =>
+      if (editingPage?.id === nextPage.id) {
+        setEditingPage(updatedPage);
+      }
+      setPagesMap((current) => ({
+        ...current,
+        [localeForUpdate]: current[localeForUpdate].map((p) =>
           p.id === nextPage.id
             ? {
                 ...p,
                 draft: {
                   ...p.draft,
                   version: newVersion,
-                  updatedAt: new Date().toISOString(),
+                  updatedAt: nowIso,
                 },
               }
             : p
-        )
-      );
+        ),
+      }));
       showToast('Đã lưu bản nháp vào Database. Website công khai chưa thay đổi.');
     } catch (err: any) {
       showToast(err?.message || 'Có lỗi xảy ra khi lưu bản nháp.', 'error');
@@ -547,7 +683,6 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
 
   const handlePublish = async (nextPage: PageBuilderPage): Promise<void> => {
     try {
-      // First save draft if modified, then publish
       const input = toSaveDraftInput(nextPage);
       const saveRes = await savePageDraftAction(Number(nextPage.id), input);
       if (!saveRes.success) {
@@ -565,6 +700,11 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
       const nowIso = new Date().toISOString();
       const updatedPage: PageBuilderPage = {
         ...nextPage,
+        draft: {
+          ...nextPage.draft,
+          version: newVersion,
+          updatedAt: nowIso,
+        },
         published: {
           ...JSON.parse(JSON.stringify(nextPage.draft)),
           version: newVersion,
@@ -574,11 +714,17 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
         },
       };
       setEditingPage(updatedPage);
-      setPages((current) =>
-        current.map((p) =>
+      setPagesMap((current) => ({
+        ...current,
+        [builderLocale]: current[builderLocale].map((p) =>
           p.id === nextPage.id
             ? {
                 ...p,
+                draft: {
+                  ...p.draft,
+                  version: newVersion,
+                  updatedAt: nowIso,
+                },
                 published: {
                   ...p.published,
                   version: newVersion,
@@ -586,12 +732,50 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
                 },
               }
             : p
-        )
-      );
-      showToast(`Đã xuất bản thành công! Link công khai: https://cic.com.vn${nextPage.slug}`);
+        ),
+      }));
+      const publicPath =
+        builderLocale === 'en'
+          ? `/en${nextPage.slug === '/' ? '' : nextPage.slug}`
+          : nextPage.slug;
+      showToast(`Đã xuất bản thành công! Link công khai: https://www.cic.com.vn${publicPath}`);
     } catch (err: any) {
       showToast(err?.message || 'Có lỗi xảy ra khi xuất bản trang.', 'error');
     }
+  };
+
+  const handleRestoreRevision = async (
+    pageId: string,
+    pageName: string,
+    version: PageBuilderVersion
+  ): Promise<PageBuilderVersion | null> => {
+    if (!version.revisionId) {
+      showToast('Không tìm thấy mã định danh phiên bản để khôi phục.', 'error');
+      return null;
+    }
+    const res = await getCmsPageRevisionAction(Number(pageId), Number(version.revisionId));
+    if (!res.success || !res.data) {
+      showToast(res.error ?? 'Không thể tải nội dung phiên bản lịch sử.', 'error');
+      return null;
+    }
+    showToast(`Đã nạp Phiên bản v${version.version} vào Bản nháp. Bấm "Lưu nháp" để ghi nhận.`);
+    return mapRevisionToBuilderVersion(res.data, pageName);
+  };
+
+  const handleSwitchBuilderLocale = async (targetLocale: CmsLocale) => {
+    if (!editingPage) return;
+    const counterpart = (pagesMap[targetLocale] ?? []).find(
+      (p) => p.code === editingPage.code || p.slug === editingPage.slug
+    );
+    if (!counterpart) {
+      showToast(
+        `Trang "${editingPage.name}" hiện chưa có bản tương ứng ở ngôn ngữ ${targetLocale.toUpperCase()}.`,
+        'error'
+      );
+      return;
+    }
+    await handleEdit(counterpart, targetLocale);
+    showToast(`Đã chuyển sang biên tập bản ${targetLocale.toUpperCase()} của trang "${counterpart.name}".`);
   };
 
   const handleCreateLegal = () => {
@@ -605,7 +789,7 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
 
     startTransition(async () => {
       const res = await createLegalPageAction({
-        workspace: workspaceLocale,
+        workspace: globalWorkspaceLocale,
         name,
         slug,
       });
@@ -617,33 +801,43 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
 
       setCreateOpen(false);
       setNewPageName('');
+      router.refresh();
       showToast(`Đã tạo trang "${name}" (Draft). Bắt đầu biên tập nội dung.`);
 
-      // Open editor for new page
       const detailRes = await getCmsPageDetailAction(Number(res.data.id));
       if (detailRes.success && detailRes.data) {
         const editorPage = toPageBuilderPage(detailRes.data as StaticPageFullDetail);
+        setBuilderLocale(globalWorkspaceLocale);
         setEditingPage(editorPage);
       }
     });
   };
 
-  const mediaImages = useMemo(() => getDemoMediaPickerItems(workspaceLocale), [workspaceLocale]);
-
-  // If in editor view
+  // If in Page Builder view
   if (editingPage) {
+    const counterpartLocale: CmsLocale = builderLocale === 'vi' ? 'en' : 'vi';
+    const hasCounterpart = (pagesMap[counterpartLocale] ?? []).some(
+      (p) => p.code === editingPage.code || p.slug === editingPage.slug
+    );
+
     return (
       <>
+        {isLoadingDetail && <LoadingOverlay message="Đang chuyển đổi dữ liệu trang..." />}
         <PageBuilderEditor
-          key={`${editingPage.id}-${editingPage.draft.version}-${editingPage.published.version}`}
-          workspaceLocale={workspaceLocale}
+          key={`${editingPage.id}-${builderLocale}-${editingPage.draft.version}-${editingPage.published.version}`}
+          workspaceLocale={builderLocale}
+          hasAvailableCounterpartLocale={hasCounterpart}
+          onSwitchLocale={handleSwitchBuilderLocale}
           page={editingPage}
           entityOptions={entityOptions}
           mediaImages={mediaImages}
           onBack={() => setEditingPage(null)}
-          onSaveDraft={handleSaveDraft}
+          onSaveDraft={(nextPage) => handleSaveDraft(nextPage, builderLocale)}
           onPreview={setPreviewPage}
           onPublish={handlePublish}
+          onRestoreRevision={(version) =>
+            handleRestoreRevision(editingPage.id, editingPage.name, version)
+          }
         />
         <PageBuilderPreviewModal page={previewPage} onClose={() => setPreviewPage(null)} />
       </>
@@ -660,16 +854,26 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
         description={dict.modules.staticPages.description}
         meta={
           <span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-400">
-            {pages.length} {dict.modules.staticPages.itemUnit} · {workspaceLocale.toUpperCase()}
+            {pages.length} {dict.modules.staticPages.itemUnit} · {globalWorkspaceLocale.toUpperCase()}
           </span>
         }
         actions={
           <div className="flex flex-wrap gap-2">
             <CmsButton
               variant="secondary"
+              leadingIcon={<HelpCircle />}
+              onClick={() => setShowGuide((v) => !v)}
+            >
+              {showGuide ? 'Ẩn hướng dẫn' : 'Hướng dẫn 4 bước'}
+            </CmsButton>
+            <CmsButton
+              variant="secondary"
               leadingIcon={<RefreshCw className={isPending ? 'animate-spin' : ''} />}
               onClick={() => {
-                showToast('Đã làm mới danh sách trang.');
+                startTransition(() => {
+                  router.refresh();
+                });
+                showToast('Đã đồng bộ lại danh sách trang từ máy chủ.');
               }}
             >
               Làm mới
@@ -683,6 +887,59 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
         }
       />
 
+      {/* READINESS SUMMARY CARDS (Inspired by robot-web PageDirectoryListView) */}
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-2xs dark:border-slate-800 dark:bg-slate-900">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            Tổng số trang ({globalWorkspaceLocale.toUpperCase()})
+          </p>
+          <p className="mt-1 text-xl font-black text-slate-900 dark:text-white">
+            {readinessStats.total} trang
+          </p>
+          <p className="mt-0.5 text-[11px] text-slate-500">Quản lý tập trung Draft & Published</p>
+        </div>
+
+        <div className="rounded-2xl border border-emerald-200/70 bg-emerald-50/40 p-3.5 shadow-2xs dark:border-emerald-900/40 dark:bg-slate-900">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+            Đã xuất bản công khai
+          </p>
+          <p className="mt-1 flex items-center gap-1.5 text-xl font-black text-emerald-700 dark:text-emerald-300">
+            <CheckCircle2 className="h-5 w-5" />
+            {readinessStats.publishedCount}/{readinessStats.total}
+          </p>
+          <p className="mt-0.5 text-[11px] text-emerald-700/80 dark:text-emerald-400/80">
+            Đang phục vụ khách truy cập
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-amber-200/70 bg-amber-50/40 p-3.5 shadow-2xs dark:border-amber-900/40 dark:bg-slate-900">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+            Có bản nháp chờ duyệt
+          </p>
+          <p className="mt-1 text-xl font-black text-amber-700 dark:text-amber-300">
+            {readinessStats.draftDiffCount} trang
+          </p>
+          <p className="mt-0.5 text-[11px] text-amber-700/80 dark:text-amber-400/80">
+            Sửa an toàn không ảnh hưởng web thật
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-blue-200/70 bg-blue-50/40 p-3.5 shadow-2xs dark:border-blue-900/40 dark:bg-slate-900">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">
+            Song ngữ VI ↔ EN
+          </p>
+          <p className="mt-1 text-xl font-black text-blue-700 dark:text-blue-300">
+            {readinessStats.bilingualReadyCount}/{(pagesMap.vi ?? []).length} cặp trang
+          </p>
+          <p className="mt-0.5 text-[11px] text-blue-700/80 dark:text-blue-400/80">
+            Chuyển nhanh ngay trong Builder
+          </p>
+        </div>
+      </section>
+
+      {showGuide && <PageBuilderGuideCard onClose={() => setShowGuide(false)} />}
+
+      {/* FILTER BAR */}
       <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs dark:border-slate-800 dark:bg-slate-900">
         <div className="grid grid-cols-1 items-center gap-3 md:grid-cols-12">
           <div className="relative flex items-center md:col-span-6">
@@ -695,7 +952,11 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
                 setQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              placeholder={workspaceLocale === 'en' ? 'Search by name, code or path...' : 'Tìm theo tên, code hoặc đường dẫn...'}
+              placeholder={
+                globalWorkspaceLocale === 'en'
+                  ? 'Search by name, code or path...'
+                  : 'Tìm theo tên, code hoặc đường dẫn...'
+              }
               className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs font-medium outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800"
             />
           </div>
@@ -709,7 +970,9 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
             className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium outline-none focus:border-orange-500 md:col-span-3 dark:border-slate-700 dark:bg-slate-800"
           >
             <option value="all">{dict.common.allStatus}</option>
-            <option value="has_draft">{workspaceLocale === 'en' ? 'Draft Changes' : 'Có thay đổi bản nháp'}</option>
+            <option value="has_draft">
+              {globalWorkspaceLocale === 'en' ? 'Draft Changes' : 'Có thay đổi bản nháp'}
+            </option>
             <option value="published">{dict.common.published}</option>
           </select>
 
@@ -722,7 +985,7 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
                 setStatusFilter('all');
                 setCurrentPage(1);
               }}
-              className="flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"
+              className="flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800 cursor-pointer"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               {dict.common.reset}
@@ -731,31 +994,56 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
         </div>
       </section>
 
+      {/* PAGES TABLE */}
       <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
         <div className="hidden overflow-x-auto md:block">
-          <table className="cms-data-table min-w-[920px] text-left w-full">
+          <table className="cms-data-table min-w-[920px] w-full text-left">
             <thead>
-              <tr className="border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-slate-500">
+              <tr className="border-b border-slate-100 text-xs font-bold text-slate-500 dark:border-slate-800">
                 <th className="p-3">Page</th>
-                <th className="p-3">{workspaceLocale === 'en' ? 'Code / Slug' : 'Code / đường dẫn'}</th>
-                <th className="p-3">{workspaceLocale === 'en' ? 'Sections' : 'Section'}</th>
-                <th className="p-3">Draft</th>
-                <th className="p-3">Published</th>
+                <th className="p-3">{globalWorkspaceLocale === 'en' ? 'Code / Slug' : 'Code / đường dẫn'}</th>
+                <th className="p-3">{globalWorkspaceLocale === 'en' ? 'Sections' : 'Khu vực'}</th>
+                <th className="p-3">Bản nháp (Draft)</th>
+                <th className="p-3">Công khai (Published)</th>
                 <th className="p-3 text-right">{dict.common.actions}</th>
               </tr>
             </thead>
             <tbody>
-              {paginatedPages.map((page) => (
-                <PageRow
-                  key={page.id}
-                  page={page}
-                  onPreview={() => {
-                    // Preview requires loading full detail
-                    handleEdit(page);
-                  }}
-                  onEdit={() => handleEdit(page)}
-                />
-              ))}
+              {paginatedPages.map((page) => {
+                const isSeoOpen = inlineSeoState?.page.id === page.id;
+                return (
+                  <React.Fragment key={page.id}>
+                    <PageRow
+                      page={page}
+                      workspaceLocale={globalWorkspaceLocale}
+                      seoActive={isSeoOpen}
+                      onToggleSeo={() => void handleOpenInlineSeo(page)}
+                      onEdit={() => void handleEdit(page)}
+                    />
+                    {isSeoOpen && inlineSeoState && (
+                      <tr className="border-t border-orange-100 bg-orange-50/20 dark:border-slate-800 dark:bg-slate-900/60">
+                        <td colSpan={6} className="p-3">
+                          <PageInlineSeoPanel
+                            compact
+                            pageName={inlineSeoState.page.name}
+                            slug={inlineSeoState.page.slug}
+                            workspaceLocale={globalWorkspaceLocale}
+                            seo={inlineSeoState.seo}
+                            saving={inlineSeoState.saving}
+                            onChange={(patch) =>
+                              setInlineSeoState((curr) =>
+                                curr ? { ...curr, seo: { ...curr.seo, ...patch } } : null
+                              )
+                            }
+                            onSaveSeoOnly={handleSaveInlineSeo}
+                            onClose={() => setInlineSeoState(null)}
+                          />
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -765,8 +1053,8 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
             <PageCard
               key={page.id}
               page={page}
-              onPreview={() => handleEdit(page)}
-              onEdit={() => handleEdit(page)}
+              onToggleSeo={() => void handleOpenInlineSeo(page)}
+              onEdit={() => void handleEdit(page)}
             />
           ))}
         </div>
@@ -806,12 +1094,10 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
   );
 }
 
-
-
 function LoadingOverlay({ message }: { message: string }) {
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/40 backdrop-blur-xs">
-      <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-slate-900 px-6 py-4 shadow-2xl border border-slate-200 dark:border-slate-800 text-sm font-bold text-slate-800 dark:text-slate-100">
+      <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-4 text-sm font-bold text-slate-800 shadow-2xl dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
         <Loader2 className="h-5 w-5 animate-spin text-orange-600" />
         {message}
       </div>
@@ -820,45 +1106,56 @@ function LoadingOverlay({ message }: { message: string }) {
 }
 
 function typeLabel(templateKey: string) {
-  return templateKey === 'legal_standard' ? 'Mẫu nội dung chuẩn' : 'Thiết kế riêng';
+  return templateKey === 'legal_standard' ? 'Mẫu nội dung chuẩn (CKEditor 5)' : 'Giao diện trực quan (Visual Builder)';
 }
 
 function PageRow({
   page,
-  onPreview,
+  workspaceLocale,
+  seoActive,
+  onToggleSeo,
   onEdit,
 }: {
   page: CmsStaticPageListItem;
-  onPreview: () => void;
+  workspaceLocale: CmsLocale;
+  seoActive: boolean;
+  onToggleSeo: () => void;
   onEdit: () => void;
 }) {
   const changed = page.draft.version > page.published.version;
+  const publicUrl = workspaceLocale === 'en' ? `/en${page.slug === '/' ? '' : page.slug}` : page.slug;
   return (
-    <tr className="border-t border-slate-100 dark:border-slate-800 hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
+    <tr className="border-t border-slate-100 transition-colors hover:bg-slate-50/50 dark:border-slate-800 dark:hover:bg-slate-800/40">
       <td className="p-3">
         <div className="flex items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">
             <Globe2 className="h-4 w-4" />
           </span>
           <div>
-            <p className="text-sm font-bold text-slate-900 dark:text-white">{page.name}</p>
+            <button
+              type="button"
+              onClick={onEdit}
+              className="text-left text-sm font-bold text-slate-900 hover:text-orange-600 dark:text-white dark:hover:text-orange-400 cursor-pointer"
+            >
+              {page.name}
+            </button>
             <p className="text-xs text-slate-500 dark:text-slate-400">{typeLabel(page.templateKey)}</p>
           </div>
         </div>
       </td>
       <td className="p-3">
         <p className="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">{page.code}</p>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{page.slug}</p>
+        <p className="mt-1 font-mono text-xs text-slate-500 dark:text-slate-400">{publicUrl}</p>
       </td>
       <td className="p-3 text-sm font-semibold text-slate-800 dark:text-slate-200">
-        {page.sectionCount} cố định
+        {page.sectionCount} khu vực
       </td>
       <td className="p-3">
         <span
           className={`rounded-md px-2 py-1 text-xs font-bold ${
             changed
-              ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60'
-              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+              ? 'border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800/60 dark:bg-amber-950/50 dark:text-amber-300'
+              : 'border border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400'
           }`}
         >
           v{page.draft.version}
@@ -870,23 +1167,49 @@ function PageRow({
       </td>
       <td className="p-3">
         {page.published.version > 0 ? (
-          <span className="rounded-md bg-emerald-50 dark:bg-emerald-950/50 px-2 py-1 text-xs font-bold text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
+          <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700 dark:border-emerald-800/60 dark:bg-emerald-950/50 dark:text-emerald-300">
             v{page.published.version} · Published
           </span>
         ) : (
-          <span className="rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-1 text-xs font-bold text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+          <span className="rounded-md border border-slate-200 bg-slate-100 px-2 py-1 text-xs font-bold text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
             Chưa xuất bản
           </span>
         )}
       </td>
       <td className="p-3">
-        <div className="flex justify-end gap-1">
+        <div className="flex items-center justify-end gap-1.5">
           <button
-            onClick={onEdit}
-            className="rounded-lg p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-orange-600 dark:hover:text-orange-400 cursor-pointer"
-            title="Chỉnh sửa & Xem trước"
+            type="button"
+            onClick={onToggleSeo}
+            className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-bold transition cursor-pointer ${
+              seoActive
+                ? 'border-orange-400 bg-orange-50 text-orange-700 dark:border-orange-700 dark:bg-orange-950/50 dark:text-orange-300'
+                : 'border-slate-200 bg-white text-slate-600 hover:border-orange-300 hover:text-orange-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
+            }`}
+            title="Sửa nhanh SEO Google & Xem trước SERP"
           >
-            <Edit className="h-4 w-4" />
+            <Globe className="h-3.5 w-3.5" />
+            <span>SEO</span>
+          </button>
+
+          <a
+            href={publicUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-500 hover:border-orange-300 hover:text-orange-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
+            title="Mở trang công khai ở tab mới"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+
+          <button
+            type="button"
+            onClick={onEdit}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-orange-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-orange-500 cursor-pointer"
+            title="Mở Page Builder trực quan"
+          >
+            <Edit className="h-3.5 w-3.5" />
+            <span>Mở Builder</span>
           </button>
         </div>
       </td>
@@ -896,18 +1219,18 @@ function PageRow({
 
 function PageCard({
   page,
-  onPreview,
+  onToggleSeo,
   onEdit,
 }: {
   page: CmsStaticPageListItem;
-  onPreview: () => void;
+  onToggleSeo: () => void;
   onEdit: () => void;
 }) {
   return (
     <article className="space-y-3 p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">
             <Globe2 className="h-4 w-4" />
           </span>
           <div className="min-w-0">
@@ -915,22 +1238,30 @@ function PageCard({
             <p className="text-xs text-slate-500 dark:text-slate-400">{typeLabel(page.templateKey)}</p>
           </div>
         </div>
-        <div className="flex shrink-0 gap-1">
+        <div className="flex shrink-0 gap-1.5">
           <button
+            type="button"
+            onClick={onToggleSeo}
+            className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300 cursor-pointer"
+          >
+            SEO
+          </button>
+          <button
+            type="button"
             onClick={onEdit}
-            className="rounded-lg bg-orange-50 dark:bg-orange-950/50 p-2 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/50 cursor-pointer"
+            className="rounded-lg bg-orange-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-orange-500 cursor-pointer"
             aria-label={`Chỉnh sửa ${page.name}`}
           >
-            <Edit className="h-4 w-4" />
+            Builder
           </button>
         </div>
       </div>
-      <div className="rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 py-2">
+      <div className="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800/60">
         <p className="break-all font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">
           {page.slug}
         </p>
         <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-          {page.sectionCount} section cố định · Draft v{page.draft.version}
+          {page.sectionCount} khu vực · Draft v{page.draft.version}
           {page.published.version > 0 ? ` · Published v${page.published.version}` : ' · Chưa xuất bản'}
         </p>
       </div>
@@ -960,17 +1291,17 @@ function CreatePageModal({
       aria-modal="true"
       aria-label="Tạo trang nội dung"
     >
-      <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-2xl border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100">
+      <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-5 text-slate-900 shadow-2xl dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-lg font-black text-slate-900 dark:text-white">Tạo trang nội dung</h2>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              Dùng cùng thiết kế chuẩn với Chính sách bảo mật và Điều khoản sử dụng.
+              Dùng cùng thiết kế chuẩn với Chính sách bảo mật và Điều khoản sử dụng (CKEditor 5 đầy đủ).
             </p>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200 cursor-pointer"
             aria-label="Đóng"
           >
             <X className="h-5 w-5" />
@@ -983,12 +1314,12 @@ function CreatePageModal({
             <input
               value={name}
               onChange={(e) => onNameChange(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2.5 text-sm outline-none focus:border-orange-500"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               placeholder="Ví dụ: Quy chế hoạt động"
             />
           </label>
 
-          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 p-3">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">
             <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
               Đường dẫn tự động
             </p>
@@ -1000,8 +1331,8 @@ function CreatePageModal({
             </p>
           </div>
 
-          <div className="break-all rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/50 p-3 text-xs text-orange-800 dark:text-orange-300">
-            <span className="font-bold">Link sau khi xuất bản:</span> https://cic.com.vn/{slug}
+          <div className="break-all rounded-xl border border-orange-200 bg-orange-50 p-3 text-xs text-orange-800 dark:border-orange-900/50 dark:bg-orange-950/40 dark:text-orange-300">
+            <span className="font-bold">Link sau khi xuất bản:</span> https://www.cic.com.vn/{slug}
           </div>
         </div>
 

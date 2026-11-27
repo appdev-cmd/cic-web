@@ -242,6 +242,29 @@ export async function getCmsPageDetail(pageId: string | number): Promise<StaticP
 }
 
 /**
+ * Loads a specific revision detail for restoring version history in Page Builder.
+ */
+export async function getCmsPageRevision(
+  pageId: string | number,
+  revisionId: string | number
+): Promise<StaticPageRevisionDetail | null> {
+  const sql = getPostgresClient();
+  const numericPageId = Number(pageId);
+  const numericRevId = Number(revisionId);
+  if (!Number.isFinite(numericPageId) || !Number.isFinite(numericRevId)) return null;
+
+  const [owned] = await sql`
+    SELECT id
+    FROM cic_content_page_revisions
+    WHERE id = ${numericRevId} AND page_id = ${numericPageId}
+    LIMIT 1
+  `;
+  if (!owned) return null;
+
+  return loadRevisionDetail(sql, numericRevId);
+}
+
+/**
  * Public website query: strictly loads the published revision.
  * Returns null if the page does not exist or has not been published.
  */
