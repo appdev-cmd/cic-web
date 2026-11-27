@@ -31,6 +31,7 @@ import { setupCanvasDomEnhancements, normalizeText } from './visual-canvas/canva
 
 export interface PageBuilderVisualCanvasProps {
   mode?: 'edit' | 'preview';
+  workspaceLocale?: 'vi' | 'en';
   page: PageBuilderPage;
   sections: PageBuilderSection[];
   selectedId: string;
@@ -77,6 +78,7 @@ export interface PageBuilderVisualCanvasProps {
 
 export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = ({
   mode = 'preview',
+  workspaceLocale = 'vi',
   page,
   sections,
   selectedId,
@@ -428,6 +430,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
             >
               <WebsitePage
                 page={{ ...page, draft: { ...page.draft, sections } }}
+                workspaceLocale={workspaceLocale}
                 activeHeroSlide={activeHeroSlide}
                 editMode={mode === 'edit'}
                 bindingRegistry={bindingRegistry}

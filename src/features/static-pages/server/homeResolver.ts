@@ -143,6 +143,14 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
           LIMIT 4
         `;
       }
+      if (isEn && rows.length === 0) {
+        rows = await sql`
+          SELECT * FROM cic_projects
+          WHERE published = true AND is_featured = true
+          ORDER BY coalesce(updated_time, created_time) DESC NULLS LAST, ordering, id
+          LIMIT 4
+        `;
+      }
       return rows;
     } catch (err) {
       console.error('Failed to load projects for home page:', err);

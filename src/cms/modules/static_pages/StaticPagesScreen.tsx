@@ -339,7 +339,7 @@ function mapRevisionToBuilderVersion(
         refMap.set(type, list);
       });
       const defaultRefsBySection: Record<string, { entityType: PageBuilderEntityType; defaultIds: string[] }> = {
-        'home.projects': { entityType: 'project', defaultIds: ['3', '4', '5'] },
+        'home.projects': { entityType: 'project', defaultIds: ['1', '2', '3'] },
         'home.events': { entityType: 'event', defaultIds: ['40', '11', '9', '13'] },
         'home.news': { entityType: 'news', defaultIds: ['1719', '1718', '1717', '1716'] },
       };
@@ -495,12 +495,7 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
       .then((res) => {
         if (cancelled) return;
         if (res.success && res.data && res.data.length > 0) {
-          const existingIds = new Set(res.data.map((item) => `${item.entityType}:${item.id}`));
-          const merged = [
-            ...res.data,
-            ...pageBuilderEntityOptions.filter((item) => !existingIds.has(`${item.entityType}:${item.id}`)),
-          ];
-          setEntityOptions(merged);
+          setEntityOptions(res.data);
         }
       })
       .catch((err) => {

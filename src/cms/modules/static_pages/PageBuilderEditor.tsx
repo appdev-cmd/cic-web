@@ -872,6 +872,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({
           >
             <PageBuilderVisualCanvas
               mode={canvasMode}
+              workspaceLocale={workspaceLocale}
               page={workingPage}
               sections={workingPage.draft.sections}
               selectedId={selectedSectionId}

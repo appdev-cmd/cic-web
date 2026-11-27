@@ -31,6 +31,7 @@ export async function savePageDraftAction(
   try {
     const actor = await requireStaticPagesPermission('edit');
     const result = await savePageDraftRecord(pageId, payload, actor);
+    revalidatePath('/cms/pages');
     revalidatePath('/cms/static-pages');
     return { success: true, data: result };
   } catch (err) {
@@ -52,7 +53,13 @@ export async function publishPageAction(
 
     // Revalidate CMS and public website paths
     invalidateHomePageCache();
+    revalidatePath('/cms/pages');
     revalidatePath('/cms/static-pages');
+    revalidatePath('/privacy');
+    revalidatePath('/terms');
+    revalidatePath('/en');
+    revalidatePath('/en/privacy');
+    revalidatePath('/en/terms');
     if (result.slug) {
       revalidatePath(result.slug);
       if (result.slug === '/') {
@@ -145,15 +152,24 @@ export async function getPageBuilderEntityOptionsAction(
     const partnerTable = isEn ? sql`cic_manufactories_en` : sql`cic_manufactories`;
     const options: PageBuilderEntityOption[] = [];
 
-    // 1. Projects
+    // 1. Projects (fallback to cic_projects when cic_projects_en is empty)
     try {
-      const projectRows = await sql`
+      let projectRows = await sql`
         SELECT id, alias, title, tagline, solution, sector, image, location, is_featured, customer_name, technologies
         FROM ${projTable}
         WHERE published = true
         ORDER BY is_featured DESC, ordering, id
         LIMIT 50
       `;
+      if (isEn && projectRows.length === 0) {
+        projectRows = await sql`
+          SELECT id, alias, title, tagline, solution, sector, image, location, is_featured, customer_name, technologies
+          FROM cic_projects
+          WHERE published = true
+          ORDER BY is_featured DESC, ordering, id
+          LIMIT 50
+        `;
+      }
       projectRows.forEach((p) => {
         options.push({
           id: String(p.id),

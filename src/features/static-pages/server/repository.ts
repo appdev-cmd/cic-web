@@ -14,6 +14,7 @@ import type {
 } from '../types';
 import { CUSTOM_LEGAL_PAGE_CONTRACT } from '../manifest';
 import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
+import { ensureCanonicalSystemPagesSeeded } from './canonicalBootstrap';
 
 const text = (v: unknown) => (typeof v === 'string' ? v : '');
 
@@ -74,6 +75,7 @@ export function normalizeSectionConfig(cfg: unknown): Record<string, unknown> {
  * Explicit projection joining draft and published revisions.
  */
 export async function listCmsPages(workspace: 'vi' | 'en'): Promise<CmsStaticPageListItem[]> {
+  await ensureCanonicalSystemPagesSeeded();
   const sql = getPostgresClient();
   const rows = await sql`
     SELECT
@@ -272,6 +274,7 @@ export async function getPublicPublishedPage(
   workspace: 'vi' | 'en',
   codeOrSlug: string
 ): Promise<(StaticPageRevisionDetail & { pageId: string; code: string; name: string; slug: string }) | null> {
+  await ensureCanonicalSystemPagesSeeded();
   const sql = getPostgresClient();
   const normalizedSlug = codeOrSlug.startsWith('/') ? codeOrSlug : `/${codeOrSlug}`;
   const [page] = await sql`
@@ -497,10 +500,11 @@ export async function publishPageRecord(
       }
     }
 
-    // Update published_revision_id on page
+    // Update published_revision_id and align draft_revision_id so next draft edit forks cleanly into v+1
     await sql`
       UPDATE cic_content_pages
       SET published_revision_id = ${newRevId},
+          draft_revision_id = ${newRevId},
           updated_at = now(),
           updated_by = ${actor.legacyUserId}
       WHERE id = ${pageId}

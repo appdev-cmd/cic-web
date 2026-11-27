@@ -20,6 +20,7 @@ import { findPageBuilderImage } from '../PageMediaPickerModal';
 import type { PageBuilderConfigValue, PageBuilderPage, PageBuilderSection } from '../pageBuilderTypes';
 import { RichTextEditor } from '../RichTextEditor';
 import { sanitizeHtmlContent } from '../../../../shared/lib/sanitize';
+import { I18nProvider } from '../../../../shared/i18n';
 
 const noop = () => undefined;
 
@@ -222,6 +223,7 @@ export function LegalPage({
 
 export interface WebsitePageProps {
   page: PageBuilderPage;
+  workspaceLocale?: 'vi' | 'en';
   activeHeroSlide?: number;
   editMode: boolean;
   bindingRegistry: ElementBindingRegistry;
@@ -231,101 +233,110 @@ export interface WebsitePageProps {
 
 export function WebsitePage({ 
   page, 
+  workspaceLocale = 'vi',
   activeHeroSlide, 
   editMode, 
   bindingRegistry, 
   selectedId, 
   onConfigValueChange 
 }: WebsitePageProps) {
-  if (page.pageType === 'home') {
-    const resolved = resolvePageContent({
-      pageType: 'home',
-      version: page.draft,
-      legacyFallback: getLegacyHomePageContent(),
-    });
-    return (
-      <HomeView 
-        content={resolved.content} 
-        renderPolicy={{ motionEnabled: !editMode }} 
-        bindingRegistry={bindingRegistry} 
-        setCurrentView={noop} 
-        setActiveLink={noop} 
-        setActiveServiceId={noop} 
-        setActiveProjectId={noop} 
-        setPreSelectedNewsCategory={noop} 
-        setAboutSubTab={noop} 
-        setActiveEventId={noop} 
-        setIsRegisteringEvent={noop} 
-        previewSlideIndex={activeHeroSlide} 
-        editMode={editMode} 
-      />
-    );
-  }
-  if (page.pageType === 'about') {
-    const resolved = resolvePageContent({ pageType: 'about', version: page.draft, legacyFallback: getLegacyAboutPageContent() });
-    const selectedSection = page.draft.sections.find((s) => s.id === selectedId);
-    const inferredTab: 'overview' | 'structure' | 'experience' = (selectedSection?.sectionKey === 'about.organization')
-      ? 'structure'
-      : (['about.capacity', 'about.experience', 'about.software_partners', 'about.hardware_partners', 'about.contact_cta'].includes(selectedSection?.sectionKey ?? ''))
-        ? 'experience'
-        : 'overview';
+  const renderBody = () => {
+    if (page.pageType === 'home') {
+      const resolved = resolvePageContent({
+        pageType: 'home',
+        version: page.draft,
+        legacyFallback: getLegacyHomePageContent(workspaceLocale),
+      });
+      return (
+        <HomeView 
+          content={resolved.content} 
+          renderPolicy={{ motionEnabled: !editMode }} 
+          bindingRegistry={bindingRegistry} 
+          setCurrentView={noop} 
+          setActiveLink={noop} 
+          setActiveServiceId={noop} 
+          setActiveProjectId={noop} 
+          setPreSelectedNewsCategory={noop} 
+          setAboutSubTab={noop} 
+          setActiveEventId={noop} 
+          setIsRegisteringEvent={noop} 
+          previewSlideIndex={activeHeroSlide} 
+          editMode={editMode} 
+        />
+      );
+    }
+    if (page.pageType === 'about') {
+      const resolved = resolvePageContent({
+        pageType: 'about',
+        version: page.draft,
+        legacyFallback: getLegacyAboutPageContent(workspaceLocale),
+      });
+      const selectedSection = page.draft.sections.find((s) => s.id === selectedId);
+      const inferredTab: 'overview' | 'structure' | 'experience' = (selectedSection?.sectionKey === 'about.organization')
+        ? 'structure'
+        : (['about.capacity', 'about.experience', 'about.software_partners', 'about.hardware_partners', 'about.contact_cta'].includes(selectedSection?.sectionKey ?? ''))
+          ? 'experience'
+          : 'overview';
 
-    return (
-      <AboutView 
-        activeTab={inferredTab} 
-        setActiveTab={noop} 
-        onNavigateToContact={noop} 
-        aboutContent={resolved.content} 
-        renderPolicy={{ motionEnabled: !editMode }} 
-        bindingRegistry={bindingRegistry} 
-        pageSections={page.draft.sections} 
-        resolveMediaUrl={(id) => findPageBuilderImage(id)?.url ?? id} 
-        editMode={editMode}
-        onConfigValueChange={onConfigValueChange}
-      />
-    );
-  }
-  if (page.pageType === 'organization') {
-    return (
-      <AboutView 
-        activeTab="structure" 
-        setActiveTab={noop} 
-        onNavigateToContact={noop} 
-        renderPolicy={{ motionEnabled: !editMode }} 
-        bindingRegistry={bindingRegistry} 
-        pageSections={page.draft.sections} 
-        resolveMediaUrl={(id) => findPageBuilderImage(id)?.url ?? id} 
-        editMode={editMode}
-        onConfigValueChange={onConfigValueChange}
-      />
-    );
-  }
-  if (page.pageType === 'capacity_experience') {
-    const resolved = resolvePageContent({
-      pageType: 'capacity_experience',
-      version: page.draft,
-      legacyFallback: { capacity: getLegacyAboutCapacityContent() },
-    });
-    return (
-      <AboutView 
-        activeTab="experience" 
-        setActiveTab={noop} 
-        onNavigateToContact={noop} 
-        capacityContent={resolved.content.capacity} 
-        renderPolicy={{ motionEnabled: !editMode }} 
-        bindingRegistry={bindingRegistry} 
-        pageSections={page.draft.sections} 
-        resolveMediaUrl={(id) => findPageBuilderImage(id)?.url ?? id} 
-        editMode={editMode}
-        onConfigValueChange={onConfigValueChange}
-      />
-    );
-  }
-  if (page.pageType === 'contact') {
-    const resolved = resolvePageContent({ pageType: 'contact', version: page.draft, legacyFallback: getLegacyContactPageContent() });
-    return <ContactView content={resolved.content} renderPolicy={{ motionEnabled: !editMode }} bindingRegistry={bindingRegistry} />;
-  }
-  if (page.pageType === 'legal') {
+      return (
+        <AboutView 
+          activeTab={inferredTab} 
+          setActiveTab={noop} 
+          onNavigateToContact={noop} 
+          aboutContent={resolved.content} 
+          renderPolicy={{ motionEnabled: !editMode }} 
+          bindingRegistry={bindingRegistry} 
+          pageSections={page.draft.sections} 
+          resolveMediaUrl={(id) => findPageBuilderImage(id)?.url ?? id} 
+          editMode={editMode}
+          onConfigValueChange={onConfigValueChange}
+        />
+      );
+    }
+    if (page.pageType === 'organization') {
+      return (
+        <AboutView 
+          activeTab="structure" 
+          setActiveTab={noop} 
+          onNavigateToContact={noop} 
+          renderPolicy={{ motionEnabled: !editMode }} 
+          bindingRegistry={bindingRegistry} 
+          pageSections={page.draft.sections} 
+          resolveMediaUrl={(id) => findPageBuilderImage(id)?.url ?? id} 
+          editMode={editMode}
+          onConfigValueChange={onConfigValueChange}
+        />
+      );
+    }
+    if (page.pageType === 'capacity_experience') {
+      const resolved = resolvePageContent({
+        pageType: 'capacity_experience',
+        version: page.draft,
+        legacyFallback: { capacity: getLegacyAboutCapacityContent(workspaceLocale) },
+      });
+      return (
+        <AboutView 
+          activeTab="experience" 
+          setActiveTab={noop} 
+          onNavigateToContact={noop} 
+          capacityContent={resolved.content.capacity} 
+          renderPolicy={{ motionEnabled: !editMode }} 
+          bindingRegistry={bindingRegistry} 
+          pageSections={page.draft.sections} 
+          resolveMediaUrl={(id) => findPageBuilderImage(id)?.url ?? id} 
+          editMode={editMode}
+          onConfigValueChange={onConfigValueChange}
+        />
+      );
+    }
+    if (page.pageType === 'contact') {
+      const resolved = resolvePageContent({
+        pageType: 'contact',
+        version: page.draft,
+        legacyFallback: getLegacyContactPageContent(workspaceLocale),
+      });
+      return <ContactView content={resolved.content} renderPolicy={{ motionEnabled: !editMode }} bindingRegistry={bindingRegistry} />;
+    }
     return (
       <LegalPage 
         sections={page.draft.sections} 
@@ -339,18 +350,7 @@ export function WebsitePage({
         onConfigValueChange={onConfigValueChange} 
       />
     );
-  }
-  return (
-    <LegalPage 
-      sections={page.draft.sections} 
-      pageName={page.name}
-      pageCode={page.code}
-      versionNumber={page.draft.version}
-      publishedAt={page.draft.publishedAt}
-      seoDescription={page.draft.seo.description}
-      editMode={editMode} 
-      selectedId={selectedId} 
-      onConfigValueChange={onConfigValueChange} 
-    />
-  );
+  };
+
+  return <I18nProvider locale={workspaceLocale}>{renderBody()}</I18nProvider>;
 }
